@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DermAI - Super Admin Dashboard & Management Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .admin-nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+    .metric-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      border-left: 5px solid var(--primary);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .metric-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fa-solid fa-hospital-user"></i> DermAI <span id="portalLogo">Super Admin</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Trang Bệnh Nhân</a></li>
+      <li><a href="doctor.html">Portal Bác Sĩ</a></li>
+      <li><a href="admin.html" class="active" id="portalNavLabel">Super Admin Portal</a></li>
+    </ul>
+    <div id="authWidget" style="display: flex; align-items: center;">
+      <a href="login.html" class="btn btn-accent" style="padding: 0.5rem 1.25rem; font-size: 0.85rem;"><i class="fa-solid fa-right-to-bracket"></i> Đổi Tài Khoản</a>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header style="background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%); color: white; padding: 2rem; text-align: center;">
+    <h1 id="portalTitle">Hệ Thống Quản Trị Trung Tâm & Phân Quyền Dashboard</h1>
+    <p id="portalSub" style="color: #cbd5e1; margin-top: 0.5rem;">Thống kê doanh thu, số lượt quét AI, quản lý danh mục Bác sĩ, Dịch vụ & Khung giờ ca khám</p>
+  </header>
+
+  <main class="container" style="margin-top: 2rem;">
+
+    <!-- Navigation Tabs -->
+    <div class="admin-nav-tabs">
+      <button id="btnStats" class="tab-btn active" onclick="showTab('tabStats', this)"><i class="fa-solid fa-chart-pie"></i> 1. Thống Kê Dashboard</button>
+      <button id="btnDoctors" class="tab-btn" onclick="showTab('tabDoctors', this)"><i class="fa-solid fa-user-md"></i> 2. Quản Lý Bác Sĩ</button>
+      <button id="btnServices" class="tab-btn" onclick="showTab('tabServices', this)"><i class="fa-solid fa-tags"></i> 3. Quản Lý Dịch Vụ & Giá</button>
+      <button id="btnBookings" class="tab-btn" onclick="showTab('tabBookings', this)"><i class="fa-solid fa-list-check"></i> 4. Phiếu Đặt Lịch & Check-in</button>
+    </div>
+
+    <!-- TAB 1: DASHBOARD STATS -->
+    <div id="tabStats" class="tab-content">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem;">
+        <div class="metric-card" style="border-color: #0f4c81;">
+          <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">TỔNG DOANH THU ĐẶT CỌC</span>
+          <div class="metric-val" id="statRevenue">0 đ</div>
+        </div>
+        <div class="metric-card" style="border-color: #00b4d8;">
+          <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">TỔNG LƯỢT ĐẶT LỊCH</span>
+          <div class="metric-val" id="statBookings">0</div>
+        </div>
+        <div class="metric-card" style="border-color: #10b981;">
+          <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">SỐ LƯỢT PHÂN TÍCH AI</span>
+          <div class="metric-val" id="statAIScans">0</div>
+        </div>
+        <div class="metric-card" style="border-color: #ef4444;">
+          <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">CẢNH BÁO ÁC TÍNH (MEL)</span>
+          <div class="metric-val" id="statMalignant" style="color: #ef4444;">0</div>
+        </div>
+      </div>
+
+      <section class="glass-card">
+        <h3 style="color: var(--primary); margin-bottom: 1rem;"><i class="fa-solid fa-microscope"></i> Hiệu Năng Mô Hình AI Vision Transformer</h3>
+        <p>Tốc độ suy luận trung bình: <strong id="statLatency" style="color: var(--accent);">145 ms</strong> | Tốc độ đáp ứng UI: <strong>Real-time</strong></p>
+        <p style="margin-top: 0.5rem;">Kiến trúc mạng: <strong>ViT-Small-384 + EfficientNet-B4 Dual Backbone</strong></p>
+      </section>
+    </div>
+
+    <!-- TAB 2: DOCTORS CRUD -->
+    <div id="tabDoctors" class="tab-content" style="display: none;">
+      <section class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fa-solid fa-user-plus"></i> Thêm Bác Sĩ / Nhân Sự Mới</h2>
+        </div>
+        <form onsubmit="submitAddDoctor(event)" style="display: grid; grid-template-columns: 1fr 1fr 1fr 120px; gap: 1rem; align-items: end;">
+          <div class="form-group" style="margin: 0;">
+            <label>Họ và Tên (*)</label>
+            <input type="text" id="docName" class="form-control" placeholder="PGS.TS Bác sĩ Nguyễn Văn X" required>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label>Chuyên Khoa (*)</label>
+            <input type="text" id="docSpecialty" class="form-control" placeholder="Ung bướu & Da liễu" required>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label>Số Năm Kinh Nghiệm (*)</label>
+            <input type="number" id="docExp" class="form-control" value="10" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="padding: 0.75rem;"><i class="fa-solid fa-plus"></i> Thêm</button>
+        </form>
+
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <h3>Danh Sách Nhân Sự Hiện Tại</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Họ và Tên</th>
+              <th>Chức Vụ</th>
+              <th>Chuyên Khoa</th>
+              <th>Số Năm Kinh Nghiệm</th>
+              <th>Hành Động</th>
+            </tr>
+          </thead>
+          <tbody id="doctorAdminTable"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- TAB 3: SERVICES CRUD -->
+    <div id="tabServices" class="tab-content" style="display: none;">
+      <section class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fa-solid fa-plus-circle"></i> Thêm Gói Dịch Vụ / Bảng Giá Mới</h2>
+        </div>
+        <form onsubmit="submitAddService(event)" style="display: grid; grid-template-columns: 2fr 1fr 1fr 120px; gap: 1rem; align-items: end;">
+          <div class="form-group" style="margin: 0;">
+            <label>Tên Dịch Vụ (*)</label>
+            <input type="text" id="srvName" class="form-control" placeholder="Khám Da liễu Laser VIP" required>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label>Giá Khám (VNĐ) (*)</label>
+            <input type="number" id="srvPrice" class="form-control" placeholder="300000" required>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label>Loại Dịch Vụ (*)</label>
+            <select id="srvType" class="form-control">
+              <option value="THUONG">THƯỜNG</option>
+              <option value="BHYT">BHYT</option>
+              <option value="YEU_CAU">YÊU CẦU / VIP</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="padding: 0.75rem;"><i class="fa-solid fa-plus"></i> Tạo Mới</button>
+        </form>
+
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <h3>Danh Mục Gói Dịch Vụ</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tên Dịch Vụ</th>
+              <th>Giá Tiền</th>
+              <th>Phân Loại</th>
+              <th>Hành Động</th>
+            </tr>
+          </thead>
+          <tbody id="serviceAdminTable"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- TAB 4: BOOKINGS CHECKIN -->
+    <div id="tabBookings" class="tab-content" style="display: none;">
+      <section class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fa-solid fa-list-check"></i> Quản Lý Phiếu Đặt Lịch & Check-in Bệnh Nhận</h2>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Bệnh Nhân</th>
+              <th>Bác Sĩ</th>
+              <th>Gói Dịch Vụ & Giá Tiền</th>
+              <th>Ngày / Khung Giờ</th>
+              <th>Loại Đặt Lịch</th>
+              <th>Chẩn Đoán AI</th>
+              <th>Trạng Thái</th>
+              <th>Thao Tác Lễ Tân</th>
+            </tr>
+          </thead>
+          <tbody id="bookingAdminTable"></tbody>
+        </table>
+      </section>
+    </div>
+
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:5000/api/v1';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      loadDoctors();
+      loadServices();
+      loadSlots();
+      loadBookingsAndConsults();
+    });
+
+    function showTab(tabId, btnElement) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      const targetEl = document.getElementById(tabId);
+      if (targetEl) targetEl.style.display = 'block';
+      if (btnElement) btnElement.classList.add('active');
+
+      if (tabId === 'tabStats') loadStats();
+      if (tabId === 'tabDoctors') loadDoctors();
+      if (tabId === 'tabServices') loadServices();
+      if (tabId === 'tabSlots') loadSlots();
+      if (tabId === 'tabBookings') loadBookingsAndConsults();
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API_BASE}/admin/stats`);
+        const data = await res.json();
+        document.getElementById('statRevenue').innerText = (data.total_revenue || 0).toLocaleString('vi-VN') + ' đ';
+        document.getElementById('statBookings').innerText = data.total_bookings || 0;
+        document.getElementById('statAIScans').innerText = data.ai_scans_count || 0;
+        document.getElementById('statMalignant').innerText = data.malignant_detected || 0;
+        document.getElementById('statLatency').innerText = (data.ai_avg_latency_ms || 145) + ' ms';
+      } catch (err) {
+        console.error("Lỗi nạp thống kê", err);
+      }
+    }
+
+    async function loadDoctors() {
+      try {
+        const res = await fetch(`${API_BASE}/doctors`);
+        const doctors = await res.json();
+        const tbody = document.getElementById('doctorAdminTable');
+        if (!doctors || doctors.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:1.5rem;">Chưa có nhân sự nào trong hệ thống. Hãy bấm nút "Thêm" ở trên.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = doctors.map(d => `
+          <tr>
+            <td><strong>${d.ho_ten}</strong></td>
+            <td><span class="badge badge-primary">${d.chuc_vu || 'DOCTOR'}</span></td>
+            <td>${d.chuyen_khoa || 'Da liễu'}</td>
+            <td>${d.nam_kinh_nghiem || 1} năm</td>
+            <td><button onclick="deleteDoctor('${d.id}')" class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.8rem; background:#ef4444; color:white;"><i class="fa-solid fa-trash"></i> Xóa</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error("Lỗi loadDoctors", e);
+      }
+    }
+
+    async function submitAddDoctor(event) {
+      event.preventDefault();
+      const name = document.getElementById('docName').value.trim();
+      const spec = document.getElementById('docSpecialty').value.trim();
+      const exp = parseInt(document.getElementById('docExp').value) || 1;
+
+      if (!name || !spec) {
+        alert("⚠️ Vui lòng nhập đầy đủ Họ Tên và Chuyên Khoa!");
+        return;
+      }
+
+      const payload = {
+        ho_ten: name,
+        chuyen_khoa: spec,
+        nam_kinh_nghiem: exp,
+        chuc_vu: 'DOCTOR'
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/doctors`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("🎉 " + (data.message || "Đã thêm Bác sĩ mới thành công!"));
+          document.getElementById('docName').value = '';
+          document.getElementById('docSpecialty').value = '';
+          loadDoctors();
+        } else {
+          alert("❌ Không thể thêm Bác sĩ: " + (data.detail || JSON.stringify(data)));
+        }
+      } catch (err) {
+        alert("Lỗi kết nối đến Backend Server: " + err.message);
+      }
+    }
+
+    async function deleteDoctor(id) {
+      if (!confirm("Bạn có chắc chắn muốn xóa nhân sự này?")) return;
+      try {
+        await fetch(`${API_BASE}/doctors/${id}`, {method: 'DELETE'});
+        alert("✅ Đã xóa bác sĩ thành công!");
+        loadDoctors();
+      } catch (err) {
+        alert("Lỗi xóa bác sĩ: " + err.message);
+      }
+    }
+
+    async function loadServices() {
+      try {
+        const res = await fetch(`${API_BASE}/services`);
+        const services = await res.json();
+        const tbody = document.getElementById('serviceAdminTable');
+        if (!services || services.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:1.5rem;">Chưa có gói dịch vụ nào. Hãy thêm gói mới ở trên.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = services.map(s => `
+          <tr>
+            <td><strong>${s.ten_dich_vu}</strong></td>
+            <td><strong style="color:var(--primary);">${(s.gia_kham || 0).toLocaleString('vi-VN')} đ</strong></td>
+            <td><span class="badge badge-warning">${s.loai_dich_vu || 'THUONG'}</span></td>
+            <td><button onclick="deleteService('${s.id}')" class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.8rem; background:#ef4444; color:white;"><i class="fa-solid fa-trash"></i> Xóa</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error("Lỗi loadServices", e);
+      }
+    }
+
+    async function submitAddService(event) {
+      event.preventDefault();
+      const srvName = document.getElementById('srvName').value.trim();
+      const srvPrice = parseFloat(document.getElementById('srvPrice').value) || 100000;
+      const srvType = document.getElementById('srvType').value;
+
+      if (!srvName) {
+        alert("⚠️ Vui lòng nhập Tên Dịch Vụ!");
+        return;
+      }
+
+      const payload = {
+        ten_dich_vu: srvName,
+        gia_kham: srvPrice,
+        loai_dich_vu: srvType
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/services`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("🎉 " + (data.message || "Đã thêm gói dịch vụ mới thành công!"));
+          document.getElementById('srvName').value = '';
+          document.getElementById('srvPrice').value = '';
+          loadServices();
+        } else {
+          alert("❌ Lỗi: " + (data.detail || JSON.stringify(data)));
+        }
+      } catch (err) {
+        alert("Lỗi kết nối server: " + err.message);
+      }
+    }
+
+    async function deleteService(id) {
+      if (!confirm("Xóa dịch vụ này?")) return;
+      try {
+        await fetch(`${API_BASE}/services/${id}`, {method: 'DELETE'});
+        alert("✅ Đã xóa gói dịch vụ thành công!");
+        loadServices();
+      } catch (err) {
+        alert("Lỗi xóa dịch vụ: " + err.message);
+      }
+    }
+
+    async function loadSlots() {
+      const res = await fetch(`${API_BASE}/slots`);
+      const slots = await res.json();
+      const div = document.getElementById('slotsGrid');
+      div.innerHTML = slots.map(s => `
+        <div style="background:#f8fafc; padding:0.75rem 1.25rem; border-radius:8px; border:1px solid #cbd5e1; font-weight:700; color:var(--primary);">
+          <i class="fa-solid fa-clock"></i> ${s.gio_bat_dau} - ${s.gio_ket_thuc}
+        </div>
+      `).join('');
+    }
+
+    async function submitAddSlot(event) {
+      event.preventDefault();
+      const payload = {
+        gio_bat_dau: document.getElementById('slotStart').value,
+        gio_ket_thuc: document.getElementById('slotEnd').value,
+        so_luong_toi_da: parseInt(document.getElementById('slotMax').value) || 2
+      };
+      await fetch(`${API_BASE}/slots`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      alert("✅ Đã thêm khung giờ ca khám!");
+      loadSlots();
+    }
+
+    async function loadBookingsAndConsults() {
+      const [bRes, cRes] = await Promise.all([
+        fetch(`${API_BASE}/bookings`),
+        fetch(`${API_BASE}/consultations`)
+      ]);
+      const bookings = await bRes.json();
+      const consults = await cRes.json();
+
+      document.getElementById('bookingAdminTable').innerHTML = bookings.map(b => {
+        const selectHtml = `
+          <select onchange="changeBookingStatus('${b.id}', this.value)" class="form-control" style="padding: 0.45rem 0.65rem; font-size: 0.82rem; font-weight: 700; border-radius: 8px; border: 1.5px solid #0284c7; color: #0369a1; background: #f0f9ff; cursor: pointer; min-width: 170px;">
+            <option value="CHO_XAC_NHAN" ${b.status === 'CHO_XAC_NHAN' ? 'selected' : ''}>⏳ 1. Chờ Xác Nhận</option>
+            <option value="DA_XAC_NHAN" ${b.status === 'DA_XAC_NHAN' ? 'selected' : ''}>✅ 2. Đã Xác Nhận Lịch</option>
+            <option value="CHECK_IN" ${b.status === 'CHECK_IN' ? 'selected' : ''}>🏥 3. Check-in Đón Tiếp</option>
+            <option value="HOAN_THANH" ${b.status === 'HOAN_THANH' ? 'selected' : ''}>🎉 4. Đã Khám & Kê Đơn</option>
+            <option value="HUY_LICH" ${b.status === 'HUY_LICH' ? 'selected' : ''}>❌ 5. Hủy Lịch Hẹn</option>
+          </select>
+        `;
+
+        return `
+          <tr>
+            <td><strong>${b.patient_name}</strong><br><span style="font-size:0.78rem; color:#64748b;">${b.patient_phone || ''}</span></td>
+            <td>${b.doctor_name}</td>
+            <td><strong>${b.service_name || 'Khám Tiêu Chuẩn'}</strong><br><span style="color:var(--primary); font-weight:800; font-size:0.9rem;">${(b.service_price || 150000).toLocaleString('vi-VN')} đ</span></td>
+            <td>${b.date}<br><span style="font-size:0.8rem; color:var(--primary); font-weight:600;">${b.slot}</span></td>
+            <td><span class="badge ${b.form_type === 'AI' ? 'badge-primary' : 'badge-warning'}">${b.form_type}</span></td>
+            <td>${b.ai_top1 ? `<strong>${b.ai_top1}</strong> (${(b.ai_confidence * 100).toFixed(0)}%)` : 'Không có'}</td>
+            <td><span class="badge ${b.status === 'CHECK_IN' ? 'badge-success' : b.status === 'HOAN_THANH' ? 'badge-primary' : b.status === 'DA_XAC_NHAN' ? 'badge-primary' : b.status === 'HUY_LICH' ? 'badge-danger' : 'badge-warning'}">${b.status}</span></td>
+            <td>${selectHtml}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('consultAdminTable').innerHTML = consults.map(c => `
+        <tr>
+          <td><strong>${c.ho_ten}</strong></td>
+          <td><a href="tel:${c.so_dien_thoai}" style="color:var(--primary); font-weight:600;">${c.so_dien_thoai}</a></td>
+          <td>${new Date(c.created_at).toLocaleString('vi-VN')}</td>
+          <td><span class="badge badge-warning">${c.trang_thai_xu_ly}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    async function changeBookingStatus(bookingId, newStatus) {
+      try {
+        const res = await fetch(`${API_BASE}/bookings/${bookingId}/status`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({status: newStatus})
+        });
+        const result = await res.json();
+        alert("✅ " + result.message);
+        loadBookingsAndConsults();
+        loadStats();
+      } catch (err) {
+        alert("Lỗi đổi trạng thái: " + err.message);
+      }
+    }
+
+    async function checkin(bookingId) {
+      const res = await fetch(`${API_BASE}/bookings/${bookingId}/checkin`, {method: 'POST'});
+      const result = await res.json();
+      alert("✅ " + result.message);
+      loadBookingsAndConsults();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const userStr = localStorage.getItem('dermAI_user');
+      if (!userStr) {
+        alert("🔐 Vui lòng đăng nhập với tài khoản Quản Trị / Lễ Tân để truy cập!");
+        window.location.href = 'login.html';
+        return;
+      }
+      try {
+        const user = JSON.parse(userStr);
+        const role = (user.role || '').toUpperCase();
+        if (role === 'DOCTOR' || role === 'BAC_SI') {
+          alert("👨‍⚕️ Tài khoản Bác Sĩ không có quyền truy cập Portal Lễ Tân / Quản Trị! Hệ thống sẽ chuyển bạn về Portal Bác Sĩ.");
+          window.location.href = 'doctor.html';
+          return;
+        } else if (role !== 'ADMIN' && role !== 'STAFF' && role !== 'LE_TAN') {
+          alert("⚠️ Bạn không có quyền truy cập trang Quản Trị / Lễ Tân! Hệ thống sẽ chuyển về Trang Bệnh Nhân.");
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // STRICT RBAC FOR RECEPTIONIST (STAFF / LE_TAN)
+        if (role === 'STAFF' || role === 'LE_TAN') {
+          document.getElementById('btnStats').style.display = 'none';
+          document.getElementById('btnDoctors').style.display = 'none';
+          document.getElementById('btnServices').style.display = 'none';
+
+          document.getElementById('portalLogo').innerText = 'Portal Lễ Tân';
+          document.getElementById('portalNavLabel').innerText = 'Portal Lễ Tân';
+          document.getElementById('portalTitle').innerText = '👩‍⚕️ Portal Lễ Tân - Đón Tiếp & Check-in Bệnh Nhân';
+          document.getElementById('portalSub').innerText = 'Tiếp đón bệnh nhân, đối chiếu mã phiếu đặt lịch & chuyển hàng chờ Bác sĩ thăm khám';
+
+          // Default active tab for receptionist: Tab 4 (Phiếu Đặt Lịch & Check-in)
+          showTab('tabBookings', document.getElementById('btnBookings'));
+        }
+      } catch (e) {}
+    });
+
+    function logoutUser() {
+      localStorage.removeItem('dermAI_token');
+      localStorage.removeItem('dermAI_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

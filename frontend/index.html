@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DermAI - Hệ thống Đặt Lịch & Chẩn Đoán Da Liễu Thông Minh AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Modal Dialog */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #94a3b8;
+    }
+    .demo-account-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: rgba(0, 180, 216, 0.1);
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .demo-account-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <i class="fa-solid fa-microscope"></i> DermAI <span>Vision</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active"><i class="fa-solid fa-house"></i> Trang Chủ</a></li>
+      <li><a href="#aiSection"><i class="fa-solid fa-wand-magic-sparkles"></i> Soi Da AI</a></li>
+      <li><a href="#bookingSection"><i class="fa-solid fa-calendar-check"></i> Đặt Lịch Khám</a></li>
+      <li><a href="#" onclick="openHistoryModal()"><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Khám</a></li>
+    </ul>
+
+    <!-- Auth Widget -->
+    <div id="authWidget" style="display: flex; align-items: center; gap: 1rem;">
+      <a href="login.html" class="btn btn-accent" style="padding: 0.55rem 1.35rem;"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập / Đăng Ký</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <h1 class="hero-title">Hệ Thống Đặt Lịch & Chẩn Đoán Da Liễu AI</h1>
+    <p class="hero-subtitle">Ứng dụng Mô hình Vision Transformer (ViT) & EfficientNet phân tích hình ảnh tổn thương da, gợi ý chẩn đoán sơ bộ & kết nối Bác sĩ Chuyên khoa hàng đầu</p>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Section 1: AI Smart Booking -->
+    <section class="glass-card" id="aiSection">
+      <div class="card-header">
+        <h2 class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Soi Da & Đặt Lịch Khám Thông Minh Qua AI</h2>
+        <span class="badge badge-success badge-pulse"><i class="fa-solid fa-microchip"></i> Mô hình AI: ViT-Small-384 + Grad-CAM</span>
+      </div>
+
+      <p style="margin-bottom: 1.5rem; color: #475569;">Tải lên ảnh chụp vùng da nghi ngờ tổn thương (nốt ruồi, mảng đỏ, u da). Hệ thống AI Vision Transformer sẽ tự động phân tích trong &lt; 3 giây, sinh bản đồ nhiệt Grad-CAM Explainable AI và đề xuất bác sĩ phù hợp nhất.</p>
+
+      <!-- Dropzone Upload -->
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">Kéo & thả ảnh vùng da tổn thương vào đây</h3>
+        <p style="color: #64748b; margin-top: 0.5rem; font-weight: 500;">Hỗ trợ định dạng JPG, PNG, WEBP (Kích thước chuẩn hóa 384x384)</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+      </div>
+
+      <!-- Loading Spinner -->
+      <div id="aiLoading" style="display: none; text-align: center; padding: 2.5rem;">
+        <i class="fa-solid fa-atom fa-spin" style="font-size: 3.5rem; color: var(--accent); filter: drop-shadow(0 0 12px rgba(0,180,216,0.6));"></i>
+        <h3 style="margin-top: 1.25rem; color: var(--primary); font-weight: 800;">Đang Chạy Mô Hình Vision Transformer & Sinh Bản Đồ Nhiệt Grad-CAM...</h3>
+        <p style="color: #64748b; margin-top: 0.5rem;">Phân tích 18.533 đặc trưng soi da y khoa ISIC/HAM10000</p>
+      </div>
+
+      <!-- AI Results View -->
+      <div id="aiResults" style="display: none;">
+        <div class="ai-results-grid">
+          <div class="heatmap-box">
+            <div class="laser-scanner" id="laserScanner"></div>
+            <h4 style="margin-bottom: 0.75rem; color: var(--accent-neon); font-weight: 800;"><i class="fa-solid fa-fire-flame-curved"></i> Bản Đồ Nhiệt Grad-CAM (Explainable AI - XAI)</h4>
+            <img id="resultHeatmapImg" src="" alt="GradCAM Heatmap">
+            <p style="font-size: 0.88rem; color: #cbd5e1; margin-top: 0.75rem; line-height: 1.5;"><i class="fa-solid fa-circle-info" style="color: var(--accent-neon);"></i> Khu vực màu Đỏ / Vàng là vùng tổn thương mà AI tập trung phân tích để hỗ trợ Bác sĩ thẩm định.</p>
+          </div>
+
+          <div>
+            <h3 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 1.6rem; font-weight: 800;" id="top1ClassName">---</h3>
+            <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span id="malignantBadge" class="badge">---</span>
+              <span id="confidenceText" style="font-weight: 800; color: var(--primary-dark); font-size: 1.1rem;">---</span>
+            </div>
+
+            <h4 style="margin-top: 1.5rem; margin-bottom: 0.75rem; color: #334155; font-size: 1.05rem; font-weight: 700;">Phân Phối Xác Suất Top-3 Bệnh Da Liễu:</h4>
+            <div id="top3List"></div>
+
+            <div style="margin-top: 1.75rem; padding: 1.25rem; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: var(--radius-sm); border-left: 5px solid var(--accent); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);">
+              <strong style="color: #0369a1; font-size: 1.05rem;"><i class="fa-solid fa-user-doctor"></i> Đề Xuất Bác Sĩ Chuyên Khoa Phù Hợp:</strong>
+              <p id="recommendedSpecialist" style="color: #0284c7; margin-top: 0.35rem; font-weight: 700; font-size: 1.05rem;">---</p>
+            </div>
+          </div>
+        </div>
+
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+        <!-- Appointment Form tied to AI -->
+        <h3 style="color: var(--primary); margin-bottom: 1rem;"><i class="fa-solid fa-calendar-check"></i> Hoàn Tất Đặt Lịch Với Bác Sĩ Được Gợi Ý</h3>
+        <form id="aiBookingForm" onsubmit="submitAIBooking(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Họ và Tên (*)</label>
+              <input type="text" id="aiName" class="form-control" placeholder="Nguyễn Văn A" required>
+            </div>
+            <div class="form-group">
+              <label>Số Điện Thoại (*)</label>
+              <input type="tel" id="aiPhone" class="form-control" placeholder="0912345678" required>
+            </div>
+            <div class="form-group">
+              <label>Chọn Bác Sĩ (*)</label>
+              <select id="aiDoctorSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Chọn Ngày Khám (*)</label>
+              <input type="date" id="aiDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Chọn Khung Giờ (Slot 30 phút) (*)</label>
+              <select id="aiSlotSelect" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Chọn Gói Dịch Vụ (*)</label>
+              <select id="aiServiceSelect" class="form-control" required></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Mô tả thêm triệu chứng / Tiền sử bệnh</label>
+            <textarea id="aiSymptoms" class="form-control" rows="2" placeholder="Vùng nốt ruồi bị ngứa, lan rộng trong 2 tháng nay..."></textarea>
+          </div>
+
+          <div style="text-align: right; margin-top: 1rem;">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-lock"></i> Khóa Slot & Đặt Cọc 100.000đ Giữ Chỗ</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Section 2: Clinic Services & Doctors Directory -->
+    <section class="glass-card" id="bookingSection">
+      <div class="card-header">
+        <h2 class="card-title"><i class="fa-solid fa-hospital-user"></i> Đội Ngũ Bác Sĩ & Bảng Giá Dịch Vụ</h2>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div>
+          <h3><i class="fa-solid fa-user-md" style="color: var(--primary);"></i> Danh Sách Bác Sĩ</h3>
+          <div id="doctorsList" style="margin-top: 1rem;"></div>
+        </div>
+        <div>
+          <h3><i class="fa-solid fa-tags" style="color: var(--accent);"></i> Bảng Giá Dịch Vụ</h3>
+          <div id="servicesList" style="margin-top: 1rem;"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- AUTH MODAL (LOGIN / REGISTER) -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeAuthModal()">&times;</span>
+      
+      <!-- Login View -->
+      <div id="loginView">
+        <h2 style="color: var(--primary); margin-bottom: 1.5rem;"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập Hệ Thống</h2>
+        <form onsubmit="handleLoginSubmit(event)">
+          <div class="form-group">
+            <label>Số Điện Thoại (*)</label>
+            <input type="tel" id="loginPhone" class="form-control" placeholder="0933333333" required>
+          </div>
+          <div class="form-group">
+            <label>Mật Khẩu (*)</label>
+            <input type="password" id="loginPass" class="form-control" placeholder="Mật khẩu của bạn" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Đăng Nhập</button>
+        </form>
+      </div>
+
+      <!-- Register View -->
+      <div id="registerView" style="display: none;">
+        <h2 style="color: var(--primary); margin-bottom: 1.5rem;"><i class="fa-solid fa-user-plus"></i> Đăng Ký Tài Khoản</h2>
+        <form onsubmit="handleRegisterSubmit(event)">
+          <div class="form-group">
+            <label>Họ và Tên (*)</label>
+            <input type="text" id="regName" class="form-control" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="form-group">
+            <label>Số Điện Thoại (*)</label>
+            <input type="tel" id="regPhone" class="form-control" placeholder="0912345678" required>
+          </div>
+          <div class="form-group">
+            <label>Mật Khẩu (*)</label>
+            <input type="password" id="regPass" class="form-control" placeholder="Tạo mật khẩu" required>
+          </div>
+          <div class="form-group">
+            <label>Chọn Vai Trò (Role) (*)</label>
+            <select id="regRole" class="form-control">
+              <option value="KHACH_HANG">🧑‍🦱 Khách Hàng / Bệnh Nhân</option>
+              <option value="DOCTOR">👨‍⚕️ Bác Sĩ Chuyên Khoa</option>
+              <option value="STAFF">👩‍⚕️ Y Tá / Lễ Tân</option>
+              <option value="ADMIN">🛡️ Quản Trị Viên (Admin)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Đăng Ký Khởi Tạo</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECT APPOINTMENT MODAL -->
+  <div id="directBookingModal" class="modal">
+    <div class="modal-content" style="max-width: 560px;">
+      <span class="close-btn" onclick="closeDirectBookingModal()">&times;</span>
+      <h2 style="color: var(--primary); margin-bottom: 0.35rem; font-size: 1.35rem;"><i class="fa-solid fa-calendar-check" style="color: var(--accent);"></i> Đặt Lịch Khám Da Liễu Direct</h2>
+      <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">Khóa lịch khám nhanh cùng Bác sĩ Chuyên khoa (Không cần qua bước Soi da AI).</p>
+      
+      <form onsubmit="submitDirectBooking(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+          <div class="form-group">
+            <label>Họ và Tên (*)</label>
+            <input type="text" id="directName" class="form-control" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="form-group">
+            <label>Số Điện Thoại (*)</label>
+            <input type="tel" id="directPhone" class="form-control" placeholder="0912345678" required>
+          </div>
+          <div class="form-group">
+            <label>Chọn Bác Sĩ (*)</label>
+            <select id="directDoctorSelect" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <label>Gói Dịch Vụ (*)</label>
+            <select id="directServiceSelect" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <label>Chọn Ngày Khám (*)</label>
+            <input type="date" id="directDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Khung Giờ Ca Khám (*)</label>
+            <select id="directSlotSelect" class="form-control" required></select>
+          </div>
+        </div>
+        <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 0.75rem; border-radius: 8px; font-size: 0.82rem; color: #0369a1; margin-bottom: 1rem;">
+          <i class="fa-solid fa-clock"></i> <strong>Khung giờ hành chính tiếp đón:</strong> 08:00 - 17:00 (Thứ 2 đến Thứ 7).<br>
+          <em>*Lịch hẹn trong giờ hành chính sẽ được Lễ tân đối chiếu check-in tức thì. Đặt ngoài giờ sẽ được ưu tiên ca 08:00 sáng ngày làm việc tiếp theo.</em>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.5rem;">
+          <label>Mô tả triệu chứng / Ghi chú cho Bác sĩ</label>
+          <textarea id="directSymptoms" class="form-control" rows="2" placeholder="Vùng da mẩn đỏ, ngứa rát..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.8rem; font-weight: 700;"><i class="fa-solid fa-lock"></i> Xác Nhận Đặt Lịch & Khóa Slot Khám</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MY BOOKING HISTORY MODAL -->
+  <div id="historyModal" class="modal">
+    <div class="modal-content" style="max-width: 680px;">
+      <span class="close-btn" onclick="closeHistoryModal()">&times;</span>
+      <h2 style="color: var(--primary); margin-bottom: 0.35rem; font-size: 1.35rem;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent);"></i> Lịch Sử Đặt Lịch Khám Của Tôi</h2>
+      <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">Danh sách các phiếu hẹn đã đặt, trạng thái tiếp đón & kết quả đơn thuốc từ Bác sĩ.</p>
+      
+      <div id="historyListArea" style="display: flex; flex-direction: column; gap: 1rem; max-height: 420px; overflow-y: auto;">
+        <!-- Dynamic history items -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TICKET DETAIL MODAL -->
+  <div id="ticketDetailModal" class="modal">
+    <div class="modal-content" style="max-width: 640px; background: #ffffff; padding: 2rem; border-radius: 16px;">
+      <span class="close-btn" onclick="closeTicketDetailModal()">&times;</span>
+      
+      <div id="ticketPrintContent">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.25rem;">
+          <div>
+            <h3 style="color: var(--primary); margin: 0; font-size: 1.3rem;"><i class="fa-solid fa-hospital"></i> PHÒNG KHÁM DA LIỄU AI DERMAI</h3>
+            <p style="color: #64748b; font-size: 0.8rem; margin: 0.2rem 0 0 0;">Phiếu Thăm Khám & Kết Quả Chẩn Đoán Y Khoa</p>
+          </div>
+          <div style="text-align: right;">
+            <span class="badge badge-primary" id="tStatusBadge">COMPLETED</span>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;" id="tTicketId">Mã: BK-10025</div>
+          </div>
+        </div>
+
+        <!-- Ticket Body -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: #f8fafc; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.88rem;">
+          <div>
+            <p style="margin: 0 0 0.4rem 0;"><strong>Họ & Tên Bệnh Nhân:</strong> <span id="tPatientName">---</span></p>
+            <p style="margin: 0 0 0.4rem 0;"><strong>Số Điện Thoại:</strong> <span id="tPatientPhone">---</span></p>
+            <p style="margin: 0;"><strong>Triệu Chứng Khai Báo:</strong> <span id="tSymptoms">---</span></p>
+          </div>
+          <div>
+            <p style="margin: 0 0 0.4rem 0;"><strong>Bác Sĩ Phụ Trách:</strong> <span id="tDoctorName">---</span></p>
+            <p style="margin: 0 0 0.4rem 0;"><strong>Gói Dịch Vụ & Chi Phí:</strong> <span id="tServiceName">---</span></p>
+            <p style="margin: 0;"><strong>Ngày & Khung Giờ Ca Khám:</strong> <span id="tSlotDate">---</span></p>
+          </div>
+        </div>
+
+        <!-- AI Image & Heatmap Section (if available) -->
+        <div id="tAISection" style="display: none; background: #0f172a; padding: 1rem; border-radius: 10px; color: white; margin-bottom: 1.25rem;">
+          <h4 style="color: var(--accent-neon); margin: 0 0 0.75rem 0; font-size: 0.95rem;"><i class="fa-solid fa-robot"></i> Kết Quả Soi Da AI Vision Transformer</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+            <div>
+              <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.35rem;">Ảnh da gốc</div>
+              <img id="tImgOriginal" src="" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid #334155;">
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--accent-neon); margin-bottom: 0.35rem;">Bản đồ nhiệt Grad-CAM</div>
+              <img id="tImgHeatmap" src="" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 2px solid var(--accent);">
+            </div>
+          </div>
+          <div style="margin-top: 0.75rem; font-size: 0.85rem; color: #e2e8f0;" id="tAIPrediction">---</div>
+        </div>
+
+        <!-- Doctor Examination Results (if completed) -->
+        <div id="tDoctorSection" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.88rem;">
+          <h4 style="color: #15803d; margin: 0 0 0.5rem 0; font-size: 0.95rem;"><i class="fa-solid fa-stethoscope"></i> KẾT QUẢ KHÁM VÀ ĐƠN THUỐC TỪ BÁC SĨ</h4>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Chẩn đoán y khoa chính thức:</strong> <span id="tDiagnosis" style="color: #166534; font-weight: 600;">Chưa thăm khám</span></p>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Đơn thuốc & Lời dặn:</strong></p>
+          <pre id="tPrescription" style="background: #ffffff; padding: 0.65rem; border-radius: 6px; font-family: inherit; font-size: 0.82rem; color: #1e293b; margin: 0; white-space: pre-wrap; border: 1px solid #dcfce7;">---</pre>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+        <button onclick="window.print()" class="btn" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;"><i class="fa-solid fa-print"></i> In Phiếu Khám</button>
+        <button onclick="closeTicketDetailModal()" class="btn btn-primary"><i class="fa-solid fa-check"></i> Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 DermAI Vision Transformer System - Đồ án Chuyên ngành Da liễu AI Đa Nền Tảng</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'http://localhost:5000/api/v1';
+    let currentAIResult = null;
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkUserSession();
+      loadDoctorsAndServices();
+    });
+
+    function checkUserSession() {
+      const session = localStorage.getItem('dermai_user');
+      if (session) {
+        currentUser = JSON.parse(session);
+        document.getElementById('authWidget').innerHTML = `
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <span class="badge badge-success"><i class="fa-solid fa-user-check"></i> ${currentUser.name} (${currentUser.role})</span>
+            <button onclick="logout()" class="btn" style="padding:0.4rem 0.8rem; font-size:0.8rem; background:rgba(255,255,255,0.2); color:white;">Đăng Xuất</button>
+          </div>
+        `;
+        if (currentUser.name) {
+          document.getElementById('aiName').value = currentUser.name;
+          document.getElementById('aiPhone').value = currentUser.phone;
+        }
+      }
+    }
+
+    function openAuthModal(view) {
+      document.getElementById('authModal').style.display = 'flex';
+      document.getElementById('loginView').style.display = view === 'login' ? 'block' : 'none';
+      document.getElementById('registerView').style.display = view === 'register' ? 'block' : 'none';
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').style.display = 'none';
+    }
+
+    async function quickLogin(phone, pass) {
+      document.getElementById('loginPhone').value = phone;
+      document.getElementById('loginPass').value = pass;
+      await handleLoginSubmit(new Event('submit'));
+    }
+
+    async function handleLoginSubmit(e) {
+      if (e) e.preventDefault();
+      const phone = document.getElementById('loginPhone').value;
+      const pass = document.getElementById('loginPass').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({so_dien_thoai: phone, mat_khau: pass})
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('dermai_user', JSON.stringify(data));
+          alert(`🎉 Đăng nhập thành công với vai trò ${data.role}!`);
+          closeAuthModal();
+          checkUserSession();
+        } else {
+          alert("Lỗi: " + data.detail);
+        }
+      } catch (err) {
+        alert("Lỗi kết nối server: " + err.message);
+      }
+    }
+
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        ho_ten: document.getElementById('regName').value,
+        so_dien_thoai: document.getElementById('regPhone').value,
+        mat_khau: document.getElementById('regPass').value,
+        role: document.getElementById('regRole').value
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert("🎉 Đăng ký tài khoản thành công! Hãy tiến hành đăng nhập.");
+          openAuthModal('login');
+        } else {
+          alert("Lỗi: " + data.detail);
+        }
+      } catch (err) {
+        alert("Lỗi đăng ký: " + err.message);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('dermai_user');
+      window.location.reload();
+    }
+
+    const defaultDoctors = [
+      { id: "doc-1", ho_ten: "PGS.TS Bác sĩ Nguyễn Văn An", chuyen_khoa: "Ung Bướu & Hắc Tố Da (Melanoma)", nam_kinh_nghiem: 18, rating: "4.95" },
+      { id: "doc-2", ho_ten: "BS.CKII Trần Thị Mai", chuyen_khoa: "Da Liễu Thẩm Mỹ & Cấy Tế Bào", nam_kinh_nghiem: 14, rating: "4.90" },
+      { id: "doc-3", ho_ten: "ThS.BS Lê Hoàng Nam", chuyen_khoa: "Laser & Dày Sừng Ánh Sáng (Actinic)", nam_kinh_nghiem: 10, rating: "4.88" },
+      { id: "doc-4", ho_ten: "BS.CKI Phạm Minh Đức", chuyen_khoa: "Dị Ứng & Bệnh Da Trẻ Em", nam_kinh_nghiem: 8, rating: "4.85" }
+    ];
+
+    const defaultServices = [
+      { id: "srv-1", ten_dich_vu: "Khám Da liễu Khám thường", gia_kham: 150000, loai_dich_vu: "THUONG", mo_ta: "Khám chẩn đoán tổng quát bệnh ngoài da cùng bác sĩ chuyên khoa." },
+      { id: "srv-2", ten_dich_vu: "Khám Da liễu BHYT", gia_kham: 40000, loai_dich_vu: "BHYT", mo_ta: "Khám theo chế độ Bảo hiểm y tế quy định (Hỗ trợ 80-100%)." },
+      { id: "srv-3", ten_dich_vu: "Khám Chuyên sâu Ung bướu Da (VIP)", gia_kham: 500000, loai_dich_vu: "YEU_CAU", mo_ta: "Khám với Trưởng khoa & Phân tích chuyên sâu tổn thương hắc tố/nghi ngờ ung thư da." },
+      { id: "srv-4", ten_dich_vu: "Điều trị Laser & Dày sừng ánh sáng", gia_kham: 800000, loai_dich_vu: "YEU_CAU", mo_ta: "Thủ thuật điều trị tổn thương dày sừng, mụn hạt bẹt bằng công nghệ Laser CO2." }
+    ];
+
+    const defaultSlots = [
+      { id: "slot-1", gio_bat_dau: "08:00", gio_ket_thuc: "08:30" },
+      { id: "slot-2", gio_bat_dau: "08:30", gio_ket_thuc: "09:00" },
+      { id: "slot-3", gio_bat_dau: "09:00", gio_ket_thuc: "09:30" },
+      { id: "slot-4", gio_bat_dau: "09:30", gio_ket_thuc: "10:00" },
+      { id: "slot-5", gio_bat_dau: "10:00", gio_ket_thuc: "10:30" },
+      { id: "slot-6", gio_bat_dau: "13:30", gio_ket_thuc: "14:00" },
+      { id: "slot-7", gio_bat_dau: "14:00", gio_ket_thuc: "14:30" },
+      { id: "slot-8", gio_bat_dau: "14:30", gio_ket_thuc: "15:00" }
+    ];
+
+    function renderDoctors(doctors) {
+      const docListEl = document.getElementById('doctorsList');
+      const docSelectEl = document.getElementById('aiDoctorSelect');
+      const directDocSelectEl = document.getElementById('directDoctorSelect');
+      if (!docListEl) return;
+
+      docListEl.innerHTML = doctors.map(d => `
+        <div style="background: #ffffff; padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 14px rgba(0,0,0,0.04); transition: all 0.25s ease; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);">
+              <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <div>
+              <h4 style="font-size: 1.05rem; color: #0f172a; font-weight: 700; margin: 0 0 0.25rem 0; display: flex; align-items: center; gap: 0.4rem;">
+                ${d.ho_ten} <i class="fa-solid fa-circle-check" style="color: #0284c7; font-size: 0.9rem;" title="Bác sĩ chuyên khoa chính thức"></i>
+              </h4>
+              <p style="font-size: 0.85rem; color: #0284c7; font-weight: 600; margin: 0 0 0.35rem 0;">${d.chuyen_khoa || 'Da liễu tổng hợp'}</p>
+              <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; color: #64748b;">
+                <span><i class="fa-solid fa-briefcase" style="color: #64748b;"></i> ${d.nam_kinh_nghiem || 10} năm kinh nghiệm</span>
+                <span><i class="fa-solid fa-star" style="color: #f59e0b;"></i> ${d.rating || '4.9'}/5.0</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="selectDoctorForBooking('${d.id}')" class="btn btn-accent" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0;">
+            <i class="fa-solid fa-calendar-check"></i> Đặt Lịch Bác Sĩ
+          </button>
+        </div>
+      `).join('');
+
+      const docOptions = doctors.map(d => `<option value="${d.id}">${d.ho_ten} - ${d.chuyen_khoa || 'Da liễu'}</option>`).join('');
+      if (docSelectEl) docSelectEl.innerHTML = docOptions;
+      if (directDocSelectEl) directDocSelectEl.innerHTML = docOptions;
+    }
+
+    function renderServices(services) {
+      const srvListEl = document.getElementById('servicesList');
+      const srvSelectEl = document.getElementById('aiServiceSelect');
+      const directSrvSelectEl = document.getElementById('directServiceSelect');
+      if (!srvListEl) return;
+
+      srvListEl.innerHTML = services.map(s => `
+        <div style="background: #ffffff; padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 14px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+              <span class="badge ${s.loai_dich_vu === 'YEU_CAU' ? 'badge-danger' : (s.loai_dich_vu === 'BHYT' ? 'badge-success' : 'badge-primary')}" style="font-size: 0.75rem;">
+                ${s.loai_dich_vu === 'YEU_CAU' ? 'Chuyên Sâu VIP' : (s.loai_dich_vu === 'BHYT' ? 'Áp Dụng BHYT' : 'Khám Tiêu Chuẩn')}
+              </span>
+              <strong style="font-size: 1rem; color: #0f172a;">${s.ten_dich_vu}</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.4;">${s.mo_ta || 'Khám & chẩn đoán bệnh lý ngoài da cùng bác sĩ.'}</p>
+          </div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <div style="font-size: 1.15rem; font-weight: 800; color: #0f4c81; margin-bottom: 0.4rem;">${(s.gia_kham || 0).toLocaleString('vi-VN')} đ</div>
+            <button onclick="selectServiceForBooking('${s.id}')" class="btn" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; padding: 0.35rem 0.8rem; font-size: 0.8rem; font-weight: 700;">
+              <i class="fa-solid fa-cart-plus"></i> Chọn Gói Này
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      const srvOptions = services.map(s => `<option value="${s.id}">${s.ten_dich_vu} (${(s.gia_kham || 0).toLocaleString('vi-VN')} đ)</option>`).join('');
+      if (srvSelectEl) srvSelectEl.innerHTML = srvOptions;
+      if (directSrvSelectEl) directSrvSelectEl.innerHTML = srvOptions;
+    }
+
+    function renderSlots(slots) {
+      const slotSelectEl = document.getElementById('aiSlotSelect');
+      const directSlotSelectEl = document.getElementById('directSlotSelect');
+      if (slots && slots.length > 0) {
+        const slotOptions = slots.map(s => `<option value="${s.id}">${s.gio_bat_dau} - ${s.gio_ket_thuc}</option>`).join('');
+        if (slotSelectEl) slotSelectEl.innerHTML = slotOptions;
+        if (directSlotSelectEl) directSlotSelectEl.innerHTML = slotOptions;
+      }
+    }
+
+    // Render immediate defaults so UI is never empty
+    renderDoctors(defaultDoctors);
+    renderServices(defaultServices);
+    renderSlots(defaultSlots);
+
+    async function loadDoctorsAndServices() {
+      try {
+        const [docRes, srvRes, slotRes] = await Promise.all([
+          fetch(`${API_BASE}/doctors`).catch(() => null),
+          fetch(`${API_BASE}/services`).catch(() => null),
+          fetch(`${API_BASE}/slots`).catch(() => null)
+        ]);
+
+        if (docRes && docRes.ok) {
+          const docs = await docRes.json();
+          if (docs && docs.length > 0) renderDoctors(docs);
+        }
+        if (srvRes && srvRes.ok) {
+          const srvs = await srvRes.json();
+          if (srvs && srvs.length > 0) renderServices(srvs);
+        }
+        if (slotRes && slotRes.ok) {
+          const slots = await slotRes.json();
+          if (slots && slots.length > 0) renderSlots(slots);
+        }
+      } catch (err) {
+        console.error("Backend fetch error, using resilient defaults", err);
+      }
+    }
+    loadDoctorsAndServices();
+
+    async function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      document.getElementById('dropzone').style.display = 'none';
+      document.getElementById('aiLoading').style.display = 'block';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch(`${API_BASE}/ai/analyze`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+        currentAIResult = data;
+
+        document.getElementById('aiLoading').style.display = 'none';
+        document.getElementById('aiResults').style.display = 'block';
+
+        document.getElementById('resultHeatmapImg').src = data.heatmap_url;
+        document.getElementById('top1ClassName').innerText = data.predicted_class_name;
+        
+        const badge = document.getElementById('malignantBadge');
+        if (data.is_malignant) {
+          badge.className = 'badge badge-danger';
+          badge.innerText = 'Cảnh báo Ác tính (Malignant)';
+        } else {
+          badge.className = 'badge badge-success';
+          badge.innerText = 'Lành tính (Benign)';
+        }
+        
+        document.getElementById('confidenceText').innerText = `Độ tin cậy AI: ${(data.confidence * 100).toFixed(1)}%`;
+        document.getElementById('recommendedSpecialist').innerText = data.recommended_specialist;
+
+        document.getElementById('top3List').innerHTML = data.top3_predictions.map(p => `
+          <div style="margin-bottom: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+              <span>${p.class_name}</span>
+              <strong>${(p.confidence * 100).toFixed(1)}%</strong>
+            </div>
+            <div class="probability-bar">
+              <div class="probability-fill" style="width: ${p.confidence * 100}%;"></div>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        alert("Lỗi kết nối AI: " + err.message);
+        document.getElementById('aiLoading').style.display = 'none';
+        document.getElementById('dropzone').style.display = 'block';
+      }
+    }
+
+    async function submitAIBooking(event) {
+      event.preventDefault();
+      if (!currentAIResult) return;
+
+      const payload = {
+        ho_ten: document.getElementById('aiName').value,
+        so_dien_thoai: document.getElementById('aiPhone').value,
+        bac_si_id: document.getElementById('aiDoctorSelect').value,
+        dich_vu_id: document.getElementById('aiServiceSelect').value,
+        khung_gio_id: document.getElementById('aiSlotSelect').value,
+        ngay_kham: document.getElementById('aiDate').value,
+        trieu_chung: document.getElementById('aiSymptoms').value,
+        loai_form: 'AI',
+        anh_ton_thuong_url: currentAIResult.heatmap_url,
+        ai_top1_class: currentAIResult.predicted_class,
+        ai_top1_confidence: currentAIResult.confidence,
+        ai_top3_json: JSON.stringify(currentAIResult.top3_predictions),
+        ai_heatmap_url: currentAIResult.heatmap_url
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/bookings`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        alert("🎉 Đặt lịch khám thông minh AI thành công!\nMã phiếu khám của bạn: " + result.booking_id);
+        window.location.reload();
+      } catch (err) {
+        alert("Lỗi gửi thông tin đặt lịch: " + err.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDoctorsAndServices();
+
+      const userStr = localStorage.getItem('dermAI_user');
+      const authWidget = document.getElementById('authWidget');
+      if (userStr && authWidget) {
+        try {
+          const user = JSON.parse(userStr);
+          const role = (user.role || '').toUpperCase();
+          const name = user.ho_ten || user.name || 'Khách hàng';
+          
+          let portalBtn = '';
+          if (role === 'ADMIN') {
+            portalBtn = `<a href="admin.html" class="btn btn-accent" style="padding: 0.45rem 1rem; font-size: 0.85rem;"><i class="fa-solid fa-gear"></i> Super Admin Portal</a>`;
+          } else if (role === 'STAFF' || role === 'LE_TAN') {
+            portalBtn = `<a href="admin.html" class="btn btn-accent" style="padding: 0.45rem 1rem; font-size: 0.85rem;"><i class="fa-solid fa-hospital-user"></i> Portal Lễ Tân</a>`;
+          } else if (role === 'DOCTOR' || role === 'BAC_SI') {
+            portalBtn = `<a href="doctor.html" class="btn btn-accent" style="padding: 0.45rem 1rem; font-size: 0.85rem;"><i class="fa-solid fa-user-doctor"></i> Doctor Portal</a>`;
+          }
+          
+          authWidget.innerHTML = `
+            <span style="font-weight: 600; color: #a5f3fc; font-size: 0.9rem;"><i class="fa-solid fa-circle-user"></i> Xin chào, ${name}</span>
+            ${portalBtn}
+            <button onclick="logoutUser()" class="btn" style="background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); padding: 0.45rem 1rem; font-size: 0.85rem;"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</button>
+          `;
+        } catch(e) {}
+      }
+    });
+
+    window.onload = function() {
+      loadDoctorsAndServices();
+    };
+
+    function logoutUser() {
+      localStorage.removeItem('dermAI_token');
+      localStorage.removeItem('dermAI_user');
+      window.location.reload();
+    }
+
+    function selectDoctorForBooking(docId) {
+      openDirectBookingModal(docId, null);
+    }
+
+    function selectServiceForBooking(srvId) {
+      openDirectBookingModal(null, srvId);
+    }
+
+    function openDirectBookingModal(docId, srvId) {
+      const modal = document.getElementById('directBookingModal');
+      if (!modal) return;
+      modal.style.display = 'flex';
+
+      // Auto-fill logged in user info
+      const userStr = localStorage.getItem('dermAI_user');
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          if (u.ho_ten || u.name) document.getElementById('directName').value = u.ho_ten || u.name;
+          if (u.so_dien_thoai || u.phone) document.getElementById('directPhone').value = u.so_dien_thoai || u.phone;
+        } catch(e) {}
+      }
+
+      // Default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('directDate').value = today;
+
+      if (docId) {
+        const dSel = document.getElementById('directDoctorSelect');
+        if (dSel) dSel.value = docId;
+      }
+      if (srvId) {
+        const sSel = document.getElementById('directServiceSelect');
+        if (sSel) sSel.value = srvId;
+      }
+    }
+
+    function closeDirectBookingModal() {
+      const modal = document.getElementById('directBookingModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function submitDirectBooking(event) {
+      event.preventDefault();
+      const payload = {
+        ho_ten: document.getElementById('directName').value,
+        so_dien_thoai: document.getElementById('directPhone').value,
+        bac_si_id: document.getElementById('directDoctorSelect').value,
+        dich_vu_id: document.getElementById('directServiceSelect').value,
+        khung_gio_id: document.getElementById('directSlotSelect').value,
+        ngay_kham: document.getElementById('directDate').value,
+        trieu_chung: document.getElementById('directSymptoms').value,
+        loai_form: 'THUONG'
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/bookings`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        alert("🎉 ĐẶT LỊCH THÀNH CÔNG!\nMã phiếu khám: " + (result.booking_id || result.id || 'BK-10025') + "\nBác sĩ & Phòng khám đã lưu phiếu giữ chỗ!");
+        closeDirectBookingModal();
+        openHistoryModal();
+      } catch (err) {
+        alert("Lỗi đặt lịch: " + err.message);
+      }
+    }
+
+    function openHistoryModal() {
+      const modal = document.getElementById('historyModal');
+      if (modal) modal.style.display = 'flex';
+      loadMyBookingHistory();
+    }
+
+    function closeHistoryModal() {
+      const modal = document.getElementById('historyModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function loadMyBookingHistory() {
+      const container = document.getElementById('historyListArea');
+      if (!container) return;
+      container.innerHTML = '<p style="color:#64748b; text-align:center; padding:2rem;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lịch sử đặt lịch...</p>';
+      
+      try {
+        const userStr = localStorage.getItem('dermAI_user');
+        let phone = '';
+        if (userStr) {
+          try {
+            const u = JSON.parse(userStr);
+            phone = u.so_dien_thoai || u.phone || '';
+          } catch(e) {}
+        }
+        
+        const res = await fetch(`${API_BASE}/bookings/my-history?phone=${encodeURIComponent(phone)}`);
+        const list = await res.json();
+        window.myHistoryCache = list || [];
+        
+        if (!list || list.length === 0) {
+          container.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:2rem;"><i class="fa-solid fa-folder-open" style="font-size:2rem;"></i><br>Bạn chưa có phiếu đặt lịch nào.</p>';
+          return;
+        }
+
+        container.innerHTML = list.map(b => `
+          <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:1.15rem; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+              <div>
+                <span class="badge ${b.status === 'HOAN_THANH' ? 'badge-primary' : b.status === 'CHECK_IN' ? 'badge-success' : 'badge-warning'}">
+                  ${b.status === 'HOAN_THANH' ? '✅ Đã Khám & Có Đơn Thuốc' : b.status === 'CHECK_IN' ? '🏥 Đã Check-in Tại Phòng Khám' : '⏳ Chờ Xác Nhận Check-in'}
+                </span>
+                <h4 style="margin:0.4rem 0 0.2rem 0; font-size:1.05rem; color:#0f172a;">${b.service_name}</h4>
+              </div>
+              <div style="text-align:right;">
+                <span style="font-weight:800; color:var(--primary); font-size:1.05rem;">${(b.service_price || 150000).toLocaleString('vi-VN')} đ</span>
+                <div style="font-size:0.78rem; color:#64748b;">Mã: ${b.id.substring(0, 8)}</div>
+              </div>
+            </div>
+            
+            <div style="font-size:0.85rem; color:#475569; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; background:#f8fafc; padding:0.65rem 0.85rem; border-radius:8px; margin-top:0.5rem;">
+              <div><i class="fa-solid fa-user-doctor" style="color:var(--accent);"></i> <strong>Bác sĩ:</strong> ${b.doctor_name}</div>
+              <div><i class="fa-solid fa-clock" style="color:var(--accent);"></i> <strong>Ca:</strong> ${b.slot} (${b.date})</div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem;">
+              ${b.diagnosis ? `<span style="font-size:0.82rem; color:#16a34a; font-weight:600;"><i class="fa-solid fa-stethoscope"></i> Đã có kết quả chẩn đoán</span>` : `<span></span>`}
+              <button onclick="openTicketDetail('${b.id}')" class="btn" style="background:#e0f2fe; color:#0284c7; border:1px solid #bae6fd; padding:0.35rem 0.8rem; font-size:0.8rem; font-weight:700;">
+                <i class="fa-solid fa-eye"></i> Xem Chi Tiết Phiếu
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<p style="color:#ef4444; text-align:center; padding:1rem;">Không thể tải lịch sử. Lỗi: ' + err.message + '</p>';
+      }
+    }
+
+    function openTicketDetail(bookingId) {
+      const list = window.myHistoryCache || [];
+      const b = list.find(x => x.id === bookingId);
+      if (!b) return;
+
+      document.getElementById('ticketDetailModal').style.display = 'flex';
+      document.getElementById('tStatusBadge').innerText = b.status;
+      document.getElementById('tTicketId').innerText = 'Mã phiếu: ' + b.id;
+      document.getElementById('tPatientName').innerText = b.patient_name || 'Khách hàng';
+      document.getElementById('tPatientPhone').innerText = b.patient_phone || '---';
+      document.getElementById('tSymptoms').innerText = b.symptoms || 'Khám tổn thương da';
+      document.getElementById('tDoctorName').innerText = b.doctor_name || 'PGS.TS Bác sĩ Nguyễn Văn An';
+      document.getElementById('tServiceName').innerText = `${b.service_name} (${(b.service_price || 150000).toLocaleString('vi-VN')} đ)`;
+      document.getElementById('tSlotDate').innerText = `${b.slot} ngày ${b.date}`;
+
+      if (b.diagnosis || b.prescription) {
+        document.getElementById('tDoctorSection').style.display = 'block';
+        document.getElementById('tDiagnosis').innerText = b.diagnosis || 'Chẩn đoán lâm sàng bình thường.';
+        
+        let rxText = b.prescription || 'Chưa kê đơn thuốc.';
+        try {
+          const parsed = JSON.parse(b.prescription);
+          if (Array.isArray(parsed) && parsed[0] && parsed[0].prescription) rxText = parsed[0].prescription;
+        } catch(e) {}
+        document.getElementById('tPrescription').innerText = rxText;
+      } else {
+        document.getElementById('tDoctorSection').style.display = 'block';
+        document.getElementById('tDiagnosis').innerText = 'Phiếu khám đang trong hàng chờ tiếp đón Bác sĩ.';
+        document.getElementById('tPrescription').innerText = 'Chưa có đơn thuốc (Bác sĩ sẽ kê sau khi thăm khám).';
+      }
+    }
+
+    function closeTicketDetailModal() {
+      document.getElementById('ticketDetailModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

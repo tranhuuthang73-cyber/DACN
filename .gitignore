@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+env/
+venv/
+*.db
+*.sqlite
+*.sqlite3
+.gemini/
+*.log
+scratch/
+
+# Ignore large ML model weights > 100MB for GitHub
+output_model/
+*.pth
+*.pt
+*.bin
+*.onnx

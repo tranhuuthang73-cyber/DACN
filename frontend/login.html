@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DermAI - Đăng Nhập & Đăng Ký Hệ Thống Y Tế AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Full Page Auth Styling Pro Max */
+    body.auth-page {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+      padding: 2rem 1rem;
+    }
+
+    /* Ambient Background Orbs */
+    .auth-orb-1 {
+      position: absolute;
+      top: 10%;
+      left: 15%;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(0, 245, 212, 0.25) 0%, transparent 70%);
+      filter: blur(60px);
+      animation: floatOrb 10s infinite alternate ease-in-out;
+    }
+
+    .auth-orb-2 {
+      position: absolute;
+      bottom: 10%;
+      right: 15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+      filter: blur(70px);
+      animation: floatOrb 14s infinite alternate-reverse ease-in-out;
+    }
+
+    /* Glass Auth Card */
+    .auth-card {
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 180, 216, 0.2);
+      position: relative;
+      z-index: 10;
+      color: white;
+      animation: authCardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes authCardEntrance {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .auth-header .logo {
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    /* Auth Tab Switcher */
+    .auth-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #94a3b8;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 9px;
+      transition: all 0.3s ease;
+    }
+
+    .auth-tab.active {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 180, 216, 0.35);
+    }
+
+    /* Form Input Controls */
+    .auth-form .form-group label {
+      color: #cbd5e1;
+      font-size: 0.9rem;
+    }
+
+    .auth-form .form-control {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      padding: 0.9rem 1.1rem;
+    }
+
+    .auth-form .form-control::placeholder {
+      color: #64748b;
+    }
+
+    .auth-form .form-control:focus {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
+    }
+
+    .input-icon-group {
+      position: relative;
+    }
+
+    .input-icon-group i {
+      position: absolute;
+      left: 1.1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+
+    .input-icon-group .form-control {
+      padding-left: 2.8rem;
+    }
+
+    /* Quick Demo Role Buttons */
+    .quick-roles {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px dashed rgba(0, 180, 216, 0.3);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    .quick-roles-title {
+      font-size: 0.85rem;
+      color: var(--accent-neon);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .role-btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .role-btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.82rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      cursor: pointer;
+      font-weight: 600;
+      text-align: left;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .role-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent-neon);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+    }
+
+    /* Back Home Link */
+    .back-home {
+      margin-top: 1.75rem;
+      text-align: center;
+    }
+
+    .back-home a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .back-home a:hover {
+      color: var(--accent-neon);
+    }
+  </style>
+</head>
+<body class="auth-page">
+
+  <!-- Ambient Light Orbs -->
+  <div class="auth-orb-1"></div>
+  <div class="auth-orb-2"></div>
+
+  <!-- Main Auth Card -->
+  <div class="auth-card">
+    <div class="auth-header">
+      <a href="index.html" class="logo">
+        <i class="fa-solid fa-microscope"></i> DermAI <span>Vision</span>
+      </a>
+      <p>Cổng Đăng Nhập & Quản Lý Khám Bệnh Da Liễu AI</p>
+    </div>
+
+    <!-- Tab Switcher -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập</button>
+      <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')"><i class="fa-solid fa-user-plus"></i> Đăng Ký</button>
+    </div>
+
+    <!-- Alert Banner -->
+    <div id="authAlert" style="display: none; padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.9rem; font-weight: 600;"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" class="auth-form" onsubmit="handleLoginSubmit(event)">
+      <div class="form-group">
+        <label><i class="fa-solid fa-phone"></i> Số Điện Thoại</label>
+        <div class="input-icon-group">
+          <i class="fa-solid fa-mobile-screen"></i>
+          <input type="text" id="loginPhone" class="form-control" placeholder="Nhập số điện thoại (ví dụ: 0933333333)" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-lock"></i> Mật Khẩu</label>
+        <div class="input-icon-group">
+          <i class="fa-solid fa-key"></i>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Nhập mật khẩu" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-accent" style="width: 100%; padding: 1rem; margin-top: 0.5rem; font-size: 1.05rem;">
+        <i class="fa-solid fa-paper-plane"></i> Đăng Nhập Hệ Thống
+      </button>
+    </form>
+
+    <!-- REGISTER FORM (Hidden by default) -->
+    <form id="registerForm" class="auth-form" style="display: none;" onsubmit="handleRegisterSubmit(event)">
+      <div class="form-group">
+        <label><i class="fa-solid fa-user"></i> Họ & Tên Bệnh Nhân</label>
+        <div class="input-icon-group">
+          <i class="fa-solid fa-id-card"></i>
+          <input type="text" id="regName" class="form-control" placeholder="Nhập họ và tên đầy đủ" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-phone"></i> Số Điện Thoại</label>
+        <div class="input-icon-group">
+          <i class="fa-solid fa-mobile-screen"></i>
+          <input type="text" id="regPhone" class="form-control" placeholder="Nhập số điện thoại" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-lock"></i> Mật Khẩu</label>
+        <div class="input-icon-group">
+          <i class="fa-solid fa-key"></i>
+          <input type="password" id="regPassword" class="form-control" placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; margin-top: 0.5rem; font-size: 1.05rem;">
+        <i class="fa-solid fa-user-check"></i> Đăng Ký Tài Khoản Mới
+      </button>
+    </form>
+
+    <!-- Quick Role Tester Widget -->
+    <div class="quick-roles">
+      <div class="quick-roles-title">
+        <i class="fa-solid fa-bolt-lightning"></i> Test Phân Quyền Nhanh (Click để đăng nhập):
+      </div>
+      <div class="role-btn-grid">
+        <button class="role-btn" onclick="quickFill('0933333333', 'patient123')">🧑‍🦱 Bệnh nhân</button>
+        <button class="role-btn" onclick="quickFill('0922222222', 'staff123')">👩‍⚕️ Lễ tân</button>
+        <button class="role-btn" onclick="quickFill('0911111111', 'doctor123')">👨‍⚕️ Bác sĩ</button>
+        <button class="role-btn" onclick="quickFill('0900000000', 'admin123')">🛡️ Super Admin</button>
+      </div>
+    </div>
+
+    <!-- Back Home Button -->
+    <div class="back-home">
+      <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Quay lại trang chủ DermAI</a>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000/api/v1';
+
+    function switchAuthTab(type) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+      const authAlert = document.getElementById('authAlert');
+
+      authAlert.style.display = 'none';
+
+      if (type === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        tabLoginBtn.classList.add('active');
+        tabRegisterBtn.classList.remove('active');
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        tabLoginBtn.classList.remove('active');
+        tabRegisterBtn.classList.add('active');
+      }
+    }
+
+    function showAlert(msg, type = 'error') {
+      const authAlert = document.getElementById('authAlert');
+      authAlert.style.display = 'block';
+      if (type === 'error') {
+        authAlert.style.background = '#fee2e2';
+        authAlert.style.color = '#dc2626';
+        authAlert.style.border = '1px solid #fecdd3';
+      } else {
+        authAlert.style.background = '#dcfce7';
+        authAlert.style.color = '#15803d';
+        authAlert.style.border = '1px solid #bbf7d0';
+      }
+      authAlert.innerHTML = msg;
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const phone = document.getElementById('loginPhone').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ so_dien_thoai: phone, mat_khau: password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('dermAI_token', data.token || 'demo-token');
+          localStorage.setItem('dermAI_user', JSON.stringify(data.user || data));
+          showAlert('<i class="fa-solid fa-circle-check"></i> Đăng nhập thành công! Đang chuyển hướng...', 'success');
+          
+          const userRole = (data.role || (data.user && data.user.role) || 'KHACH_HANG').toUpperCase();
+          setTimeout(() => {
+            if (userRole === 'ADMIN') window.location.href = 'admin.html';
+            else if (userRole === 'DOCTOR' || userRole === 'BAC_SI') window.location.href = 'doctor.html';
+            else if (userRole === 'STAFF' || userRole === 'LE_TAN') window.location.href = 'admin.html';
+            else window.location.href = 'index.html';
+          }, 800);
+        } else {
+          showAlert(`<i class="fa-solid fa-circle-exclamation"></i> ${data.detail || data.message || 'Số điện thoại hoặc mật khẩu không chính xác'}`);
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert('<i class="fa-solid fa-wifi"></i> Không thể kết nối đến Backend Server (localhost:5000). Hãy đảm bảo Backend đã được khởi chạy!');
+      }
+    }
+
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ho_ten: name, so_dien_thoai: phone, mat_khau: password, role: 'KHACH_HANG' })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showAlert('<i class="fa-solid fa-circle-check"></i> Đăng ký tài khoản thành công! Hãy đăng nhập.', 'success');
+          setTimeout(() => {
+            switchAuthTab('login');
+            document.getElementById('loginPhone').value = phone;
+            document.getElementById('loginPassword').value = password;
+          }, 1000);
+        } else {
+          showAlert(`<i class="fa-solid fa-circle-exclamation"></i> ${data.detail || data.message || 'Đăng ký thất bại'}`);
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert('<i class="fa-solid fa-wifi"></i> Không thể kết nối đến Backend Server (localhost:5000)');
+      }
+    }
+
+    function quickFill(phone, password) {
+      switchAuthTab('login');
+      document.getElementById('loginPhone').value = phone;
+      document.getElementById('loginPassword').value = password;
+      showAlert(`<i class="fa-solid fa-key"></i> Đã điền tài khoản mẫu! Nhấn "Đăng Nhập Hệ Thống" để vào ngay.`, 'success');
+    }
+  </script>
+</body>
+</html>
