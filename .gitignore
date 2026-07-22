@@ -12,6 +12,9 @@ venv/
 *.log
 scratch/
 
+# Ignore AI agent skills workspace folder
+.agents/
+
 # Ignore large ML model weights > 100MB for GitHub
 output_model/
 *.pth
