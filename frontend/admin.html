@@ -1329,6 +1329,44 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       initTheme();
+
+      const userStr = localStorage.getItem('dermAI_user') || localStorage.getItem('dermai_user');
+      if (!userStr) {
+        showToast("🔐 Vui lòng đăng nhập để truy cập Cổng Quản Trị!", "warning");
+        setTimeout(() => window.location.href = 'login.html', 1000);
+        return;
+      }
+
+      try {
+        const user = JSON.parse(userStr);
+        const role = (user.role || '').toUpperCase();
+        const userName = user.ho_ten || user.so_dien_thoai || 'Người dùng';
+        
+        if (document.getElementById('userNameLabel')) document.getElementById('userNameLabel').innerText = userName;
+        if (document.getElementById('avatarInitial')) document.getElementById('avatarInitial').innerText = userName.charAt(0).toUpperCase();
+
+        if (role === 'STAFF' || role === 'LE_TAN') {
+          // Lễ tân / Y tá tiếp đón: KHÔNG XEM THỐNG KÊ DOANH THU & QUẢN LÝ BÁC SĨ
+          if (document.getElementById('userRoleBadge')) document.getElementById('userRoleBadge').innerText = 'LỄ TÂN TIẾP ĐÓN';
+          if (document.getElementById('roleHeaderTag')) document.getElementById('roleHeaderTag').innerText = 'Quyền Lễ Tân / Y Tá (Tiếp Đón & Check-in)';
+          
+          // Ẩn Menu Thống kê Doanh Thu, Bác Sĩ & Gói Dịch Vụ
+          if (document.getElementById('menuStats')) document.getElementById('menuStats').parentElement.style.display = 'none';
+          if (document.getElementById('menuDoctors')) document.getElementById('menuDoctors').parentElement.style.display = 'none';
+          if (document.getElementById('menuServices')) document.getElementById('menuServices').parentElement.style.display = 'none';
+          
+          // Tự động nhảy sang Tab 4: Đặt Lịch & Check-in
+          switchNav('tabBookings', document.getElementById('menuBookings'));
+        } else if (role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'QUAN_TRI') {
+          if (document.getElementById('userRoleBadge')) document.getElementById('userRoleBadge').innerText = 'SUPER ADMIN';
+          if (document.getElementById('roleHeaderTag')) document.getElementById('roleHeaderTag').innerText = 'Phân Quyền Admin (Toàn Quyền Doanh Thu)';
+        } else {
+          showToast("⛔ Bạn không có quyền truy cập Cổng Quản Trị này!", "error");
+          setTimeout(() => window.location.href = 'index.html', 1200);
+        }
+      } catch (e) {
+        console.error("RBAC Parse Error:", e);
+      }
     });
   </script>
 </body>
