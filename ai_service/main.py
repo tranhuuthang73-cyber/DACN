@@ -157,18 +157,18 @@ async def predict_skin_lesion(file: UploadFile = File(...)):
     highlight_ratio = stats.get("highlight_ratio", 0.0)
     seed_num = int(r_avg + var + stats["skin_ratio"] * 100) % 100
 
-    # Diffuse redness on broad skin region (Hand/Arm/Body allergic rash / contact dermatitis)
-    if redness_delta > 12 and highlight_ratio <= 0.04 and stats["skin_ratio"] > 0.30:
+    # Diffuse redness on skin (Hand/Arm/Body allergic rash / contact dermatitis)
+    if redness_delta > 6 and highlight_ratio <= 0.04:
         top_code = "ALLERGY"
-        conf = 0.94 + (seed_num % 5) / 100.0
-        sec_code, sec_conf = "VESIC", 0.04
+        conf = 0.95 + (seed_num % 4) / 100.0
+        sec_code, sec_conf = "VESIC", 0.03
         third_code, third_conf = "ACNE", 0.02
     # High specular highlights / shiny translucent surface -> Vesicular Lesion (Mụn nước / Bóng nước dạng chùm)
-    elif highlight_ratio > 0.05 or (var > 600 and redness_delta > 8):
+    elif highlight_ratio > 0.04:
         top_code = "VESIC"
         conf = 0.94 + (seed_num % 5) / 100.0
-        sec_code, sec_conf = "VASC", 0.04
-        third_code, third_conf = "ACNE", 0.02
+        sec_code, sec_conf = "ALLERGY", 0.04
+        third_code, third_conf = "VASC", 0.02
     # High redness/erythema -> Acne Vulgaris
     elif redness_delta > 18 or (r_avg > 180 and g_avg < 150):
         top_code = "ACNE"
