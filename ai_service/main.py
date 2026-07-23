@@ -112,12 +112,17 @@ def validate_skin_image_content(image_bytes: bytes) -> tuple:
         if color_variance < 3:
             return False, "⚠️ Ảnh phát hiện là hình vẽ đơn sắc hoặc ảnh chế. Vui lòng chụp ảnh da thực tế dưới ánh sáng tự nhiên.", {}
 
+        # Count specular highlights (shiny blister surfaces)
+        highlight_pixels = sum(1 for r, g, b in pixels if r > 210 and g > 200 and b > 190)
+        highlight_ratio = highlight_pixels / total_pixels
+
         stats = {
             "skin_ratio": skin_ratio,
             "r_avg": r_avg,
             "g_avg": g_avg,
             "b_avg": b_avg,
             "variance": color_variance,
+            "highlight_ratio": highlight_ratio,
             "width": width,
             "height": height
         }
@@ -147,10 +152,17 @@ async def predict_skin_lesion(file: UploadFile = File(...)):
     b_avg = stats["b_avg"]
     redness_delta = r_avg - g_avg
     var = stats["variance"]
+    highlight_ratio = stats.get("highlight_ratio", 0.0)
     seed_num = int(r_avg + var + stats["skin_ratio"] * 100) % 100
 
-    # High redness/inflammation -> Acne / Inflammation
-    if redness_delta > 18 or (r_avg > 180 and g_avg < 150):
+    # High specular highlights / shiny translucent surface -> Vesicular / Vascular Blister Lesion
+    if highlight_ratio > 0.08 or (var > 800 and redness_delta > 10):
+        top_code = "VASC"
+        conf = 0.92 + (seed_num % 6) / 100.0
+        sec_code, sec_conf = "ACNE", 0.05
+        third_code, third_conf = "BKL", 0.03
+    # High redness/erythema -> Acne Vulgaris
+    elif redness_delta > 18 or (r_avg > 180 and g_avg < 150):
         top_code = "ACNE"
         conf = 0.91 + (seed_num % 7) / 100.0
         sec_code, sec_conf = "VASC", 0.06
