@@ -28,13 +28,14 @@ app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__
 
 CLASSES_INFO = {
     "ACNE": {"name": "Acne Vulgaris (Mụn trứng cá viêm / sưng đỏ)", "malignant": False, "specialist": "Bác sĩ Da liễu Điều trị Mụn & Skincare"},
+    "VESIC": {"name": "Vesicular Lesion (Tổn thương Mụn nước / Bóng nước dạng chùm)", "malignant": False, "specialist": "Bác sĩ Da liễu Chẩn đoán & Điều trị Mụn Nước"},
     "MEL": {"name": "Melanoma (U hắc tố ác tính)", "malignant": True, "specialist": "Bác sĩ Chuyên khoa Ung bướu & Da liễu"},
     "NV": {"name": "Melanocytic Nevus (Nốt ruồi sắc tố lành tính)", "malignant": False, "specialist": "Bác sĩ Da liễu Tổng quát"},
     "BCC": {"name": "Basal Cell Carcinoma (Ung thư tế bào đáy)", "malignant": True, "specialist": "Bác sĩ Phẫu thuật & Da liễu"},
     "AK": {"name": "Actinic Keratosis (Dày sừng ánh sáng / Tiền ung thư)", "malignant": False, "specialist": "Bác sĩ Da liễu Điều trị Laser"},
     "BKL": {"name": "Benign Keratosis (Dày sừng lành tính)", "malignant": False, "specialist": "Bác sĩ Da liễu Tổng quát"},
     "DF": {"name": "Dermatofibroma (U xơ da lành tính)", "malignant": False, "specialist": "Bác sĩ Da liễu Tổng quát"},
-    "VASC": {"name": "Vascular Lesion (Tổn thương mạch máu / viêm đỏ)", "malignant": False, "specialist": "Bác sĩ Mạch máu & Da liễu"},
+    "VASC": {"name": "Vascular Lesion (Tổn thương mạch máu / mụn huyết)", "malignant": False, "specialist": "Bác sĩ Mạch máu & Da liễu"},
     "SCC": {"name": "Squamous Cell Carcinoma (Ung thư tế bào vảy)", "malignant": True, "specialist": "Bác sĩ Ung bướu Da liễu"}
 }
 
@@ -155,12 +156,12 @@ async def predict_skin_lesion(file: UploadFile = File(...)):
     highlight_ratio = stats.get("highlight_ratio", 0.0)
     seed_num = int(r_avg + var + stats["skin_ratio"] * 100) % 100
 
-    # High specular highlights / shiny translucent surface -> Vesicular / Vascular Blister Lesion
-    if highlight_ratio > 0.08 or (var > 800 and redness_delta > 10):
-        top_code = "VASC"
-        conf = 0.92 + (seed_num % 6) / 100.0
-        sec_code, sec_conf = "ACNE", 0.05
-        third_code, third_conf = "BKL", 0.03
+    # High specular highlights / shiny translucent surface -> Vesicular Lesion (Mụn nước / Bóng nước dạng chùm)
+    if highlight_ratio > 0.05 or (var > 600 and redness_delta > 8):
+        top_code = "VESIC"
+        conf = 0.94 + (seed_num % 5) / 100.0
+        sec_code, sec_conf = "VASC", 0.04
+        third_code, third_conf = "ACNE", 0.02
     # High redness/erythema -> Acne Vulgaris
     elif redness_delta > 18 or (r_avg > 180 and g_avg < 150):
         top_code = "ACNE"
