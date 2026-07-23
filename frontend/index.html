@@ -922,6 +922,77 @@
       }
     }
 
+    function renderDoctors(docs) {
+      const container = document.getElementById('doctorsList');
+      if (!container) return;
+
+      const docSelects = [document.getElementById('aiDoctorSelect'), document.getElementById('directDoctorSelect')];
+      docSelects.forEach(sel => {
+        if (sel) {
+          sel.innerHTML = docs.map(d => `<option value="${d.id}">${d.ho_ten} (${d.chuyen_khoa})</option>`).join('');
+        }
+      });
+
+      container.innerHTML = docs.map(d => `
+        <div class="doctor-card" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:20px; padding:1.5rem; transition:all 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+          <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+            <div style="width:54px; height:54px; border-radius:50%; background:linear-gradient(135deg, #0284c7, #00f5d4); color:white; font-weight:800; font-size:1.4rem; display:flex; align-items:center; justify-content:center; shrink:0; box-shadow:0 6px 15px rgba(2,132,199,0.3);">
+              ${d.ho_ten.charAt(0)}
+            </div>
+            <div>
+              <h3 style="font-size:1.1rem; font-weight:800; margin:0; color:var(--text-main);">${d.ho_ten}</h3>
+              <span style="font-size:0.82rem; color:var(--primary); font-weight:700;">${d.chuyen_khoa}</span>
+            </div>
+          </div>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1.25rem;"><i class="fa-solid fa-award" style="color:#f59e0b;"></i> ${d.nam_kinh_nghiem || 5} Năm Kinh Nghiệm Lâm Sàng</p>
+          <button onclick="selectDoctorForBooking('${d.id}')" class="btn btn-outline" style="width:100%; padding:0.65rem; font-size:0.85rem; border-radius:10px;">
+            <i class="fa-solid fa-calendar-check"></i> Đặt Lịch Với Bác Sĩ
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderServices(srvs) {
+      const container = document.getElementById('servicesList');
+      if (!container) return;
+
+      const srvSelects = [document.getElementById('aiServiceSelect'), document.getElementById('directServiceSelect')];
+      srvSelects.forEach(sel => {
+        if (sel) {
+          sel.innerHTML = srvs.map(s => `<option value="${s.id}">${s.ten_dich_vu} - ${(s.gia_kham).toLocaleString('vi-VN')} đ</option>`).join('');
+        }
+      });
+
+      container.innerHTML = srvs.map(s => `
+        <div class="service-card" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:20px; padding:1.75rem; transition:all 0.3s ease; display:flex; flex-direction:column; justify-content:space-between; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+              <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin:0;">${s.ten_dich_vu}</h3>
+              <span class="badge ${s.loai_dich_vu === 'BHYT' ? 'badge-success' : 'badge-primary'}">${s.loai_dich_vu}</span>
+            </div>
+            <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.6; margin-bottom:1.25rem;">${s.mo_ta || 'Dịch vụ thăm khám da liễu và soi da AI chuyên sâu.'}</p>
+          </div>
+          <div>
+            <div style="font-size:1.5rem; font-weight:900; color:var(--primary); margin-bottom:1rem;">
+              ${(s.gia_kham).toLocaleString('vi-VN')} đ
+            </div>
+            <button onclick="selectServiceForBooking('${s.id}')" class="btn btn-primary" style="width:100%; padding:0.7rem; font-size:0.88rem; border-radius:10px;">
+              <i class="fa-solid fa-cart-shopping"></i> Chọn Gói Này
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSlots(slots) {
+      const slotSelects = [document.getElementById('aiSlotSelect'), document.getElementById('directSlotSelect')];
+      slotSelects.forEach(sel => {
+        if (sel) {
+          sel.innerHTML = slots.map(s => `<option value="${s.id}">${s.gio_bat_dau} - ${s.gio_ket_thuc} (${s.so_luong_toi_da} ca/khung)</option>`).join('');
+        }
+      });
+    }
+
     function selectDoctorForBooking(docId) {
       document.getElementById('directDoctorSelect').value = docId;
       document.getElementById('bookingSection').scrollIntoView({ behavior: 'smooth' });
