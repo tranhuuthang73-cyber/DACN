@@ -250,6 +250,20 @@
         <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
       </div>
 
+      <!-- INTERACTIVE BODY SKIN REGION SELECTOR -->
+      <div style="margin-top: 1.75rem; margin-bottom: 1.5rem; background:#f8fafc; padding:1.15rem 1.35rem; border-radius:16px; border:1px solid #e2e8f0;">
+        <label style="font-size: 0.92rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <i class="fa-solid fa-child-reaching" style="color: var(--primary); font-size:1.1rem;"></i> Chọn Vị Trí Vùng Da Thăm Khám (Giúp Bác Sĩ & AI Định Vị Rõ Hơn):
+        </label>
+        <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;" id="bodyRegionContainer">
+          <button type="button" class="body-region-pill active" onclick="selectBodyRegion(this, 'Khuôn Mặt / Cổ')">💆 Khuôn Mặt / Cổ</button>
+          <button type="button" class="body-region-pill" onclick="selectBodyRegion(this, 'Cánh Tay / Bàn Tay')">🦾 Cánh Tay / Bàn Tay</button>
+          <button type="button" class="body-region-pill" onclick="selectBodyRegion(this, 'Lưng / Ngực')">👕 Lưng / Ngực</button>
+          <button type="button" class="body-region-pill" onclick="selectBodyRegion(this, 'Bắp Chân / Bàn Chân')">🦿 Bắp Chân / Bàn Chân</button>
+          <button type="button" class="body-region-pill" onclick="selectBodyRegion(this, 'Vùng Khác')">🧍 Vùng Khác</button>
+        </div>
+      </div>
+
       <!-- AI SCANNING LOADING INDICATOR -->
       <div id="aiLoading" style="display: none; text-align: center; padding: 3.5rem 1.5rem; background:#090e1a; border-radius:20px; color:white; margin-top:1.5rem; position:relative; overflow:hidden; border:1px solid #1e293b;">
         <div class="laser-scanner" id="laserScanner" style="display:block;"></div>
@@ -536,6 +550,42 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- DERMABOT AI MEDICAL CHATBOT FAB & WINDOW -->
+  <button class="dermabot-fab" onclick="toggleDermaBot()">
+    <i class="fa-solid fa-robot fa-bounce" style="color: var(--accent-neon); font-size: 1.2rem;"></i>
+    <span>Trợ Lý Y Tế AI</span>
+  </button>
+
+  <div class="dermabot-chat-window" id="dermaBotWindow">
+    <div class="chat-header">
+      <div style="display: flex; align-items: center; gap: 0.65rem;">
+        <i class="fa-solid fa-robot" style="color: var(--accent-neon); font-size: 1.3rem;"></i>
+        <div>
+          <strong style="font-size: 0.95rem; display: block;">DermaBot AI Medical</strong>
+          <span style="font-size: 0.75rem; color: #38bdf8;">● Trực Tuyến 24/7 (Vision Model v2)</span>
+        </div>
+      </div>
+      <span onclick="toggleDermaBot()" style="cursor: pointer; font-size: 1.4rem; color: #cbd5e1;">&times;</span>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+      <div class="chat-msg ai">
+        👋 Xin chào! Tôi là <strong>DermaBot AI</strong> - Trợ lý tư vấn da liễu. Bạn cần hỗ trợ gì về tổn thương ngoài da, nốt ruồi hay gói BHYT không?
+      </div>
+    </div>
+
+    <div style="padding: 0.5rem 0.75rem; background: #ffffff; border-top: 1px solid #f1f5f9; display: flex; gap: 0.4rem; overflow-x: auto; white-space: nowrap;">
+      <button onclick="askPresetBot('Nốt ruồi có nguy hiểm không?')" class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; background: #e0f2fe; color: #0284c7;">Nốt ruồi nguy hiểm?</button>
+      <button onclick="askPresetBot('Khám BHYT giảm bao nhiêu %?')" class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; background: #fef3c7; color: #b45309;">Khám BHYT giảm %?</button>
+      <button onclick="askPresetBot('Quy trình soi da AI như thế nào?')" class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; background: #dcfce7; color: #15803d;">Quy trình soi da AI?</button>
+    </div>
+
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" class="form-control" placeholder="Nhập câu hỏi cho AI..." style="padding: 0.55rem 0.85rem; font-size: 0.88rem;" onkeypress="if(event.key==='Enter') sendChatMessage()">
+      <button onclick="sendChatMessage()" class="btn btn-primary" style="padding: 0.55rem 0.95rem;"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
   </div>
 
@@ -1053,6 +1103,53 @@
     function closeCheckoutModal() {
       const modal = document.getElementById('checkoutModal');
       if (modal) modal.style.display = 'none';
+    }
+
+    let selectedBodyRegion = 'Khuôn Mặt / Cổ';
+
+    function selectBodyRegion(btn, regionName) {
+      document.querySelectorAll('#bodyRegionContainer .body-region-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedBodyRegion = regionName;
+    }
+
+    function toggleDermaBot() {
+      const win = document.getElementById('dermaBotWindow');
+      if (win) {
+        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+      }
+    }
+
+    function askPresetBot(question) {
+      document.getElementById('chatInput').value = question;
+      sendChatMessage();
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const body = document.getElementById('chatBody');
+      body.innerHTML += `<div class="chat-msg user">${text}</div>`;
+      input.value = '';
+      body.scrollTop = body.scrollHeight;
+
+      setTimeout(() => {
+        let reply = "Cảm ơn bạn đã đặt câu hỏi. Đội ngũ Bác sĩ da liễu DermAI khuyến cáo bạn nên tải ảnh soi da AI hoặc đặt lịch thăm khám trực tiếp để có chẩn đoán chính xác nhất.";
+        const lower = text.toLowerCase();
+
+        if (lower.includes("nốt ruồi") || lower.includes("nguy hiểm")) {
+          reply = "📌 <strong>Tư vấn Nốt Ruồi (Nevus/Melanoma):</strong><br>Nốt ruồi bình thường có màu đều, bờ rõ. Tuy nhiên nếu nốt ruồi thay đổi màu sắc, viền không đều, to nhanh >6mm hoặc chảy máu thì cần được Bác sĩ kiểm tra ngay để loại trừ U hắc tố ác tính (Melanoma). Bạn có thể bấm <strong>'Soi Da AI'</strong> ở trên để máy quét kiểm tra nhé!";
+        } else if (lower.includes("bhyt") || lower.includes("bảo hiểm") || lower.includes("giảm")) {
+          reply = "🏥 <strong>Chế độ Bảo Hiểm Y Tế (BHYT):</strong><br>Phòng khám hỗ trợ khám BHYT giảm <strong>80% - 100%</strong> chi phí khám theo đúng quy định. Giá gói khám BHYT chỉ từ <strong>40.000 đ</strong> (tiết kiệm 110.000 đ cho bệnh nhân)!";
+        } else if (lower.includes("quy trình") || lower.includes("soi da")) {
+          reply = "🔬 <strong>Quy trình 3 Bước Soi Da AI:</strong><br>1. Tải ảnh chụp vùng da tổn thương.<br>2. Mô hình AI Vision Transformer phân tích đặc trưng & khoanh vùng bằng bản đồ nhiệt Grad-CAM.<br>3. Bác sĩ chuyên khoa xem kết quả, chẩn đoán & kê đơn thuốc điện tử.";
+        }
+
+        body.innerHTML += `<div class="chat-msg ai">${reply}</div>`;
+        body.scrollTop = body.scrollHeight;
+      }, 500);
     }
   </script>
 </body>
