@@ -648,6 +648,11 @@
               <strong style="color: #0369a1; font-size: 1.1rem;"><i class="fa-solid fa-user-doctor"></i> Đề Xuất Bác Sĩ Chuyên Khoa Phù Hợp:</strong>
               <p id="recommendedSpecialist" style="color: #0284c7; margin-top: 0.4rem; font-weight: 800; font-size: 1.1rem;">---</p>
             </div>
+
+            <div id="medicalDisclaimer" style="margin-top: 1rem; padding: 1rem; background: #fffbe6; border: 1px solid #ffe58f; border-radius: var(--radius-sm); font-size: 0.88rem; color: #856404;">
+              <i class="fa-solid fa-shield-halved" style="color: #d97706; margin-right: 0.4rem;"></i>
+              <strong>Khuyến Cáo An Toàn Y Tế:</strong> Kết quả AI mang tính chất tầm soát hỗ trợ ban đầu. Để đảm bảo an toàn tuyệt đối 100%, Bác sĩ chuyên khoa tại DermAI sẽ thăm khám trực tiếp, đối chiếu triệu chứng lâm sàng và phê duyệt phiếu chẩn đoán cuối cùng trước khi kê đơn.
+            </div>
           </div>
         </div>
 
@@ -1201,6 +1206,11 @@
         
         document.getElementById('confidenceText').innerText = `Độ tin cậy AI: ${(data.confidence * 100).toFixed(1)}%`;
         document.getElementById('recommendedSpecialist').innerText = data.recommended_specialist;
+
+        const disclaimerEl = document.getElementById('medicalDisclaimer');
+        if (disclaimerEl) {
+          disclaimerEl.style.display = 'block';
+        }
 
         document.getElementById('top3List').innerHTML = data.top3_predictions.map(p => `
           <div style="margin-bottom: 0.85rem;">
