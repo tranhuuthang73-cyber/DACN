@@ -61,15 +61,22 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* DARK MODE OVERRIDE */
+/* COMPREHENSIVE UNIFORM DARK MODE OVERRIDES */
 body.dark-mode {
   --bg-page: #090d16;
   --bg-card: #0f172a;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border-color: #1e293b;
-  background-color: var(--bg-page);
-  color: var(--text-main);
+  background-color: #090d16 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
+body.dark-mode h4, body.dark-mode h5, body.dark-mode h6,
+body.dark-mode p, body.dark-mode label, body.dark-mode span, 
+body.dark-mode strong, body.dark-mode div, body.dark-mode td {
+  color: inherit;
 }
 
 body.dark-mode .glass-card,
@@ -78,15 +85,42 @@ body.dark-mode .queue-card,
 body.dark-mode .inspection-viewport,
 body.dark-mode .stat-card,
 body.dark-mode .modal-card,
-body.dark-mode .ticket-card {
+body.dark-mode .ticket-card,
+body.dark-mode .doctor-card,
+body.dark-mode .service-card,
+body.dark-mode .checkout-card,
+body.dark-mode .modal-content,
+body.dark-mode .ticket-modal-content {
   background-color: #0f172a !important;
   color: #f8fafc !important;
   border-color: #1e293b !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .top-header,
+body.dark-mode .main-wrapper,
+body.dark-mode .content-area {
+  background-color: #090d16 !important;
+  border-color: #1e293b !important;
+}
+
+body.dark-mode .sidebar {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+body.dark-mode .custom-table {
+  color: #f8fafc !important;
 }
 
 body.dark-mode .custom-table th {
   background-color: #1e293b !important;
-  color: #94a3b8 !important;
+  color: #38bdf8 !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .custom-table tr:hover {
+  background-color: rgba(30, 41, 59, 0.6) !important;
 }
 
 body.dark-mode .custom-table td {
@@ -100,6 +134,71 @@ body.dark-mode textarea.form-control {
   background-color: #1e293b !important;
   color: #ffffff !important;
   border-color: #334155 !important;
+}
+
+body.dark-mode select.form-control option {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .dropzone-area {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  border-color: #38bdf8 !important;
+}
+
+body.dark-mode .activity-ticker-container {
+  background: #030712 !important;
+  border-color: #1f2937 !important;
+}
+
+body.dark-mode .ticker-label {
+  background: #030712 !important;
+  box-shadow: 15px 0 20px #030712 !important;
+}
+
+body.dark-mode .dermabot-chat-window {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .chat-body {
+  background-color: #090d16 !important;
+}
+
+body.dark-mode .chat-msg.ai {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .chat-input-area {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+body.dark-mode .body-region-pill {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .body-region-pill.active {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+}
+
+body.dark-mode div[style*="background:#f8fafc"],
+body.dark-mode div[style*="background: #f8fafc"] {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode label[style*="color: #0f172a"],
+body.dark-mode label[style*="color:#0f172a"],
+body.dark-mode label[style*="color: #334155"] {
+  color: #f8fafc !important;
 }
 
 /* THEME TOGGLE BUTTON STYLES */
