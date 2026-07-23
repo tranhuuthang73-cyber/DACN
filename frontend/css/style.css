@@ -48,10 +48,82 @@ html {
 }
 
 body {
-  background-color: #f1f5f9;
+  --bg-page: #f1f5f9;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  
+  background-color: var(--bg-page);
   color: var(--text-main);
   line-height: 1.6;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* DARK MODE OVERRIDE */
+body.dark-mode {
+  --bg-page: #090d16;
+  --bg-card: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #1e293b;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+}
+
+body.dark-mode .glass-card,
+body.dark-mode .section-card,
+body.dark-mode .queue-card,
+body.dark-mode .inspection-viewport,
+body.dark-mode .stat-card,
+body.dark-mode .modal-card,
+body.dark-mode .ticket-card {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #1e293b !important;
+}
+
+body.dark-mode .custom-table th {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .custom-table td {
+  border-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode input.form-control,
+body.dark-mode select.form-control,
+body.dark-mode textarea.form-control {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+/* THEME TOGGLE BUTTON STYLES */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary-light);
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
 }
 
 /* Custom Scrollbar */

@@ -94,7 +94,10 @@
       <li><a href="doctor.html" class="active"><i class="fa-solid fa-user-doctor"></i> Portal Bác Sĩ</a></li>
       <li id="adminNavLink"><a href="admin.html"><i class="fa-solid fa-user-shield"></i> Quản Trị / Lễ Tân</a></li>
     </ul>
-    <div id="authWidget" style="display: flex; align-items: center; gap:1rem;">
+    <div id="authWidget" style="display: flex; align-items: center; gap:0.85rem;">
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn" title="Chuyển chế độ Sáng / Tối">
+        <i class="fa-solid fa-moon" style="color: #38bdf8;"></i> <span>Tối</span>
+      </button>
       <a href="login.html" class="btn btn-accent" style="padding: 0.5rem 1.25rem; font-size: 0.85rem;"><i class="fa-solid fa-right-to-bracket"></i> Đổi Tài Khoản</a>
     </div>
   </nav>
@@ -374,6 +377,34 @@
           return;
         }
       } catch (e) {}
+    });
+    function initTheme() {
+      const savedTheme = localStorage.getItem('dermai_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      updateThemeBtn(savedTheme === 'dark');
+    }
+
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('dermai_theme', isDark ? 'dark' : 'light');
+      updateThemeBtn(isDark);
+    }
+
+    function updateThemeBtn(isDark) {
+      const btns = document.querySelectorAll('.theme-toggle-btn');
+      btns.forEach(btn => {
+        btn.innerHTML = isDark 
+          ? '<i class="fa-solid fa-sun" style="color:#f59e0b;"></i> <span>Sáng</span>' 
+          : '<i class="fa-solid fa-moon" style="color:#38bdf8;"></i> <span>Tối</span>';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
     });
   </script>
 </body>

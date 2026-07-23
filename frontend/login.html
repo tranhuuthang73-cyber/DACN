@@ -392,6 +392,34 @@
       document.getElementById('loginPassword').value = password;
       showAlert(`<i class="fa-solid fa-key"></i> Đã chọn tài khoản mẫu! Nhấn "ĐĂNG NHẬP HỆ THỐNG" để vào ngay.`, 'success');
     }
+    function initTheme() {
+      const savedTheme = localStorage.getItem('dermai_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      updateThemeBtn(savedTheme === 'dark');
+    }
+
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('dermai_theme', isDark ? 'dark' : 'light');
+      updateThemeBtn(isDark);
+    }
+
+    function updateThemeBtn(isDark) {
+      const btns = document.querySelectorAll('.theme-toggle-btn');
+      btns.forEach(btn => {
+        btn.innerHTML = isDark 
+          ? '<i class="fa-solid fa-sun" style="color:#f59e0b;"></i> <span>Sáng</span>' 
+          : '<i class="fa-solid fa-moon" style="color:#38bdf8;"></i> <span>Tối</span>';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+    });
   </script>
 </body>
 </html>

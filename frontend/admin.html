@@ -602,6 +602,9 @@
       </div>
 
       <div class="header-actions">
+        <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn" title="Chuyển chế độ Sáng / Tối">
+          <i class="fa-solid fa-moon" style="color: #38bdf8;"></i> <span>Tối</span>
+        </button>
         <div class="portal-badge-pill">
           <i class="fa-solid fa-shield-halved"></i>
           <span id="roleHeaderTag">Hệ Thống Phân Quyền Strict RBAC Active</span>
@@ -1299,6 +1302,34 @@
       showToast("Đã đăng xuất khỏi hệ thống!", "info");
       setTimeout(() => window.location.href = 'login.html', 800);
     }
+    function initTheme() {
+      const savedTheme = localStorage.getItem('dermai_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      updateThemeBtn(savedTheme === 'dark');
+    }
+
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('dermai_theme', isDark ? 'dark' : 'light');
+      updateThemeBtn(isDark);
+    }
+
+    function updateThemeBtn(isDark) {
+      const btns = document.querySelectorAll('.theme-toggle-btn');
+      btns.forEach(btn => {
+        btn.innerHTML = isDark 
+          ? '<i class="fa-solid fa-sun" style="color:#f59e0b;"></i> <span>Sáng</span>' 
+          : '<i class="fa-solid fa-moon" style="color:#38bdf8;"></i> <span>Tối</span>';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+    });
   </script>
 </body>
 </html>
