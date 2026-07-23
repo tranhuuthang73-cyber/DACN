@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DermAI - Đăng Nhập & Đăng Ký Hệ Thống Y Tế AI</title>
+  <title>DermAI - Cổng Đăng Nhập & Phân Quyền Hệ Thống Y Tế AI</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* Full Page Auth Styling Pro Max */
     body.auth-page {
       background: var(--bg-gradient);
       min-height: 100vh;
@@ -20,327 +22,274 @@
       padding: 2rem 1rem;
     }
 
-    /* Ambient Background Orbs */
     .auth-orb-1 {
       position: absolute;
-      top: 10%;
-      left: 15%;
-      width: 450px;
-      height: 450px;
+      top: 8%;
+      left: 12%;
+      width: 500px;
+      height: 500px;
       background: radial-gradient(circle, rgba(0, 245, 212, 0.25) 0%, transparent 70%);
-      filter: blur(60px);
+      filter: blur(75px);
       animation: floatOrb 10s infinite alternate ease-in-out;
     }
 
     .auth-orb-2 {
       position: absolute;
-      bottom: 10%;
-      right: 15%;
-      width: 500px;
-      height: 500px;
+      bottom: 8%;
+      right: 12%;
+      width: 550px;
+      height: 550px;
       background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
-      filter: blur(70px);
+      filter: blur(85px);
       animation: floatOrb 14s infinite alternate-reverse ease-in-out;
     }
 
-    /* Glass Auth Card */
+    /* VIP AUTH CONTAINER */
     .auth-card {
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: var(--radius-lg);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 32px;
       width: 100%;
-      max-width: 480px;
-      padding: 3rem 2.5rem;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 180, 216, 0.2);
+      max-width: 490px;
+      padding: 3rem 2.25rem;
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.55), 0 0 50px rgba(56, 189, 248, 0.25);
       position: relative;
       z-index: 10;
       color: white;
-      animation: authCardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      animation: authCardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes authCardEntrance {
-      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      from { opacity: 0; transform: translateY(40px) scale(0.92); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .auth-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .auth-header .logo {
-      justify-content: center;
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .auth-header p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-    }
-
-    /* Auth Tab Switcher */
+    /* VIP SLIDING TAB INDICATOR */
     .auth-tabs {
+      position: relative;
       display: flex;
       background: rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 4px;
+      border-radius: 14px;
+      padding: 5px;
       margin-bottom: 2rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .auth-tab-pill {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: calc(50% - 5px);
+      height: calc(100% - 10px);
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 1;
+    }
+
+    .auth-tab-pill.slide-right {
+      transform: translateX(100%);
+      background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+      box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
     }
 
     .auth-tab {
       flex: 1;
       text-align: center;
       padding: 0.75rem;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.95rem;
       color: #94a3b8;
-      border: none;
-      background: transparent;
       cursor: pointer;
-      border-radius: 9px;
-      transition: all 0.3s ease;
-    }
-
-    .auth-tab.active {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(0, 180, 216, 0.35);
-    }
-
-    /* Form Input Controls */
-    .auth-form .form-group label {
-      color: #cbd5e1;
-      font-size: 0.9rem;
-    }
-
-    .auth-form .form-control {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      color: white;
-      padding: 0.9rem 1.1rem;
-    }
-
-    .auth-form .form-control::placeholder {
-      color: #64748b;
-    }
-
-    .auth-form .form-control:focus {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: var(--accent-neon);
-      box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
-    }
-
-    .input-icon-group {
-      position: relative;
-    }
-
-    .input-icon-group i {
-      position: absolute;
-      left: 1.1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
-    }
-
-    .input-icon-group .form-control {
-      padding-left: 2.8rem;
-    }
-
-    /* Quick Demo Role Buttons */
-    .quick-roles {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px dashed rgba(0, 180, 216, 0.3);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-top: 2rem;
-    }
-
-    .quick-roles-title {
-      font-size: 0.85rem;
-      color: var(--accent-neon);
-      font-weight: 700;
-      margin-bottom: 0.75rem;
+      z-index: 2;
+      transition: color 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-    }
-
-    .role-btn-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-    }
-
-    .role-btn {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.82rem;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.08);
-      color: #e2e8f0;
-      cursor: pointer;
-      font-weight: 600;
-      text-align: left;
-      transition: all 0.25s ease;
-      display: flex;
-      align-items: center;
+      justify-content: center;
       gap: 0.5rem;
     }
 
-    .role-btn:hover {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent-neon);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+    .auth-tab.active {
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
 
-    /* Back Home Link */
-    .back-home {
-      margin-top: 1.75rem;
-      text-align: center;
+    /* VIP SLIDING FORM TRACK */
+    .auth-slider-viewport {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
     }
 
-    .back-home a {
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: color 0.2s ease;
-      display: inline-flex;
+    .auth-slider-track {
+      display: flex;
+      width: 200%;
+      transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .auth-slider-track.slide-register {
+      transform: translateX(-50%);
+    }
+
+    .auth-panel {
+      width: 50%;
+      padding: 0 0.25rem;
+      transition: opacity 0.4s ease;
+    }
+
+    .role-demo-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.7rem 0.9rem;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
       align-items: center;
-      gap: 0.4rem;
+      justify-content: space-between;
     }
 
-    .back-home a:hover {
-      color: var(--accent-neon);
+    .role-demo-card:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent-neon);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0, 245, 212, 0.2);
     }
   </style>
 </head>
 <body class="auth-page">
 
-  <!-- Ambient Light Orbs -->
   <div class="auth-orb-1"></div>
   <div class="auth-orb-2"></div>
 
-  <!-- Main Auth Card -->
   <div class="auth-card">
-    <div class="auth-header">
-      <a href="index.html" class="logo">
+    
+    <!-- BRAND HEADER -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="index.html" class="logo" style="justify-content: center; font-size: 2.1rem; margin-bottom: 0.4rem;">
         <i class="fa-solid fa-microscope"></i> DermAI <span>Vision</span>
       </a>
-      <p>Cổng Đăng Nhập & Quản Lý Khám Bệnh Da Liễu AI</p>
+      <p style="color: #94a3b8; font-size: 0.92rem; font-weight: 500;">Hệ Thống Phân Quyền & Quản Lý Y Tế Số 4 Vai Trò</p>
     </div>
 
-    <!-- Tab Switcher -->
+    <!-- VIP SLIDING TABS -->
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập</button>
-      <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')"><i class="fa-solid fa-user-plus"></i> Đăng Ký</button>
-    </div>
-
-    <!-- Alert Banner -->
-    <div id="authAlert" style="display: none; padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.9rem; font-weight: 600;"></div>
-
-    <!-- LOGIN FORM -->
-    <form id="loginForm" class="auth-form" onsubmit="handleLoginSubmit(event)">
-      <div class="form-group">
-        <label><i class="fa-solid fa-phone"></i> Số Điện Thoại</label>
-        <div class="input-icon-group">
-          <i class="fa-solid fa-mobile-screen"></i>
-          <input type="text" id="loginPhone" class="form-control" placeholder="Nhập số điện thoại (ví dụ: 0933333333)" required>
-        </div>
+      <div class="auth-tab-pill" id="tabPill"></div>
+      <div class="auth-tab active" id="tabLogin" onclick="switchToTab('login')">
+        <i class="fa-solid fa-lock"></i> Đăng Nhập
       </div>
-
-      <div class="form-group">
-        <label><i class="fa-solid fa-lock"></i> Mật Khẩu</label>
-        <div class="input-icon-group">
-          <i class="fa-solid fa-key"></i>
-          <input type="password" id="loginPassword" class="form-control" placeholder="Nhập mật khẩu" required>
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-accent" style="width: 100%; padding: 1rem; margin-top: 0.5rem; font-size: 1.05rem;">
-        <i class="fa-solid fa-paper-plane"></i> Đăng Nhập Hệ Thống
-      </button>
-    </form>
-
-    <!-- REGISTER FORM (Hidden by default) -->
-    <form id="registerForm" class="auth-form" style="display: none;" onsubmit="handleRegisterSubmit(event)">
-      <div class="form-group">
-        <label><i class="fa-solid fa-user"></i> Họ & Tên Bệnh Nhân</label>
-        <div class="input-icon-group">
-          <i class="fa-solid fa-id-card"></i>
-          <input type="text" id="regName" class="form-control" placeholder="Nhập họ và tên đầy đủ" required>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label><i class="fa-solid fa-phone"></i> Số Điện Thoại</label>
-        <div class="input-icon-group">
-          <i class="fa-solid fa-mobile-screen"></i>
-          <input type="text" id="regPhone" class="form-control" placeholder="Nhập số điện thoại" required>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label><i class="fa-solid fa-lock"></i> Mật Khẩu</label>
-        <div class="input-icon-group">
-          <i class="fa-solid fa-key"></i>
-          <input type="password" id="regPassword" class="form-control" placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)" required>
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; margin-top: 0.5rem; font-size: 1.05rem;">
-        <i class="fa-solid fa-user-check"></i> Đăng Ký Tài Khoản Mới
-      </button>
-    </form>
-
-    <!-- Quick Role Tester Widget -->
-    <div class="quick-roles">
-      <div class="quick-roles-title">
-        <i class="fa-solid fa-bolt-lightning"></i> Test Phân Quyền Nhanh (Click để đăng nhập):
-      </div>
-      <div class="role-btn-grid">
-        <button class="role-btn" onclick="quickFill('0933333333', 'patient123')">🧑‍🦱 Bệnh nhân</button>
-        <button class="role-btn" onclick="quickFill('0922222222', 'staff123')">👩‍⚕️ Lễ tân</button>
-        <button class="role-btn" onclick="quickFill('0911111111', 'doctor123')">👨‍⚕️ Bác sĩ</button>
-        <button class="role-btn" onclick="quickFill('0900000000', 'admin123')">🛡️ Super Admin</button>
+      <div class="auth-tab" id="tabRegister" onclick="switchToTab('register')">
+        <i class="fa-solid fa-user-plus"></i> Đăng Ký
       </div>
     </div>
 
-    <!-- Back Home Button -->
-    <div class="back-home">
-      <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Quay lại trang chủ DermAI</a>
+    <div id="authAlert" style="display: none; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.88rem; font-weight: 600;"></div>
+
+    <!-- VIP SLIDING FORMS TRACK -->
+    <div class="auth-slider-viewport">
+      <div class="auth-slider-track" id="authTrack">
+        
+        <!-- PANEL 1: LOGIN FORM -->
+        <div class="auth-panel">
+          <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+            <div class="form-group">
+              <label style="color:#cbd5e1;">Số Điện Thoại Tài Khoản (*)</label>
+              <div style="position: relative;">
+                <i class="fa-solid fa-phone" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
+                <input type="tel" id="loginPhone" class="form-control" placeholder="0900000000" required style="padding-left: 2.8rem; background: rgba(255,255,255,0.06); color: white; border-color: rgba(255,255,255,0.15);">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label style="color:#cbd5e1;">Mật Khẩu Mật Mã (*)</label>
+              <div style="position: relative;">
+                <i class="fa-solid fa-key" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
+                <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required style="padding-left: 2.8rem; background: rgba(255,255,255,0.06); color: white; border-color: rgba(255,255,255,0.15);">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.95rem; margin-top: 1.25rem; font-size: 1.02rem;">
+              <i class="fa-solid fa-right-to-bracket"></i> ĐĂNG NHẬP HỆ THỐNG
+            </button>
+          </form>
+        </div>
+
+        <!-- PANEL 2: REGISTER FORM -->
+        <div class="auth-panel">
+          <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
+            <div class="form-group">
+              <label style="color:#cbd5e1;">Họ và Tên Bệnh Nhân (*)</label>
+              <input type="text" id="regName" class="form-control" placeholder="Nguyễn Văn A" required style="background: rgba(255,255,255,0.06); color: white; border-color: rgba(255,255,255,0.15);">
+            </div>
+            <div class="form-group">
+              <label style="color:#cbd5e1;">Số Điện Thoại (*)</label>
+              <input type="tel" id="regPhone" class="form-control" placeholder="0912345678" required style="background: rgba(255,255,255,0.06); color: white; border-color: rgba(255,255,255,0.15);">
+            </div>
+            <div class="form-group">
+              <label style="color:#cbd5e1;">Mật Khẩu (*)</label>
+              <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required style="background: rgba(255,255,255,0.06); color: white; border-color: rgba(255,255,255,0.15);">
+            </div>
+            <button type="submit" class="btn btn-accent" style="width: 100%; padding: 0.95rem; margin-top: 1rem; font-size: 1.02rem;">
+              <i class="fa-solid fa-user-plus"></i> ĐĂNG KÝ TÀI KHOẢN MỚI
+            </button>
+          </form>
+        </div>
+
+      </div>
     </div>
+
+    <!-- ONE-CLICK DEMO ACCOUNT SELECTOR -->
+    <div style="margin-top: 2rem; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 1.5rem;">
+      <div style="font-size: 0.8rem; font-weight: 800; color: var(--accent-neon); text-transform: uppercase; margin-bottom: 0.85rem; letter-spacing: 0.5px; display:flex; align-items:center; gap:0.4rem;">
+        <i class="fa-solid fa-bolt fa-bounce" style="color:var(--accent-neon);"></i> Chọn Nhanh Tài Khoản Mẫu Thử Quyền:
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem;">
+        <div class="role-demo-card" onclick="quickFill('0900000000', 'admin123')">
+          <div><strong style="font-size:0.85rem; color:#f8fafc;">Super Admin</strong><br><span style="font-size:0.75rem; color:#94a3b8;">0900000000</span></div>
+          <span class="badge" style="background:#fee2e2; color:#ef4444; font-size:0.68rem;">ADMIN</span>
+        </div>
+        <div class="role-demo-card" onclick="quickFill('0911111111', 'doctor123')">
+          <div><strong style="font-size:0.85rem; color:#f8fafc;">Bác Sĩ An</strong><br><span style="font-size:0.75rem; color:#94a3b8;">0911111111</span></div>
+          <span class="badge" style="background:#e0f2fe; color:#0284c7; font-size:0.68rem;">DOCTOR</span>
+        </div>
+        <div class="role-demo-card" onclick="quickFill('0922222222', 'staff123')">
+          <div><strong style="font-size:0.85rem; color:#f8fafc;">Y Tá Hương</strong><br><span style="font-size:0.75rem; color:#94a3b8;">0922222222</span></div>
+          <span class="badge" style="background:#fef3c7; color:#b45309; font-size:0.68rem;">STAFF</span>
+        </div>
+        <div class="role-demo-card" onclick="quickFill('0933333333', 'patient123')">
+          <div><strong style="font-size:0.85rem; color:#f8fafc;">Bệnh Nhân</strong><br><span style="font-size:0.75rem; color:#94a3b8;">0933333333</span></div>
+          <span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.68rem;">PATIENT</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
     const API_BASE = 'http://localhost:5000/api/v1';
 
-    function switchAuthTab(type) {
-      const loginForm = document.getElementById('loginForm');
-      const registerForm = document.getElementById('registerForm');
-      const tabLoginBtn = document.getElementById('tabLoginBtn');
-      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
-      const authAlert = document.getElementById('authAlert');
+    function switchToTab(tab) {
+      const pill = document.getElementById('tabPill');
+      const track = document.getElementById('authTrack');
+      const tabLogin = document.getElementById('tabLogin');
+      const tabRegister = document.getElementById('tabRegister');
 
-      authAlert.style.display = 'none';
-
-      if (type === 'login') {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-        tabLoginBtn.classList.add('active');
-        tabRegisterBtn.classList.remove('active');
+      if (tab === 'register') {
+        pill.classList.add('slide-right');
+        track.classList.add('slide-register');
+        tabLogin.classList.remove('active');
+        tabRegister.classList.add('active');
       } else {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-        tabLoginBtn.classList.remove('active');
-        tabRegisterBtn.classList.add('active');
+        pill.classList.remove('slide-right');
+        track.classList.remove('slide-register');
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
       }
+      document.getElementById('authAlert').style.display = 'none';
     }
 
     function showAlert(msg, type = 'error') {
@@ -372,11 +321,13 @@
         const data = await res.json();
 
         if (res.ok) {
-          localStorage.setItem('dermAI_token', data.token || 'demo-token');
-          localStorage.setItem('dermAI_user', JSON.stringify(data.user || data));
+          localStorage.setItem('dermAI_token', data.access_token || 'demo-token');
+          localStorage.setItem('dermAI_user', JSON.stringify(data));
+          localStorage.setItem('dermai_user', JSON.stringify(data));
+          
           showAlert('<i class="fa-solid fa-circle-check"></i> Đăng nhập thành công! Đang chuyển hướng...', 'success');
           
-          const userRole = (data.role || (data.user && data.user.role) || 'KHACH_HANG').toUpperCase();
+          const userRole = (data.role || 'KHACH_HANG').toUpperCase();
           setTimeout(() => {
             if (userRole === 'ADMIN') window.location.href = 'admin.html';
             else if (userRole === 'DOCTOR' || userRole === 'BAC_SI') window.location.href = 'doctor.html';
@@ -384,11 +335,10 @@
             else window.location.href = 'index.html';
           }, 800);
         } else {
-          showAlert(`<i class="fa-solid fa-circle-exclamation"></i> ${data.detail || data.message || 'Số điện thoại hoặc mật khẩu không chính xác'}`);
+          showAlert(`<i class="fa-solid fa-circle-exclamation"></i> ${data.detail || 'Số điện thoại hoặc mật khẩu không chính xác'}`);
         }
       } catch (err) {
-        console.error(err);
-        showAlert('<i class="fa-solid fa-wifi"></i> Không thể kết nối đến Backend Server (localhost:5000). Hãy đảm bảo Backend đã được khởi chạy!');
+        showAlert('<i class="fa-solid fa-wifi"></i> Không thể kết nối đến Backend Server (localhost:5000)');
       }
     }
 
@@ -407,26 +357,25 @@
         const data = await res.json();
 
         if (res.ok) {
-          showAlert('<i class="fa-solid fa-circle-check"></i> Đăng ký tài khoản thành công! Hãy đăng nhập.', 'success');
+          showAlert('<i class="fa-solid fa-circle-check"></i> Đăng ký tài khoản thành công! Đang chuyển sang Đăng nhập...', 'success');
           setTimeout(() => {
-            switchAuthTab('login');
+            switchToTab('login');
             document.getElementById('loginPhone').value = phone;
             document.getElementById('loginPassword').value = password;
           }, 1000);
         } else {
-          showAlert(`<i class="fa-solid fa-circle-exclamation"></i> ${data.detail || data.message || 'Đăng ký thất bại'}`);
+          showAlert(`<i class="fa-solid fa-circle-exclamation"></i> ${data.detail || 'Đăng ký thất bại'}`);
         }
       } catch (err) {
-        console.error(err);
         showAlert('<i class="fa-solid fa-wifi"></i> Không thể kết nối đến Backend Server (localhost:5000)');
       }
     }
 
     function quickFill(phone, password) {
-      switchAuthTab('login');
+      switchToTab('login');
       document.getElementById('loginPhone').value = phone;
       document.getElementById('loginPassword').value = password;
-      showAlert(`<i class="fa-solid fa-key"></i> Đã điền tài khoản mẫu! Nhấn "Đăng Nhập Hệ Thống" để vào ngay.`, 'success');
+      showAlert(`<i class="fa-solid fa-key"></i> Đã chọn tài khoản mẫu! Nhấn "ĐĂNG NHẬP HỆ THỐNG" để vào ngay.`, 'success');
     }
   </script>
 </body>

@@ -91,6 +91,148 @@ def seed_initial_data(db: Session):
             models.KhungGio(gio_bat_dau="15:00", gio_ket_thuc="15:30", so_luong_toi_da=2)
         ]
         db.add_all(slots)
+        db.flush()
+
+    # Seed Realistic Bookings, AI Logs & Examinations if database is low on data
+    if db.query(models.FormDatLich).count() < 4:
+        doctors = db.query(models.NhanVien).filter(models.NhanVien.chuc_vu == "DOCTOR").all()
+        services = db.query(models.DichVu).all()
+        slots = db.query(models.KhungGio).all()
+        
+        doc1 = doctors[0] if len(doctors) > 0 else None
+        doc2 = doctors[1] if len(doctors) > 1 else doc1
+        doc3 = doctors[2] if len(doctors) > 2 else doc1
+        
+        srv1 = services[0] if len(services) > 0 else None
+        srv2 = services[1] if len(services) > 1 else srv1
+        srv3 = services[2] if len(services) > 2 else srv1
+        srv4 = services[3] if len(services) > 3 else srv1
+
+        slot1 = slots[0] if len(slots) > 0 else None
+        slot2 = slots[1] if len(slots) > 1 else slot1
+        slot3 = slots[2] if len(slots) > 2 else slot1
+        slot4 = slots[3] if len(slots) > 3 else slot1
+
+        # Patients
+        pts = [
+            {"name": "Nguyễn Thị Mai", "phone": "0988112233", "cccd": "001198001234"},
+            {"name": "Lê Thị Ngọc", "phone": "0977223344", "cccd": "001195005678"},
+            {"name": "Hoàng Minh Trí", "phone": "0966554433", "cccd": "001192009012"},
+            {"name": "Phạm Đức Anh", "phone": "0911889900", "cccd": "001188003456"},
+            {"name": "Vũ Thị Hoa", "phone": "0934567890", "cccd": "001199007890"}
+        ]
+
+        kh_objs = []
+        for p in pts:
+            kh = models.KhachHang(ho_ten=p["name"], so_cccd=p["phone"], dia_chi="Hà Nội")
+            db.add(kh)
+            kh_objs.append(kh)
+        db.flush()
+
+        # Seed Bookings
+        # Case 1: Completed Melanoma
+        b1 = models.FormDatLich(
+            khach_hang_id=kh_objs[0].id,
+            bac_si_id=doc1.id if doc1 else None,
+            dich_vu_id=srv3.id if srv3 else None,
+            khung_gio_id=slot1.id if slot1 else None,
+            ngay_kham="2026-07-23",
+            trieu_chung="Nốt ruồi màu đen biến đổi kích thước nhanh, bờ không đều nghi u hắc tố.",
+            loai_form="AI",
+            anh_ton_thuong_url="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=500",
+            so_tien_coc=100000.0,
+            da_dat_coc=True,
+            trang_thai="HOAN_THANH"
+        )
+        db.add(b1)
+        db.flush()
+
+        ai1 = models.AIDiagnosticLog(
+            form_dat_lich_id=b1.id,
+            image_url=b1.anh_ton_thuong_url,
+            top1_class="MEL",
+            top1_confidence=0.885,
+            top3_json='[{"class_code":"MEL","class_name":"Melanoma","confidence":0.885},{"class_code":"NV","class_name":"Nevus","confidence":0.08}]',
+            heatmap_url="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=500",
+            latency_ms=142
+        )
+        db.add(ai1)
+
+        pk1 = models.PhieuKhamBenh(
+            form_dat_lich_id=b1.id,
+            bac_si_id=doc1.id if doc1 else "doc-1",
+            chan_doan_cuoi_cung="Melanoma in situ (U hắc tố ác tính giai đoạn 0). Chỉ định phẫu thuật bóc tách Mohs.",
+            don_thuoc_json='[{"prescription":"Thuốc mỡ Fucidin 2% bôi 2lần/ngày, Paracetamol 500mg (20 viên - 2viên/ngày), Augmentin 1g (14 viên)"}]',
+            ghi_chu="Hẹn tái khám sau 7 ngày phẫu thuật."
+        )
+        db.add(pk1)
+
+        # Case 2: Checked In (In Queue for Doctor!)
+        b2 = models.FormDatLich(
+            khach_hang_id=kh_objs[1].id,
+            bac_si_id=doc2.id if doc2 else None,
+            dich_vu_id=srv4.id if srv4 else None,
+            khung_gio_id=slot2.id if slot2 else None,
+            ngay_kham="2026-07-23",
+            trieu_chung="Mảng dày sừng sẫm màu vùng gò má, ngứa rát nhẹ khi đi nắng.",
+            loai_form="AI",
+            anh_ton_thuong_url="https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=500",
+            so_tien_coc=100000.0,
+            da_dat_coc=True,
+            trang_thai="CHECK_IN"
+        )
+        db.add(b2)
+        db.flush()
+
+        ai2 = models.AIDiagnosticLog(
+            form_dat_lich_id=b2.id,
+            image_url=b2.anh_ton_thuong_url,
+            top1_class="BKL",
+            top1_confidence=0.912,
+            top3_json='[{"class_code":"BKL","class_name":"Benign Keratosis","confidence":0.912}]',
+            heatmap_url="https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=500",
+            latency_ms=138
+        )
+        db.add(ai2)
+
+        # Case 3: Checked In (In Queue for Doctor!)
+        b3 = models.FormDatLich(
+            khach_hang_id=kh_objs[2].id,
+            bac_si_id=doc1.id if doc1 else None,
+            dich_vu_id=srv1.id if srv1 else None,
+            khung_gio_id=slot3.id if slot3 else None,
+            ngay_kham="2026-07-23",
+            trieu_chung="Viêm da dị ứng nổi mẩn đỏ sau khi tiếp xúc hóa chất.",
+            loai_form="THUONG",
+            anh_ton_thuong_url="",
+            so_tien_coc=0.0,
+            da_dat_coc=False,
+            trang_thai="CHECK_IN"
+        )
+        db.add(b3)
+
+        # Case 4: Confirmed
+        b4 = models.FormDatLich(
+            khach_hang_id=kh_objs[3].id,
+            bac_si_id=doc3.id if doc3 else None,
+            dich_vu_id=srv2.id if srv2 else None,
+            khung_gio_id=slot4.id if slot4 else None,
+            ngay_kham="2026-07-23",
+            trieu_chung="Khám Da liễu định kỳ theo chế độ BHYT.",
+            loai_form="THUONG",
+            anh_ton_thuong_url="",
+            so_tien_coc=0.0,
+            da_dat_coc=False,
+            trang_thai="DA_XAC_NHAN"
+        )
+        db.add(b4)
+
+    # Seed Consultations if empty
+    if db.query(models.FormTuVan).count() == 0:
+        c1 = models.FormTuVan(ho_ten="Đỗ Thu Trang", so_dien_thoai="0912345678", trang_thai_xu_ly="Chờ CSKH gọi")
+        c2 = models.FormTuVan(ho_ten="Bùi Quang Huy", so_dien_thoai="0987654321", trang_thai_xu_ly="Đã gọi tư vấn")
+        c3 = models.FormTuVan(ho_ten="Ngô Thanh Vân", so_dien_thoai="0909112233", trang_thai_xu_ly="Chờ CSKH gọi")
+        db.add_all([c1, c2, c3])
 
     db.commit()
 
@@ -191,6 +333,27 @@ def get_admin_stats(db: Session = Depends(get_db)):
     malignant_count = sum(1 for log in ai_logs if log.top1_class in ["MEL", "BCC", "SCC"])
     avg_latency = int(sum(log.latency_ms for log in ai_logs) / len(ai_logs)) if ai_logs else 145
 
+    # Chart 1: Phân bổ dịch vụ & Doanh thu
+    services = db.query(models.DichVu).all()
+    service_stats = []
+    for dv in services:
+        count = db.query(models.FormDatLich).filter(models.FormDatLich.dich_vu_id == dv.id).count()
+        service_stats.append({
+            "service_name": dv.ten_dich_vu,
+            "count": count,
+            "revenue": count * (dv.gia_kham or 150000)
+        })
+
+    # Chart 2: Phân bổ phân tích AI
+    ai_class_counts = {
+        "Melanoma (Ác tính)": sum(1 for log in ai_logs if log.top1_class == "MEL"),
+        "Nevus (Nốt ruồi)": sum(1 for log in ai_logs if log.top1_class == "NV"),
+        "Dày sừng (BKL)": sum(1 for log in ai_logs if log.top1_class == "BKL"),
+        "Ung thư tế bào đáy (BCC)": sum(1 for log in ai_logs if log.top1_class == "BCC"),
+        "Dày sừng ánh sáng (AKIEC)": sum(1 for log in ai_logs if log.top1_class == "AKIEC"),
+        "Khác": sum(1 for log in ai_logs if log.top1_class not in ["MEL", "NV", "BKL", "BCC", "AKIEC"])
+    }
+
     return {
         "total_bookings": total_bookings,
         "completed_bookings": completed_bookings,
@@ -199,15 +362,28 @@ def get_admin_stats(db: Session = Depends(get_db)):
         "ai_scans_count": len(ai_logs),
         "malignant_detected": malignant_count,
         "ai_avg_latency_ms": avg_latency,
-        "ai_model_name": "Vision Transformer (ViT-Small-384)"
+        "ai_model_name": "Vision Transformer (ViT-Small-384)",
+        "service_stats": service_stats,
+        "ai_class_counts": ai_class_counts
     }
 
 # ------------------------------------------------------------------
 # DOCTORS & SERVICES & SLOTS CRUD API
 # ------------------------------------------------------------------
+# ------------------------------------------------------------------
+# DOCTORS & SERVICES & SLOTS CRUD API
+# ------------------------------------------------------------------
 @app.get("/api/v1/doctors")
 def get_doctors(db: Session = Depends(get_db)):
-    return db.query(models.NhanVien).filter(models.NhanVien.chuc_vu == "DOCTOR").all()
+    doctors = db.query(models.NhanVien).filter(models.NhanVien.chuc_vu == "DOCTOR").all()
+    return [{
+        "id": str(d.id),
+        "user_id": str(d.user_id) if d.user_id else "",
+        "ho_ten": str(d.ho_ten or "Bác sĩ Chuyên khoa"),
+        "chuc_vu": str(d.chuc_vu or "DOCTOR"),
+        "chuyen_khoa": str(d.chuyen_khoa or "Da liễu tổng hợp"),
+        "nam_kinh_nghiem": int(d.nam_kinh_nghiem or 5)
+    } for d in doctors]
 
 @app.post("/api/v1/doctors")
 def create_doctor(doc_in: schemas.DoctorCreate, db: Session = Depends(get_db)):
@@ -220,7 +396,17 @@ def create_doctor(doc_in: schemas.DoctorCreate, db: Session = Depends(get_db)):
     db.add(nv)
     db.commit()
     db.refresh(nv)
-    return {"status": "success", "doctor": nv, "message": "Thêm nhân sự mới thành công!"}
+    return {
+        "status": "success",
+        "doctor": {
+            "id": str(nv.id),
+            "ho_ten": str(nv.ho_ten),
+            "chuc_vu": str(nv.chuc_vu),
+            "chuyen_khoa": str(nv.chuyen_khoa),
+            "nam_kinh_nghiem": int(nv.nam_kinh_nghiem or 1)
+        },
+        "message": "Thêm nhân sự mới thành công!"
+    }
 
 @app.delete("/api/v1/doctors/{doc_id}")
 def delete_doctor(doc_id: str, db: Session = Depends(get_db)):
@@ -233,7 +419,15 @@ def delete_doctor(doc_id: str, db: Session = Depends(get_db)):
 
 @app.get("/api/v1/services")
 def get_services(db: Session = Depends(get_db)):
-    return db.query(models.DichVu).all()
+    services = db.query(models.DichVu).all()
+    return [{
+        "id": str(s.id),
+        "ten_dich_vu": str(s.ten_dich_vu or "Dịch vụ khám"),
+        "gia_kham": float(s.gia_kham or 150000.0),
+        "loai_dich_vu": str(s.loai_dich_vu or "THUONG"),
+        "mo_ta": str(s.mo_ta or ""),
+        "trang_thai": bool(s.trang_thai)
+    } for s in services]
 
 @app.post("/api/v1/services")
 def create_service(srv_in: schemas.ServiceCreate, db: Session = Depends(get_db)):
@@ -247,7 +441,16 @@ def create_service(srv_in: schemas.ServiceCreate, db: Session = Depends(get_db))
     db.add(dv)
     db.commit()
     db.refresh(dv)
-    return {"status": "success", "service": dv, "message": "Thêm gói dịch vụ mới thành công!"}
+    return {
+        "status": "success",
+        "service": {
+            "id": str(dv.id),
+            "ten_dich_vu": str(dv.ten_dich_vu),
+            "gia_kham": float(dv.gia_kham or 0.0),
+            "loai_dich_vu": str(dv.loai_dich_vu or "THUONG")
+        },
+        "message": "Thêm gói dịch vụ mới thành công!"
+    }
 
 @app.delete("/api/v1/services/{srv_id}")
 def delete_service(srv_id: str, db: Session = Depends(get_db)):
@@ -260,7 +463,13 @@ def delete_service(srv_id: str, db: Session = Depends(get_db)):
 
 @app.get("/api/v1/slots")
 def get_slots(db: Session = Depends(get_db)):
-    return db.query(models.KhungGio).all()
+    slots = db.query(models.KhungGio).all()
+    return [{
+        "id": str(sl.id),
+        "gio_bat_dau": str(sl.gio_bat_dau),
+        "gio_ket_thuc": str(sl.gio_ket_thuc),
+        "so_luong_toi_da": int(sl.so_luong_toi_da or 2)
+    } for sl in slots]
 
 @app.post("/api/v1/slots")
 def create_slot(slot_in: schemas.SlotCreate, db: Session = Depends(get_db)):
@@ -272,7 +481,7 @@ def create_slot(slot_in: schemas.SlotCreate, db: Session = Depends(get_db)):
     db.add(kg)
     db.commit()
     db.refresh(kg)
-    return {"status": "success", "slot": kg, "message": "Thêm khung giờ ca khám thành công!"}
+    return {"status": "success", "message": "Thêm khung giờ ca khám thành công!"}
 
 # ------------------------------------------------------------------
 # BOOKINGS & EXAMINATIONS API
@@ -346,33 +555,33 @@ def create_booking(booking_in: schemas.BookingCreate, db: Session = Depends(get_
 
 @app.get("/api/v1/bookings")
 def list_bookings(db: Session = Depends(get_db)):
-    forms = db.query(models.FormDatLich).all()
+    forms = db.query(models.FormDatLich).order_by(models.FormDatLich.created_at.desc()).all()
     results = []
     for f in forms:
-        kh = db.query(models.KhachHang).get(f.khach_hang_id)
+        kh = db.query(models.KhachHang).get(f.khach_hang_id) if f.khach_hang_id else None
         bs = db.query(models.NhanVien).get(f.bac_si_id) if f.bac_si_id else None
         dv = db.query(models.DichVu).filter(models.DichVu.id == f.dich_vu_id).first() if f.dich_vu_id else None
-        kg = db.query(models.KhungGio).get(f.khung_gio_id)
+        kg = db.query(models.KhungGio).get(f.khung_gio_id) if f.khung_gio_id else None
         ai = db.query(models.AIDiagnosticLog).filter(models.AIDiagnosticLog.form_dat_lich_id == f.id).first()
         pk = db.query(models.PhieuKhamBenh).filter(models.PhieuKhamBenh.form_dat_lich_id == f.id).first()
 
         results.append({
-            "id": f.id,
-            "patient_name": kh.ho_ten if kh else "Vô danh",
-            "patient_phone": kh.so_cccd if kh else "",
-            "doctor_name": bs.ho_ten if bs else "Chưa chỉ định",
-            "service_name": dv.ten_dich_vu if dv else "Khám Da liễu Khám thường",
-            "service_price": dv.gia_kham if dv else 150000.0,
-            "date": f.ngay_kham,
-            "slot": f"{kg.gio_bat_dau} - {kg.gio_ket_thuc}" if kg else "",
-            "symptoms": f.trieu_chung,
-            "status": f.trang_thai,
-            "form_type": f.loai_form,
-            "image_url": f.anh_ton_thuong_url,
-            "ai_top1": ai.top1_class if ai else None,
-            "ai_confidence": ai.top1_confidence if ai else None,
-            "ai_heatmap_url": ai.heatmap_url if ai else None,
-            "diagnosis": pk.chan_doan_cuoi_cung if pk else None
+            "id": str(f.id),
+            "patient_name": str(kh.ho_ten) if (kh and kh.ho_ten) else "Bệnh nhân DermAI",
+            "patient_phone": str(kh.so_cccd or kh.so_bhyt or "") if kh else "",
+            "doctor_name": str(bs.ho_ten) if (bs and bs.ho_ten) else "Chưa chỉ định",
+            "service_name": str(dv.ten_dich_vu) if (dv and dv.ten_dich_vu) else "Khám Da liễu Khám thường",
+            "service_price": float(dv.gia_kham) if (dv and dv.gia_kham) else 150000.0,
+            "date": str(f.ngay_kham or ""),
+            "slot": f"{kg.gio_bat_dau} - {kg.gio_ket_thuc}" if kg else "08:00 - 08:30",
+            "symptoms": str(f.trieu_chung or "Tổn thương ngoài da cần khám"),
+            "status": str(f.trang_thai or "CHO_XAC_NHAN"),
+            "form_type": str(f.loai_form or "THUONG"),
+            "image_url": str(f.anh_ton_thuong_url or ""),
+            "ai_top1": str(ai.top1_class) if (ai and ai.top1_class) else None,
+            "ai_confidence": float(ai.top1_confidence) if (ai and ai.top1_confidence is not None) else 0.0,
+            "ai_heatmap_url": str(ai.heatmap_url) if (ai and ai.heatmap_url) else None,
+            "diagnosis": str(pk.chan_doan_cuoi_cung) if (pk and pk.chan_doan_cuoi_cung) else None
         })
     return results
 
@@ -399,29 +608,30 @@ def update_booking_status(booking_id: str, payload: StatusUpdatePayload, db: Ses
 
 @app.get("/api/v1/bookings/my-history")
 def get_my_booking_history(phone: Optional[str] = None, db: Session = Depends(get_db)):
-    forms = db.query(models.FormDatLich).all()
+    query = db.query(models.FormDatLich)
+    forms = query.order_by(models.FormDatLich.created_at.desc()).all()
     results = []
     for f in forms:
-        kh = db.query(models.KhachHang).get(f.khach_hang_id)
+        kh = db.query(models.KhachHang).get(f.khach_hang_id) if f.khach_hang_id else None
         bs = db.query(models.NhanVien).get(f.bac_si_id) if f.bac_si_id else None
         dv = db.query(models.DichVu).get(f.dich_vu_id) if f.dich_vu_id else None
-        kg = db.query(models.KhungGio).get(f.khung_gio_id)
+        kg = db.query(models.KhungGio).get(f.khung_gio_id) if f.khung_gio_id else None
         pk = db.query(models.PhieuKhamBenh).filter(models.PhieuKhamBenh.form_dat_lich_id == f.id).first()
 
         results.append({
-            "id": f.id,
-            "patient_name": kh.ho_ten if kh else "Bệnh nhân",
-            "patient_phone": kh.so_cccd if kh else "",
-            "doctor_name": bs.ho_ten if bs else "PGS.TS Bác sĩ Nguyễn Văn An",
-            "service_name": dv.ten_dich_vu if dv else "Khám Da liễu Khám thường",
-            "service_price": dv.gia_kham if dv else 150000.0,
-            "date": f.ngay_kham,
+            "id": str(f.id),
+            "patient_name": str(kh.ho_ten) if (kh and kh.ho_ten) else "Bệnh nhân",
+            "patient_phone": str(kh.so_cccd or kh.so_bhyt or "") if kh else "",
+            "doctor_name": str(bs.ho_ten) if (bs and bs.ho_ten) else "PGS.TS Bác sĩ Nguyễn Văn An",
+            "service_name": str(dv.ten_dich_vu) if (dv and dv.ten_dich_vu) else "Khám Da liễu Khám thường",
+            "service_price": float(dv.gia_kham) if (dv and dv.gia_kham) else 150000.0,
+            "date": str(f.ngay_kham or "2026-07-23"),
             "slot": f"{kg.gio_bat_dau} - {kg.gio_ket_thuc}" if kg else "08:00 - 08:30",
-            "status": f.trang_thai,
-            "form_type": f.loai_form,
-            "symptoms": f.trieu_chung,
-            "diagnosis": pk.chan_doan_cuoi_cung if pk else None,
-            "prescription": pk.don_thuoc_json if pk else None,
+            "status": str(f.trang_thai or "CHO_XAC_NHAN"),
+            "form_type": str(f.loai_form or "THUONG"),
+            "symptoms": str(f.trieu_chung or "Khám ngoài da"),
+            "diagnosis": str(pk.chan_doan_cuoi_cung) if (pk and pk.chan_doan_cuoi_cung) else None,
+            "prescription": str(pk.don_thuoc_json) if (pk and pk.don_thuoc_json) else None,
             "created_at": f.created_at.isoformat() if f.created_at else ""
         })
     return results
@@ -466,7 +676,14 @@ def create_consultation(c_in: schemas.TuVanCreate, db: Session = Depends(get_db)
 
 @app.get("/api/v1/consultations")
 def list_consultations(db: Session = Depends(get_db)):
-    return db.query(models.FormTuVan).all()
+    consults = db.query(models.FormTuVan).order_by(models.FormTuVan.created_at.desc()).all()
+    return [{
+        "id": str(c.id),
+        "ho_ten": str(c.ho_ten or "Khách hàng"),
+        "so_dien_thoai": str(c.so_dien_thoai or ""),
+        "trang_thai_xu_ly": str(c.trang_thai_xu_ly or "Chờ CSKH gọi"),
+        "created_at": c.created_at.isoformat() if c.created_at else ""
+    } for c in consults]
 
 if __name__ == "__main__":
     import uvicorn

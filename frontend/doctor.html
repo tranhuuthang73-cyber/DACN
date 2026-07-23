@@ -3,78 +3,168 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DermAI - Portal Bác Sĩ Chẩn Đoán & Kê Đơn</title>
+  <title>DermAI - Command Center Portal Bác Sĩ Chẩn Đoán & Kê Đơn</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    .doctor-header {
+      background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2.25rem 2rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      color: white;
+    }
+
+    .doctor-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 0.35rem;
+    }
+
+    .queue-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.15rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    .queue-card:hover {
+      border-color: var(--primary);
+      transform: translateX(4px);
+      box-shadow: 0 10px 25px rgba(2, 132, 199, 0.15);
+    }
+
+    .queue-card.next-patient {
+      background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+      border: 2px solid #f59e0b;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+    }
+
+    .inspection-viewport {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      padding: 2rem;
+      box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+    }
+
+    .img-placeholder-wrapper {
+      position: relative;
+      background: #090e1a;
+      border-radius: 12px;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+
+    .img-placeholder-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Navbar -->
+  <!-- NAVBAR -->
   <nav class="navbar">
-    <div class="logo">
-      <i class="fa-solid fa-user-doctor"></i> DermAI <span>Doctor Portal</span>
-    </div>
+    <a href="index.html" class="logo">
+      <i class="fa-solid fa-stethoscope"></i> DermAI <span>Doctor Portal</span>
+    </a>
     <ul class="nav-links">
-      <li><a href="index.html">Trang Bệnh Nhân</a></li>
-      <li><a href="doctor.html" class="active">Portal Bác Sĩ</a></li>
-      <li id="adminNavLink"><a href="admin.html">Quản Trị / Lễ Tân</a></li>
+      <li><a href="index.html"><i class="fa-solid fa-house"></i> Trang Bệnh Nhân</a></li>
+      <li><a href="doctor.html" class="active"><i class="fa-solid fa-user-doctor"></i> Portal Bác Sĩ</a></li>
+      <li id="adminNavLink"><a href="admin.html"><i class="fa-solid fa-user-shield"></i> Quản Trị / Lễ Tân</a></li>
     </ul>
-    <div id="authWidget" style="display: flex; align-items: center;">
+    <div id="authWidget" style="display: flex; align-items: center; gap:1rem;">
       <a href="login.html" class="btn btn-accent" style="padding: 0.5rem 1.25rem; font-size: 0.85rem;"><i class="fa-solid fa-right-to-bracket"></i> Đổi Tài Khoản</a>
     </div>
   </nav>
 
-  <!-- Hero Header -->
-  <header style="background: linear-gradient(135deg, #0a3257 0%, #0f4c81 100%); color: white; padding: 2.5rem 2rem; text-align: center;">
-    <h1 id="docHeaderTitle">👨‍⚕️ Lịch Khám Bác Sĩ & Soi Bản Đồ Nhiệt Grad-CAM</h1>
-    <p style="color: #cbd5e1; margin-top: 0.5rem;">Hỗ trợ Bác sĩ quan sát vùng nghi ngờ tổn thương do AI Vision Transformer gợi ý, thực hiện chẩn đoán chính thức & kê đơn thuốc</p>
+  <!-- HEADER -->
+  <header class="doctor-header">
+    <h1 id="docHeaderTitle"><i class="fa-solid fa-laptop-medical" style="color:var(--accent-neon);"></i> Command Center Bác Sĩ & Soi Bản Đồ Nhiệt Grad-CAM</h1>
+    <p style="color: #cbd5e1; margin-top: 0.25rem; font-size: 1rem;">Hỗ trợ Bác sĩ thăm khám, quan sát vùng nghi ngờ tổn thương do AI Vision Transformer khoanh vùng & kê đơn thuốc</p>
   </header>
 
   <main class="container" style="margin-top: 2rem;">
     
-    <div style="display: grid; grid-template-columns: 350px 1fr; gap: 2rem;">
+    <div style="display: grid; grid-template-columns: 360px 1fr; gap: 2rem;">
       
-      <!-- Patient Queue Side Panel -->
-      <section class="glass-card" style="padding: 1.5rem;">
-        <h3 style="color: var(--primary); margin-bottom: 1rem;"><i class="fa-solid fa-clipboard-list"></i> Ca Khám Đã Check-in</h3>
-        <div id="patientQueue" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+      <!-- PATIENT QUEUE PANEL -->
+      <section class="inspection-viewport" style="padding: 1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:2px solid #f1f5f9; padding-bottom:0.75rem;">
+          <h3 style="color: var(--primary); font-family:'Outfit',sans-serif; margin:0; font-size:1.3rem;"><i class="fa-solid fa-clipboard-list"></i> Hàng Chờ Check-in</h3>
+          <span class="badge badge-success" id="queueCountBadge">0 ca chờ</span>
+        </div>
+        <div id="patientQueue" style="display: flex; flex-direction: column; gap: 0.85rem; max-height:650px; overflow-y:auto;"></div>
       </section>
 
-      <!-- Active Examination Detail -->
-      <section class="glass-card" id="examDetailPanel" style="padding: 2rem;">
-        <div id="noSelectionMsg" style="text-align: center; padding: 4rem 1rem; color: #64748b;">
-          <i class="fa-solid fa-user-doctor" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
-          <h3>Vui lòng chọn một ca khám từ danh sách bên trái để bắt đầu thăm khám.</h3>
+      <!-- ACTIVE EXAMINATION PANEL -->
+      <section class="inspection-viewport" id="examDetailPanel">
+        
+        <div id="noSelectionMsg" style="text-align: center; padding: 6rem 1rem; color: #64748b;">
+          <i class="fa-solid fa-user-doctor" style="font-size: 4.5rem; color: #cbd5e1; margin-bottom: 1.25rem;"></i>
+          <h3 style="font-family:'Outfit',sans-serif; color:#334155; font-weight:800;">Vui lòng chọn một ca khám từ hàng chờ bên trái để bắt đầu thăm khám.</h3>
+          <p style="color:#64748b; margin-top:0.5rem;">Hệ thống tự động đồng bộ kết quả soi da AI và Grad-CAM Heatmap</p>
         </div>
 
         <div id="examFormArea" style="display: none;">
-          <div class="card-header" style="margin-bottom: 1.5rem;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1.5rem;">
             <div>
-              <h2 class="card-title" id="patientTitle">---</h2>
-              <p style="color: #64748b; font-size: 0.9rem;" id="patientMeta">---</p>
+              <h2 id="patientTitle" style="color: #0f172a; font-family:'Outfit',sans-serif; font-size:1.7rem; font-weight:800; margin: 0 0 0.35rem 0;">Ca Khám: ---</h2>
+              <p id="patientMeta" style="color: #64748b; font-size: 0.9rem; margin: 0;">---</p>
             </div>
-            <span class="badge badge-warning" id="bookingStatusBadge">CHECK_IN</span>
+            <span class="badge badge-primary" id="bookingStatusBadge">CHECK_IN</span>
           </div>
 
-          <!-- Side-by-side Image vs Grad-CAM Heatmap Viewer -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; background: #0f172a; padding: 1.25rem; border-radius: 12px; color: white;">
+          <!-- HIGH-RES RESPONSIVE INSPECTION CANVAS -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; background: #090e1a; padding: 1.25rem; border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.25);">
+            
             <div style="text-align: center;">
-              <h4 style="color: #94a3b8; margin-bottom: 0.5rem;"><i class="fa-solid fa-image"></i> Ảnh Tổn Thương Gốc</h4>
-              <img id="patientImage" src="" alt="Ảnh gốc" style="width: 100%; max-height: 280px; object-fit: cover; border-radius: 8px; border: 1px solid #334155;">
+              <div style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; margin-bottom: 0.5rem;"><i class="fa-solid fa-image"></i> Ảnh Tổn Thương Gốc</div>
+              <div class="img-placeholder-wrapper">
+                <img id="patientImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24'%3E%3Cpath fill='%23334155' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z'/%3E%3C/svg%3E" alt="Ảnh gốc">
+              </div>
+              <p style="font-size:0.75rem; color:#94a3b8; margin-top:0.4rem;">Tương thích chuẩn hóa mọi độ phân giải</p>
             </div>
+
             <div style="text-align: center;">
-              <h4 style="color: var(--accent-neon); margin-bottom: 0.5rem;"><i class="fa-solid fa-fire-flame-curved"></i> Bản Đồ Nhiệt AI Grad-CAM</h4>
-              <img id="heatmapImage" src="" alt="GradCAM Heatmap" style="width: 100%; max-height: 280px; object-fit: cover; border-radius: 8px; border: 2px solid var(--accent);">
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-neon); margin-bottom: 0.5rem;"><i class="fa-solid fa-fire-flame-curved"></i> Bản Đồ Nhiệt AI Grad-CAM</div>
+              <div class="img-placeholder-wrapper" style="border: 2px solid var(--accent-neon);">
+                <img id="heatmapImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24'%3E%3Cpath fill='%2300f5d4' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z'/%3E%3C/svg%3E" alt="GradCAM Heatmap">
+              </div>
+              <p style="font-size:0.75rem; color:var(--accent-neon); margin-top:0.4rem;"><i class="fa-solid fa-fire"></i> Vùng nhiệt trọng số AI khoanh vùng</p>
             </div>
+
           </div>
 
-          <!-- AI Top 3 Summary -->
-          <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent); margin-bottom: 1.5rem;">
-            <h4 style="color: #0369a1;"><i class="fa-solid fa-robot"></i> AI Vision Transformer Gợi Ý Chẩn Đoán Top-1:</h4>
-            <p id="aiSuggestionText" style="font-weight: 700; font-size: 1.1rem; color: #0284c7; margin-top: 0.25rem;">---</p>
+          <!-- AI TOP-1 SUGGESTION -->
+          <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.25rem; border-radius: 14px; border-left: 6px solid var(--primary); margin-bottom: 1.75rem; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.1);">
+            <h4 style="color: #0369a1; margin:0;"><i class="fa-solid fa-robot"></i> Gợi Ý Phân Tích AI Vision Transformer:</h4>
+            <p id="aiSuggestionText" style="font-weight: 800; font-size: 1.2rem; color: #0284c7; margin-top: 0.35rem;">---</p>
           </div>
 
-          <!-- Doctor Diagnosis & Prescription Form -->
+          <!-- DOCTOR FORM -->
           <form id="doctorForm" onsubmit="submitDoctorDiagnosis(event)">
             <input type="hidden" id="activeBookingId">
             
@@ -83,8 +173,17 @@
               <textarea id="doctorDiagnosis" class="form-control" rows="3" placeholder="Ghi rõ chẩn đoán y khoa chính thức sau khi khám lâm sàng..." required></textarea>
             </div>
 
+            <!-- Quick Prescriptions -->
+            <div style="margin-bottom: 1rem; display:flex; gap:0.45rem; flex-wrap:wrap; align-items:center;">
+              <span style="font-size:0.82rem; font-weight:700; color:#64748b;">Mẫu kê đơn nhanh 1 chạm:</span>
+              <button type="button" onclick="appendRx('1. Thuốc mỡ Fucidin 2% (bôi 2 lần/ngày sáng tối)')" class="btn" style="padding:0.35rem 0.75rem; font-size:0.8rem; background:#e0f2fe; color:#0284c7;">+ Fucidin 2%</button>
+              <button type="button" onclick="appendRx('2. Thuốc bôi Tretinoin 0.05% (bôi mỏng buổi tối)')" class="btn" style="padding:0.35rem 0.75rem; font-size:0.8rem; background:#e0f2fe; color:#0284c7;">+ Tretinoin 0.05%</button>
+              <button type="button" onclick="appendRx('3. Paracetamol 500mg (ngày 2 viên sau ăn)')" class="btn" style="padding:0.35rem 0.75rem; font-size:0.8rem; background:#e0f2fe; color:#0284c7;">+ Paracetamol 500mg</button>
+              <button type="button" onclick="appendRx('4. Kem chống nắng La Roche-Posay SPF50+ (thoa trước 20 phút)')" class="btn" style="padding:0.35rem 0.75rem; font-size:0.8rem; background:#e0f2fe; color:#0284c7;">+ Kem KCN SPF50+</button>
+            </div>
+
             <div class="form-group">
-              <label>Đơn Thuốc & Liều Dùng</label>
+              <label>Đơn Thuốc & Liều Dùng Chuyên Khoa</label>
               <textarea id="doctorPrescription" class="form-control" rows="3" placeholder="1. Thuốc bôi A: Bôi 2 lần/ngày sáng tối&#10;2. Thuốc uống B: Uống 1 viên sau ăn"></textarea>
             </div>
 
@@ -93,8 +192,10 @@
               <input type="date" id="doctorFollowupDate" class="form-control" style="max-width: 250px;">
             </div>
 
-            <div style="text-align: right; margin-top: 1.5rem;">
-              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-check"></i> Lưu Chẩn Đoán & Hoàn Tất Ca Khám</button>
+            <div style="text-align: right; margin-top: 2rem;">
+              <button type="submit" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.05rem;">
+                <i class="fa-solid fa-circle-check"></i> Lưu Chẩn Đoán & Hoàn Tất Ca Khám
+              </button>
             </div>
           </form>
 
@@ -108,49 +209,25 @@
   <script>
     const API_BASE = 'http://localhost:5000/api/v1';
     let bookingsCache = [];
-    let currentDoctorName = 'PGS.TS Bác sĩ Nguyễn Văn An';
 
     document.addEventListener('DOMContentLoaded', () => {
-      const userStr = localStorage.getItem('dermAI_user');
-      if (!userStr) {
-        alert("🔐 Vui lòng đăng nhập với tài khoản Bác Sĩ để truy cập Portal này!");
-        window.location.href = 'login.html';
-        return;
-      }
-      try {
-        const user = JSON.parse(userStr);
-        const role = (user.role || '').toUpperCase();
-        if (role !== 'DOCTOR' && role !== 'BAC_SI' && role !== 'ADMIN') {
-          alert("⚠️ Bạn không có quyền truy cập Portal Bác Sĩ! Hệ thống sẽ chuyển về Trang Bệnh Nhân.");
-          window.location.href = 'index.html';
-          return;
-        }
-
-        if (role === 'DOCTOR' || role === 'BAC_SI') {
-          const adminLink = document.getElementById('adminNavLink');
-          if (adminLink) adminLink.style.display = 'none';
-        }
-
-        currentDoctorName = user.ho_ten || user.name || 'PGS.TS Bác sĩ Nguyễn Văn An';
-        const docHeader = document.getElementById('docHeaderTitle');
-        if (docHeader) docHeader.innerText = `👨‍⚕️ Lịch Khám Hôm Nay - ${currentDoctorName}`;
-      } catch (e) {}
-
       loadPatientQueue();
     });
 
     async function loadPatientQueue() {
       try {
         const res = await fetch(`${API_BASE}/bookings`);
-        const allBookings = await res.json();
-
-        // Sort: CHECK_IN first, then DA_XAC_NHAN, then CHO_XAC_NHAN, then HOAN_THANH
-        const statusOrder = { 'CHECK_IN': 1, 'DA_XAC_NHAN': 2, 'CHO_XAC_NHAN': 3, 'HOAN_THANH': 4, 'HUY_LICH': 5 };
-        bookingsCache = allBookings.sort((a, b) => (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99));
+        const bookings = await res.json();
+        bookingsCache = bookings || [];
 
         const queueDiv = document.getElementById('patientQueue');
+        const countBadge = document.getElementById('queueCountBadge');
+        
+        const waitingBookings = bookingsCache.filter(b => b.status === 'CHECK_IN' || b.status === 'CHO_XAC_NHAN' || b.status === 'DA_XAC_NHAN');
+        if (countBadge) countBadge.innerText = `${waitingBookings.length} ca chưa khám`;
+
         if (bookingsCache.length === 0) {
-          queueDiv.innerHTML = '<p style="color: #94a3b8; text-align:center; padding:1.5rem;"><i class="fa-solid fa-calendar-xmark" style="font-size:1.8rem;"></i><br>Hôm nay chưa có ca khám nào.</p>';
+          queueDiv.innerHTML = '<p style="color: #64748b; text-align:center; padding:2rem;"><i class="fa-solid fa-calendar-xmark" style="font-size:2rem;"></i><br>Hôm nay chưa có ca khám nào.</p>';
           return;
         }
 
@@ -161,22 +238,22 @@
           if (isNext) firstCheckInFound = true;
 
           return `
-            <div onclick="selectPatient('${b.id}')" style="padding: 1rem; border-radius: 10px; background: ${isNext ? '#fffbeb' : '#ffffff'}; border: ${isNext ? '2px solid #f59e0b' : '1px solid #e2e8f0'}; cursor: pointer; transition: all 0.2s; box-shadow: ${isNext ? '0 4px 12px rgba(245,158,11,0.2)' : 'none'};">
-              ${isNext ? `<div style="font-size:0.78rem; color:#d97706; font-weight:800; text-transform:uppercase; margin-bottom:0.35rem;"><i class="fa-solid fa-bell fa-bounce"></i> 👉 BỆNH NHÂN TIẾP THEO ĐẾN CA KHÁM</div>` : ''}
+            <div class="queue-card ${isNext ? 'next-patient' : ''}" onclick="selectPatient('${b.id}')">
+              ${isNext ? `<div style="font-size:0.78rem; color:#d97706; font-weight:800; text-transform:uppercase; margin-bottom:0.4rem;"><i class="fa-solid fa-bell fa-bounce"></i> 👉 BỆNH NHÂN TIẾP THEO MỜI VÀO</div>` : ''}
               
               <div style="display: flex; justify-content: space-between; align-items:flex-start;">
                 <div>
-                  <strong style="color:#0f172a; font-size:1rem;">${b.patient_name}</strong>
-                  <div style="font-size:0.8rem; color:#64748b; margin-top:0.15rem;">Gói: ${b.service_name || 'Khám Da liễu'}</div>
+                  <strong style="color:#0f172a; font-size:1.05rem; font-family:'Outfit',sans-serif;">${b.patient_name}</strong>
+                  <div style="font-size:0.82rem; color:#64748b; margin-top:0.15rem;">Gói: ${b.service_name || 'Khám Da liễu'}</div>
                 </div>
                 <span class="badge ${b.status === 'HOAN_THANH' ? 'badge-primary' : b.status === 'CHECK_IN' ? 'badge-success' : 'badge-warning'}">
-                  ${b.status === 'HOAN_THANH' ? '✅ Đã Khám' : b.status === 'CHECK_IN' ? '🏥 Đã Check-in' : '⏳ Chờ Tiếp Đón'}
+                  ${b.status === 'HOAN_THANH' ? '✅ Đã Khám' : b.status === 'CHECK_IN' ? '🏥 Đã Check-in' : '⏳ Chờ Đón'}
                 </span>
               </div>
               
-              <div style="font-size: 0.82rem; color: #475569; margin-top: 0.4rem; display:flex; justify-content:space-between; background:rgba(0,0,0,0.02); padding:0.35rem 0.5rem; border-radius:6px;">
+              <div style="font-size: 0.82rem; color: #475569; margin-top: 0.5rem; display:flex; justify-content:space-between; background:#f8fafc; padding:0.4rem 0.65rem; border-radius:8px; border:1px solid #f1f5f9;">
                 <span><i class="fa-solid fa-clock"></i> ${b.slot}</span>
-                <span style="font-weight:700; color:var(--primary);">${(b.service_price || 150000).toLocaleString('vi-VN')} đ</span>
+                <span style="font-weight:800; color:var(--primary);">${(b.service_price || 150000).toLocaleString('vi-VN')} đ</span>
               </div>
             </div>
           `;
@@ -201,10 +278,12 @@
       badge.innerText = b.status === 'HOAN_THANH' ? '✅ ĐÃ KHÁM XONG' : b.status === 'CHECK_IN' ? '🏥 ĐÃ CHECK-IN' : b.status;
       badge.className = `badge ${b.status === 'HOAN_THANH' ? 'badge-primary' : 'badge-success'}`;
 
-      document.getElementById('patientImage').src = b.image_url || 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=Anh+Goc';
-      document.getElementById('heatmapImage').src = b.ai_heatmap_url || b.image_url || 'https://via.placeholder.com/400x300/0f4c81/ffffff?text=GradCAM+Heatmap';
+      const placeholderSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24'%3E%3Cpath fill='%23334155' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7l-3 3.72L9 13l-3 4h12l-4-5z'/%3E%3C/svg%3E";
 
-      document.getElementById('aiSuggestionText').innerText = b.ai_top1 ? `${b.ai_top1} (Độ tin cậy: ${(b.ai_confidence * 100).toFixed(1)}%)` : 'Chưa chạy AI';
+      document.getElementById('patientImage').src = b.image_url || placeholderSvg;
+      document.getElementById('heatmapImage').src = b.ai_heatmap_url || b.image_url || placeholderSvg;
+
+      document.getElementById('aiSuggestionText').innerText = b.ai_top1 ? `${b.ai_top1} (Độ tin cậy: ${(b.ai_confidence * 100).toFixed(1)}%)` : 'Chưa có phân tích AI cho ca này (Khám lâm sàng trực tiếp)';
       document.getElementById('doctorDiagnosis').value = b.diagnosis || '';
       
       let rxText = b.prescription || '';
@@ -213,6 +292,17 @@
         if (Array.isArray(parsed) && parsed[0] && parsed[0].prescription) rxText = parsed[0].prescription;
       } catch(e) {}
       document.getElementById('doctorPrescription').value = rxText;
+    }
+
+    function appendRx(text) {
+      const rxEl = document.getElementById('doctorPrescription');
+      if (rxEl) {
+        if (rxEl.value.trim().length > 0) {
+          rxEl.value += '\n' + text;
+        } else {
+          rxEl.value = text;
+        }
+      }
     }
 
     async function submitDoctorDiagnosis(event) {
@@ -236,7 +326,7 @@
           body: JSON.stringify(payload)
         });
         const result = await res.json();
-        alert(`🎉 ĐÃ XÁC NHẬN HOÀN TẤT CA KHÁM CHO LỄ TÂN!\n\n- Phiếu khám: ${b ? b.patient_name : ''}\n- Trạng thái đã chuyển sang: ✅ HOÀN THÀNH (Lễ tân đã nhận tín hiệu)\n- Đã cộng vào Doanh Thu phòng khám: +${servicePrice.toLocaleString('vi-VN')} đ!`);
+        alert(`🎉 ĐÃ XÁC NHẬN HOÀN TẤT CA KHÁM CHO LỄ TÂN!\n\n- Phiếu khám: ${b ? b.patient_name : ''}\n- Trạng thái đã chuyển sang: ✅ HOÀN THÀNH\n- Đã cộng vào Doanh Thu phòng khám: +${servicePrice.toLocaleString('vi-VN')} đ!`);
         loadPatientQueue();
       } catch (err) {
         alert("Lỗi khi lưu chẩn đoán: " + err.message);
@@ -244,7 +334,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const userStr = localStorage.getItem('dermAI_user');
+      const userStr = localStorage.getItem('dermAI_user') || localStorage.getItem('dermai_user');
       if (!userStr) {
         alert("🔐 Vui lòng đăng nhập với tài khoản Bác Sĩ để truy cập Portal này!");
         window.location.href = 'login.html';
@@ -253,19 +343,21 @@
       try {
         const user = JSON.parse(userStr);
         const role = (user.role || '').toUpperCase();
-        if (role !== 'DOCTOR' && role !== 'BAC_SI' && role !== 'ADMIN') {
+        
+        if (role === 'DOCTOR' || role === 'BAC_SI') {
+          const adminNav = document.getElementById('adminNavLink');
+          if (adminNav) adminNav.style.display = 'none';
+        } else if (role === 'STAFF' || role === 'LE_TAN') {
+          alert("👩‍⚕️ Tài khoản Y Tá / Lễ Tân không có quyền vào Portal Bác Sĩ! Đang chuyển đến Portal Lễ Tân...");
+          window.location.href = 'admin.html';
+          return;
+        } else if (role === 'KHACH_HANG' || role === 'PATIENT') {
           alert("⚠️ Bạn không có quyền truy cập Portal Bác Sĩ! Hệ thống sẽ chuyển về Trang Bệnh Nhân.");
           window.location.href = 'index.html';
           return;
         }
       } catch (e) {}
     });
-
-    function logoutUser() {
-      localStorage.removeItem('dermAI_token');
-      localStorage.removeItem('dermAI_user');
-      window.location.href = 'login.html';
-    }
   </script>
 </body>
 </html>
