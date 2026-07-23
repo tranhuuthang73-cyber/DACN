@@ -490,22 +490,19 @@ def create_slot(slot_in: schemas.SlotCreate, db: Session = Depends(get_db)):
 # ------------------------------------------------------------------
 @app.post("/api/v1/ai/analyze")
 async def analyze_skin_lesion(file: UploadFile = File(...)):
-    return {
-        "predicted_class": "MEL",
-        "predicted_class_name": "Melanoma (U hắc tố ác tính)",
-        "confidence": 0.885,
-        "is_malignant": True,
-        "requires_urgent_review": True,
-        "recommended_specialist": "Bác sĩ Chuyên khoa Ung bướu & Da liễu",
-        "top3_predictions": [
-            {"class_code": "MEL", "class_name": "Melanoma (U hắc tố ác tính)", "confidence": 0.885, "is_malignant": True, "recommended_specialist": "Bác sĩ Chuyên khoa Ung bướu & Da liễu"},
-            {"class_code": "NV", "class_name": "Melanocytic Nevus (Nốt ruồi lành tính)", "confidence": 0.08, "is_malignant": False, "recommended_specialist": "Bác sĩ Da liễu Tổng quát"},
-            {"class_code": "BKL", "class_name": "Benign Keratosis (Dày sừng lành tính)", "confidence": 0.035, "is_malignant": False, "recommended_specialist": "Bác sĩ Da liễu Tổng quát"}
-        ],
-        "heatmap_url": "https://via.placeholder.com/400x400/0f4c81/ffffff?text=GradCAM+Heatmap",
-        "latency_ms": 150,
-        "model_version": "ViT-Small-384-v1"
-    }
+    import requests
+    try:
+        contents = await file.read()
+        files = {"file": (file.filename, contents, file.content_type)}
+        res = requests.post("http://localhost:8001/api/v1/ai/predict", files=files)
+        if res.status_code != 200:
+            err_msg = res.json().get("detail", "Không thể phân tích ảnh")
+            raise HTTPException(status_code=res.status_code, detail=err_msg)
+        return res.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi kết nối AI Service: {str(e)}")
 
 @app.post("/api/v1/bookings")
 def create_booking(booking_in: schemas.BookingCreate, db: Session = Depends(get_db)):
