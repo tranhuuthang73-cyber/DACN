@@ -551,7 +551,7 @@ def create_booking(booking_in: schemas.BookingCreate, db: Session = Depends(get_
 
     db.commit()
     db.refresh(form)
-    return {"status": "success", "booking_id": form.id, "message": "Đặt lịch thành công!"}
+    return {"status": "success", "booking_id": form.id, "id": form.id, "message": "Đặt lịch thành công!"}
 
 @app.get("/api/v1/bookings")
 def list_bookings(db: Session = Depends(get_db)):

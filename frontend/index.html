@@ -856,6 +856,7 @@
       e.preventDefault();
       const payload = {
         ho_ten: document.getElementById('aiName').value,
+        so_dien_thoai: document.getElementById('aiPhone').value,
         so_cccd: document.getElementById('aiPhone').value,
         bac_si_id: document.getElementById('aiDoctorSelect').value,
         dich_vu_id: document.getElementById('aiServiceSelect').value,
@@ -864,7 +865,7 @@
         trieu_chung: document.getElementById('aiSymptoms').value,
         loai_form: "AI",
         anh_ton_thuong_url: currentAIResult ? currentAIResult.heatmap_url : "",
-        ai_top1_class: currentAIResult ? currentAIResult.predicted_class : None,
+        ai_top1_class: currentAIResult ? currentAIResult.predicted_class : null,
         ai_top1_confidence: currentAIResult ? currentAIResult.confidence : 0.0,
         ai_top3_json: currentAIResult ? JSON.stringify(currentAIResult.top3_predictions) : "[]",
         ai_heatmap_url: currentAIResult ? currentAIResult.heatmap_url : ""
@@ -882,7 +883,7 @@
         openCheckoutModal({
           bookingId: bookingId,
           patientName: payload.ho_ten,
-          patientPhone: payload.so_cccd,
+          patientPhone: payload.so_dien_thoai,
           doctorName: document.getElementById('aiDoctorSelect').options[document.getElementById('aiDoctorSelect').selectedIndex].text,
           serviceName: document.getElementById('aiServiceSelect').options[document.getElementById('aiServiceSelect').selectedIndex].text,
           timeSlot: `${payload.khung_gio_id} ngày ${payload.ngay_kham}`,
@@ -897,6 +898,7 @@
       e.preventDefault();
       const payload = {
         ho_ten: document.getElementById('directName').value,
+        so_dien_thoai: document.getElementById('directPhone').value,
         so_cccd: document.getElementById('directPhone').value,
         bac_si_id: document.getElementById('directDoctorSelect').value,
         dich_vu_id: document.getElementById('directServiceSelect').value,

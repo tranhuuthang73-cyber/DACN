@@ -31,7 +31,7 @@ class SlotCreate(BaseModel):
 
 class BookingCreate(BaseModel):
     ho_ten: str
-    so_dien_thoai: str
+    so_dien_thoai: Optional[str] = None
     ngay_sinh: Optional[str] = None
     dia_chi: Optional[str] = None
     so_cccd: Optional[str] = None
