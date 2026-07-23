@@ -212,7 +212,16 @@
               <input type="date" id="doctorFollowupDate" class="form-control" style="max-width: 250px;">
             </div>
 
-            <div style="text-align: right; margin-top: 2rem;">
+            <div style="text-align: right; margin-top: 2rem; display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:flex-end;">
+              <button type="button" onclick="startTelehealth()" class="btn" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; background:linear-gradient(135deg,#059669,#10b981); color:white; border:none; border-radius:12px; cursor:pointer;">
+                <i class="fa-solid fa-video"></i> 📹 Khám Trực Tuyến
+              </button>
+              <button type="button" onclick="exportMedicalPDF()" class="btn" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; background:linear-gradient(135deg,#7c3aed,#8b5cf6); color:white; border:none; border-radius:12px; cursor:pointer;">
+                <i class="fa-solid fa-file-pdf"></i> 📄 Xuất Bệnh Án PDF
+              </button>
+              <button type="button" onclick="exportPrescriptionPDF()" class="btn" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; background:linear-gradient(135deg,#ea580c,#f97316); color:white; border:none; border-radius:12px; cursor:pointer;">
+                <i class="fa-solid fa-pills"></i> 💊 Xuất Đơn Thuốc PDF
+              </button>
               <button type="submit" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.05rem;">
                 <i class="fa-solid fa-circle-check"></i> Lưu Chẩn Đoán & Hoàn Tất Ca Khám
               </button>
@@ -225,6 +234,48 @@
     </div>
 
   </main>
+
+  <!-- TELEHEALTH VIDEO CALL MODAL -->
+  <div id="telehealthModal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.92); padding:1rem;">
+    <div style="max-width:1200px; margin:0 auto; height:100%; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 0;">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#22c55e; animation:pulse 1.5s infinite;"></span>
+          <h2 style="color:white; font-family:'Outfit',sans-serif; font-weight:800; font-size:1.5rem; margin:0;">📹 DermAI Telehealth — Phòng Khám Ảo</h2>
+        </div>
+        <button onclick="endTelehealth()" style="background:#ef4444; color:white; border:none; padding:0.7rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.95rem;">
+          <i class="fa-solid fa-phone-slash"></i> Kết Thúc Cuộc Gọi
+        </button>
+      </div>
+      
+      <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:1rem; min-height:0;">
+        <div style="position:relative; background:#1e293b; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+          <video id="remoteVideo" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+          <div style="position:absolute; bottom:1rem; left:1rem; background:rgba(0,0,0,0.6); padding:0.4rem 0.8rem; border-radius:8px; color:white; font-size:0.85rem; font-weight:600;">
+            <i class="fa-solid fa-user"></i> Bệnh Nhân
+          </div>
+        </div>
+        <div style="position:relative; background:#0f172a; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+          <video id="localVideo" autoplay muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+          <div style="position:absolute; bottom:1rem; left:1rem; background:rgba(0,0,0,0.6); padding:0.4rem 0.8rem; border-radius:8px; color:white; font-size:0.85rem; font-weight:600;">
+            <i class="fa-solid fa-user-doctor"></i> Bác Sĩ (Bạn)
+          </div>
+        </div>
+      </div>
+      
+      <div style="display:flex; justify-content:center; gap:1rem; padding:1.25rem 0;">
+        <button id="toggleMicBtn" onclick="toggleMic()" style="width:56px; height:56px; border-radius:50%; border:none; background:#334155; color:white; font-size:1.3rem; cursor:pointer; transition:all 0.2s;">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+        <button id="toggleCamBtn" onclick="toggleCam()" style="width:56px; height:56px; border-radius:50%; border:none; background:#334155; color:white; font-size:1.3rem; cursor:pointer; transition:all 0.2s;">
+          <i class="fa-solid fa-video"></i>
+        </button>
+        <button onclick="endTelehealth()" style="width:56px; height:56px; border-radius:50%; border:none; background:#ef4444; color:white; font-size:1.3rem; cursor:pointer;">
+          <i class="fa-solid fa-phone-slash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const API_BASE = 'http://localhost:5000/api/v1';
@@ -406,6 +457,166 @@
     document.addEventListener('DOMContentLoaded', () => {
       initTheme();
     });
+
+    // ==================================================================
+    // TELEHEALTH WebRTC VIDEO CALL — Trụ Cột 1
+    // ==================================================================
+    let localStream = null;
+    let peerConnection = null;
+    let signalingWs = null;
+    let micEnabled = true;
+    let camEnabled = true;
+
+    const rtcConfig = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    async function startTelehealth() {
+      const bookingId = document.getElementById('activeBookingId').value;
+      if (!bookingId) {
+        alert('⚠️ Vui lòng chọn một bệnh nhân trước khi bắt đầu khám trực tuyến!');
+        return;
+      }
+
+      // Create room on backend
+      const userStr = localStorage.getItem('dermAI_user') || localStorage.getItem('dermai_user');
+      let doctorName = 'Bác sĩ';
+      let doctorId = 'doc-1';
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          doctorName = u.name || 'Bác sĩ';
+          doctorId = u.user_id || 'doc-1';
+        } catch(e) {}
+      }
+
+      try {
+        await fetch(`${API_BASE}/telehealth/create-room`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ booking_id: bookingId, doctor_id: doctorId, doctor_name: doctorName })
+        });
+      } catch(e) { console.warn('Room creation failed', e); }
+
+      // Show modal
+      document.getElementById('telehealthModal').style.display = 'block';
+
+      // Get local media
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('localVideo').srcObject = localStream;
+      } catch(err) {
+        alert('⚠️ Không thể truy cập Camera/Mic. Vui lòng cấp quyền truy cập thiết bị!');
+        return;
+      }
+
+      // Setup WebSocket signaling
+      const wsUrl = `ws://localhost:5000/api/v1/telehealth/signal/${bookingId}`;
+      signalingWs = new WebSocket(wsUrl);
+
+      signalingWs.onopen = () => {
+        console.log('🟢 Telehealth WebSocket connected');
+        createPeerConnection();
+      };
+
+      signalingWs.onmessage = async (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === 'offer') {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(msg));
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+          signalingWs.send(JSON.stringify(peerConnection.localDescription));
+        } else if (msg.type === 'answer') {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(msg));
+        } else if (msg.type === 'candidate' && msg.candidate) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate));
+        } else if (msg.type === 'peer-joined') {
+          // New peer joined, create offer
+          const offer = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(offer);
+          signalingWs.send(JSON.stringify(peerConnection.localDescription));
+        }
+      };
+    }
+
+    function createPeerConnection() {
+      peerConnection = new RTCPeerConnection(rtcConfig);
+
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+      });
+
+      peerConnection.ontrack = (event) => {
+        document.getElementById('remoteVideo').srcObject = event.streams[0];
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate && signalingWs && signalingWs.readyState === WebSocket.OPEN) {
+          signalingWs.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
+        }
+      };
+    }
+
+    function toggleMic() {
+      if (!localStream) return;
+      micEnabled = !micEnabled;
+      localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
+      const btn = document.getElementById('toggleMicBtn');
+      btn.style.background = micEnabled ? '#334155' : '#ef4444';
+      btn.innerHTML = micEnabled ? '<i class="fa-solid fa-microphone"></i>' : '<i class="fa-solid fa-microphone-slash"></i>';
+    }
+
+    function toggleCam() {
+      if (!localStream) return;
+      camEnabled = !camEnabled;
+      localStream.getVideoTracks().forEach(t => t.enabled = camEnabled);
+      const btn = document.getElementById('toggleCamBtn');
+      btn.style.background = camEnabled ? '#334155' : '#ef4444';
+      btn.innerHTML = camEnabled ? '<i class="fa-solid fa-video"></i>' : '<i class="fa-solid fa-video-slash"></i>';
+    }
+
+    function endTelehealth() {
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      if (signalingWs) {
+        signalingWs.close();
+        signalingWs = null;
+      }
+      document.getElementById('telehealthModal').style.display = 'none';
+      alert('📞 Cuộc gọi Telehealth đã kết thúc. Vui lòng hoàn tất chẩn đoán và kê đơn cho bệnh nhân.');
+    }
+
+    // ==================================================================
+    // PDF EXPORT — Trụ Cột 2
+    // ==================================================================
+    function exportMedicalPDF() {
+      const bookingId = document.getElementById('activeBookingId').value;
+      if (!bookingId) {
+        alert('⚠️ Vui lòng chọn một bệnh nhân trước khi xuất bệnh án!');
+        return;
+      }
+      window.open(`${API_BASE}/pdf/medical-record/${bookingId}`, '_blank');
+    }
+
+    function exportPrescriptionPDF() {
+      const bookingId = document.getElementById('activeBookingId').value;
+      if (!bookingId) {
+        alert('⚠️ Vui lòng chọn một bệnh nhân trước khi xuất đơn thuốc!');
+        return;
+      }
+      window.open(`${API_BASE}/pdf/prescription/${bookingId}`, '_blank');
+    }
+
   </script>
 </body>
 </html>

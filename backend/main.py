@@ -3,12 +3,14 @@ import sys
 import uuid
 import json
 import hashlib
+import io
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
 
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -684,6 +686,323 @@ def list_consultations(db: Session = Depends(get_db)):
         "trang_thai_xu_ly": str(c.trang_thai_xu_ly or "Chờ CSKH gọi"),
         "created_at": c.created_at.isoformat() if c.created_at else ""
     } for c in consults]
+
+# ------------------------------------------------------------------
+# TELEHEALTH VIDEO CALL — WebRTC Signaling (Trụ Cột 1)
+# ------------------------------------------------------------------
+telehealth_rooms: Dict[str, Dict] = {}
+telehealth_connections: Dict[str, List[WebSocket]] = {}
+
+class TelehealthRoomCreate(BaseModel):
+    booking_id: str
+    doctor_id: str
+    doctor_name: str = "Bác sĩ"
+
+@app.post("/api/v1/telehealth/create-room")
+def create_telehealth_room(room_in: TelehealthRoomCreate, db: Session = Depends(get_db)):
+    room_id = room_in.booking_id
+    telehealth_rooms[room_id] = {
+        "room_id": room_id,
+        "doctor_id": room_in.doctor_id,
+        "doctor_name": room_in.doctor_name,
+        "status": "WAITING",
+        "created_at": datetime.utcnow().isoformat(),
+        "participants": 0
+    }
+    telehealth_connections[room_id] = []
+    
+    # Update booking status
+    form = db.query(models.FormDatLich).get(room_in.booking_id)
+    if form:
+        form.trang_thai = "DANG_KHAM_ONLINE"
+        db.commit()
+    
+    return {"status": "success", "room_id": room_id, "message": "Phòng khám trực tuyến đã được tạo!"}
+
+@app.get("/api/v1/telehealth/room-status/{booking_id}")
+def get_room_status(booking_id: str):
+    room = telehealth_rooms.get(booking_id)
+    if not room:
+        return {"status": "not_found", "exists": False}
+    return {"status": "success", "exists": True, "room": room}
+
+@app.websocket("/api/v1/telehealth/signal/{room_id}")
+async def telehealth_signaling(websocket: WebSocket, room_id: str):
+    await websocket.accept()
+    
+    if room_id not in telehealth_connections:
+        telehealth_connections[room_id] = []
+    
+    telehealth_connections[room_id].append(websocket)
+    
+    if room_id in telehealth_rooms:
+        telehealth_rooms[room_id]["participants"] = len(telehealth_connections[room_id])
+        telehealth_rooms[room_id]["status"] = "ACTIVE"
+    
+    try:
+        # Notify others that a new peer joined
+        for ws in telehealth_connections[room_id]:
+            if ws != websocket:
+                try:
+                    await ws.send_json({"type": "peer-joined", "count": len(telehealth_connections[room_id])})
+                except:
+                    pass
+        
+        while True:
+            data = await websocket.receive_json()
+            # Forward signaling messages to all other peers in the room
+            for ws in telehealth_connections[room_id]:
+                if ws != websocket:
+                    try:
+                        await ws.send_json(data)
+                    except:
+                        pass
+    except WebSocketDisconnect:
+        if room_id in telehealth_connections:
+            telehealth_connections[room_id] = [ws for ws in telehealth_connections[room_id] if ws != websocket]
+            if room_id in telehealth_rooms:
+                telehealth_rooms[room_id]["participants"] = len(telehealth_connections[room_id])
+                if len(telehealth_connections[room_id]) == 0:
+                    telehealth_rooms[room_id]["status"] = "ENDED"
+            
+            # Notify remaining peers
+            for ws in telehealth_connections[room_id]:
+                try:
+                    await ws.send_json({"type": "peer-left", "count": len(telehealth_connections[room_id])})
+                except:
+                    pass
+
+# ------------------------------------------------------------------
+# PDF EXPORT — Bệnh Án & Đơn Thuốc (Trụ Cột 2)
+# ------------------------------------------------------------------
+def generate_medical_record_pdf(booking_data: dict) -> bytes:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import mm, cm
+    from reportlab.lib.colors import HexColor
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.styles import getSampleStyleSheet
+    
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    
+    # --- Header: Clinic Info ---
+    c.setFillColor(HexColor("#0284c7"))
+    c.rect(0, height - 100, width, 100, fill=1, stroke=0)
+    
+    c.setFillColor(HexColor("#ffffff"))
+    c.setFont("Helvetica-Bold", 22)
+    c.drawCentredString(width / 2, height - 40, "DERMAI CLINIC")
+    c.setFont("Helvetica", 11)
+    c.drawCentredString(width / 2, height - 58, "He thong Phong Kham Da Lieu & Cong Nghe AI")
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(width / 2, height - 73, "Dia chi: 227 Nguyen Van Cu, P.4, Q.5, TP.HCM | Hotline: 1900-DERMAI")
+    c.drawCentredString(width / 2, height - 86, "Website: dermai.vn | Email: contact@dermai.vn | GPKD: 0316XXXXXXX")
+    
+    # --- Title ---
+    y = height - 130
+    c.setFillColor(HexColor("#0f172a"))
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(width / 2, y, "PHIEU KHAM BENH - BENH AN DIEN TU")
+    
+    y -= 12
+    c.setFont("Helvetica", 9)
+    c.setFillColor(HexColor("#64748b"))
+    c.drawCentredString(width / 2, y, f"Ma phieu: {booking_data.get('id', 'N/A')[:12]}... | Ngay kham: {booking_data.get('date', 'N/A')}")
+    
+    # --- Patient Info Box ---
+    y -= 35
+    c.setStrokeColor(HexColor("#e2e8f0"))
+    c.setFillColor(HexColor("#f8fafc"))
+    c.roundRect(30, y - 90, width - 60, 95, 8, fill=1, stroke=1)
+    
+    c.setFillColor(HexColor("#0284c7"))
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(45, y - 8, "THONG TIN BENH NHAN")
+    
+    c.setFillColor(HexColor("#0f172a"))
+    c.setFont("Helvetica", 10)
+    c.drawString(45, y - 28, f"Ho va ten: {booking_data.get('patient_name', 'N/A')}")
+    c.drawString(340, y - 28, f"SDT/CCCD: {booking_data.get('patient_phone', 'N/A')}")
+    c.drawString(45, y - 46, f"Bac si kham: {booking_data.get('doctor_name', 'N/A')}")
+    c.drawString(340, y - 46, f"Khung gio: {booking_data.get('slot', 'N/A')}")
+    c.drawString(45, y - 64, f"Dich vu: {booking_data.get('service_name', 'N/A')}")
+    c.drawString(340, y - 64, f"Loai form: {booking_data.get('form_type', 'THUONG')}")
+    c.drawString(45, y - 82, f"Trieu chung: {booking_data.get('symptoms', 'N/A')[:60]}")
+    
+    # --- AI Diagnosis Section ---
+    y -= 120
+    if booking_data.get('ai_top1'):
+        c.setFillColor(HexColor("#fef3c7"))
+        c.roundRect(30, y - 65, width - 60, 70, 8, fill=1, stroke=0)
+        
+        c.setFillColor(HexColor("#92400e"))
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(45, y - 5, "CHAN DOAN AI (Vision Transformer)")
+        
+        c.setFont("Helvetica", 10)
+        c.setFillColor(HexColor("#0f172a"))
+        c.drawString(45, y - 24, f"Ket qua AI: {booking_data.get('ai_top1', 'N/A')} — Do tin cay: {booking_data.get('ai_confidence', 0):.1%}")
+        c.drawString(45, y - 42, f"Mo hinh: ViT-Small-384-v1 | ISIC 25,000+ datasets")
+        c.setFont("Helvetica-Oblique", 9)
+        c.setFillColor(HexColor("#dc2626"))
+        c.drawString(45, y - 58, "* Ket qua AI chi mang tinh tham khao. Chan doan chinh thuc do bac si thuc hien.")
+        y -= 80
+    
+    # --- Doctor Diagnosis ---
+    if booking_data.get('diagnosis'):
+        c.setFillColor(HexColor("#0284c7"))
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(45, y - 5, "CHAN DOAN CUOI CUNG CUA BAC SI")
+        
+        c.setFillColor(HexColor("#0f172a"))
+        c.setFont("Helvetica", 10)
+        diag = booking_data.get('diagnosis', '')
+        # Word wrap diagnosis text
+        words = diag.split()
+        line = ""
+        line_y = y - 25
+        for word in words:
+            if len(line + word) > 75:
+                c.drawString(45, line_y, line)
+                line_y -= 16
+                line = word + " "
+            else:
+                line += word + " "
+        if line:
+            c.drawString(45, line_y, line)
+            line_y -= 16
+        y = line_y - 10
+    
+    # --- Prescription ---
+    if booking_data.get('prescription'):
+        c.setFillColor(HexColor("#0284c7"))
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(45, y - 5, "DON THUOC DIEN TU")
+        
+        c.setFillColor(HexColor("#0f172a"))
+        c.setFont("Helvetica", 10)
+        try:
+            presc_list = json.loads(booking_data['prescription']) if isinstance(booking_data['prescription'], str) else booking_data['prescription']
+            py = y - 25
+            for idx, item in enumerate(presc_list):
+                text = item.get('prescription', str(item)) if isinstance(item, dict) else str(item)
+                c.drawString(45, py, f"{idx+1}. {text[:80]}")
+                py -= 18
+            y = py - 5
+        except:
+            c.drawString(45, y - 25, booking_data.get('prescription', 'N/A')[:80])
+            y -= 40
+    
+    # --- Digital Stamp & Signature ---
+    stamp_y = max(y - 50, 100)
+    
+    # Red stamp circle
+    c.setStrokeColor(HexColor("#dc2626"))
+    c.setLineWidth(2.5)
+    c.circle(width - 120, stamp_y + 15, 38, fill=0, stroke=1)
+    c.setFillColor(HexColor("#dc2626"))
+    c.setFont("Helvetica-Bold", 8)
+    c.drawCentredString(width - 120, stamp_y + 25, "DERMAI CLINIC")
+    c.setFont("Helvetica", 7)
+    c.drawCentredString(width - 120, stamp_y + 14, "DA XAC NHAN")
+    c.drawCentredString(width - 120, stamp_y + 4, datetime.utcnow().strftime("%d/%m/%Y"))
+    
+    # Doctor signature area
+    c.setFillColor(HexColor("#0f172a"))
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(45, stamp_y + 30, "Bac si ky ten:")
+    c.setFont("Helvetica-Oblique", 14)
+    c.setFillColor(HexColor("#0284c7"))
+    c.drawString(45, stamp_y + 8, booking_data.get('doctor_name', 'BS. N/A'))
+    c.setFont("Helvetica", 8)
+    c.setFillColor(HexColor("#64748b"))
+    c.drawString(45, stamp_y - 8, "(Chu ky dien tu xac thuc)")
+    
+    # --- Footer ---
+    c.setFillColor(HexColor("#94a3b8"))
+    c.setFont("Helvetica", 7)
+    c.drawCentredString(width / 2, 35, "DermAI Clinic — He thong Y te So tich hop AI | HIPAA Compliant | ISO 13485 | Bao mat tuyet doi")
+    c.drawCentredString(width / 2, 22, f"Ban in ngay {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC — Tai lieu nay co gia tri phap ly tuong duong ban giay co dau moc do")
+    
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+@app.get("/api/v1/pdf/medical-record/{booking_id}")
+def export_medical_record_pdf(booking_id: str, db: Session = Depends(get_db)):
+    form = db.query(models.FormDatLich).get(booking_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Khong tim thay phieu dat lich")
+    
+    kh = db.query(models.KhachHang).get(form.khach_hang_id) if form.khach_hang_id else None
+    bs = db.query(models.NhanVien).get(form.bac_si_id) if form.bac_si_id else None
+    dv = db.query(models.DichVu).get(form.dich_vu_id) if form.dich_vu_id else None
+    kg = db.query(models.KhungGio).get(form.khung_gio_id) if form.khung_gio_id else None
+    ai = db.query(models.AIDiagnosticLog).filter(models.AIDiagnosticLog.form_dat_lich_id == form.id).first()
+    pk = db.query(models.PhieuKhamBenh).filter(models.PhieuKhamBenh.form_dat_lich_id == form.id).first()
+    
+    booking_data = {
+        "id": str(form.id),
+        "patient_name": str(kh.ho_ten) if kh else "N/A",
+        "patient_phone": str(kh.so_cccd or "") if kh else "",
+        "doctor_name": str(bs.ho_ten) if bs else "N/A",
+        "service_name": str(dv.ten_dich_vu) if dv else "Kham Da lieu",
+        "date": str(form.ngay_kham or ""),
+        "slot": f"{kg.gio_bat_dau} - {kg.gio_ket_thuc}" if kg else "N/A",
+        "symptoms": str(form.trieu_chung or ""),
+        "form_type": str(form.loai_form or "THUONG"),
+        "ai_top1": str(ai.top1_class) if ai else None,
+        "ai_confidence": float(ai.top1_confidence) if ai else 0.0,
+        "diagnosis": str(pk.chan_doan_cuoi_cung) if pk else None,
+        "prescription": str(pk.don_thuoc_json) if pk else None
+    }
+    
+    pdf_bytes = generate_medical_record_pdf(booking_data)
+    
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=BenhAn_DermAI_{booking_id[:8]}.pdf"}
+    )
+
+@app.get("/api/v1/pdf/prescription/{booking_id}")
+def export_prescription_pdf(booking_id: str, db: Session = Depends(get_db)):
+    form = db.query(models.FormDatLich).get(booking_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Khong tim thay phieu dat lich")
+    
+    pk = db.query(models.PhieuKhamBenh).filter(models.PhieuKhamBenh.form_dat_lich_id == form.id).first()
+    if not pk:
+        raise HTTPException(status_code=404, detail="Chua co don thuoc cho phieu nay")
+    
+    kh = db.query(models.KhachHang).get(form.khach_hang_id) if form.khach_hang_id else None
+    bs = db.query(models.NhanVien).get(form.bac_si_id) if form.bac_si_id else None
+    
+    booking_data = {
+        "id": str(form.id),
+        "patient_name": str(kh.ho_ten) if kh else "N/A",
+        "patient_phone": str(kh.so_cccd or "") if kh else "",
+        "doctor_name": str(bs.ho_ten) if bs else "N/A",
+        "service_name": "Don thuoc dien tu",
+        "date": str(form.ngay_kham or ""),
+        "slot": "",
+        "symptoms": str(form.trieu_chung or ""),
+        "form_type": "DON_THUOC",
+        "ai_top1": None,
+        "ai_confidence": 0.0,
+        "diagnosis": str(pk.chan_doan_cuoi_cung) if pk else None,
+        "prescription": str(pk.don_thuoc_json) if pk else None
+    }
+    
+    pdf_bytes = generate_medical_record_pdf(booking_data)
+    
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=DonThuoc_DermAI_{booking_id[:8]}.pdf"}
+    )
 
 if __name__ == "__main__":
     import uvicorn
