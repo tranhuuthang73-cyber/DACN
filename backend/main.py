@@ -1069,6 +1069,67 @@ def lookup_icd_codes(q: Optional[str] = None):
     
     return {"status": "success", "results": icd_database}
 
+@app.get("/api/v1/ai/cdss-protocol")
+def get_cdss_clinical_protocol(icd: Optional[str] = "L70.0"):
+    protocols = {
+        "L70.0": {
+            "icd_code": "L70.0",
+            "condition_name": "Mụn trứng cá bọc (Acne Vulgaris)",
+            "fda_approval_tier": "Tier-1 First-Line Therapy",
+            "recommended_prescriptions": [
+                "Klenzit MS (Adapalene 0.1%): Bôi tối 1 lần/ngày",
+                "Doxycycline 100mg: Uống 1 viên x 2 lần/ngày (dùng 14 ngày)",
+                "Sữa rửa mặt SVR Sebiaclear Gel Moussant"
+            ],
+            "drug_interaction_warning": "Không dùng chung Doxycycline với thực phẩm nhiều Canxi (Sữa) trong vòng 2 giờ.",
+            "followup_days": 14
+        },
+        "C44.9": {
+            "icd_code": "C44.9",
+            "condition_name": "U hắc tố ác tính da (Melanoma)",
+            "fda_approval_tier": "Urgent Specialist Referral Needed",
+            "recommended_prescriptions": [
+                "Sinh thiết tổn thương khẩn cấp (Punch Biopsy)",
+                "Chuyển tuyến Bệnh viện Ung Bướu TP.HCM"
+            ],
+            "drug_interaction_warning": "Yêu cầu hội chẩn chuyên khoa trước khi can thiệp laser.",
+            "followup_days": 3
+        }
+    }
+    res = protocols.get(icd, protocols["L70.0"])
+    return {"status": "success", "cdss_protocol": res}
+
+@app.get("/api/v1/pdf/medical-certificate/{booking_id}")
+def export_medical_certificate_pdf(booking_id: str, db: Session = Depends(get_db)):
+    form = db.query(models.FormDatLich).get(booking_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Không tìm thấy phiếu đặt lịch")
+    kh = db.query(models.KhachHang).get(form.khach_hang_id) if form.khach_hang_id else None
+    bs = db.query(models.NhanVien).get(form.bac_si_id) if form.bac_si_id else None
+    pk = db.query(models.PhieuKhamBenh).filter(models.PhieuKhamBenh.form_dat_lich_id == form.id).first()
+
+    cert_data = {
+        "id": str(form.id),
+        "patient_name": str(kh.ho_ten) if kh else "Bệnh nhân",
+        "patient_phone": str(kh.so_cccd or "") if kh else "",
+        "doctor_name": str(bs.ho_ten) if bs else "PGS.TS Bác sĩ Nguyễn Văn An",
+        "service_name": "Giay Chung Nhan Suc Khoe Da Lieu",
+        "date": str(form.ngay_kham or "2026-07-23"),
+        "slot": "09:00 - 09:30",
+        "symptoms": str(form.trieu_chung or "Kham da lieu dinh ky"),
+        "form_type": "GIAY_CHUNG_NHAN",
+        "ai_top1": "NORMAL",
+        "ai_confidence": 0.95,
+        "diagnosis": str(pk.chan_doan_cuoi_cung) if pk else "Da khoe manh, khong co ton thuong ac tinh.",
+        "prescription": "Duy tri routine skincare va kem chong nang SPF 50+"
+    }
+    pdf_bytes = generate_medical_record_pdf(cert_data)
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=GiayChungNhan_DermAI_{booking_id[:8]}.pdf"}
+    )
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000)

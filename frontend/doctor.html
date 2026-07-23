@@ -222,6 +222,9 @@
               <button type="button" onclick="exportPrescriptionPDF()" class="btn" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; background:linear-gradient(135deg,#ea580c,#f97316); color:white; border:none; border-radius:12px; cursor:pointer;">
                 <i class="fa-solid fa-pills"></i> 💊 Xuất Đơn Thuốc PDF
               </button>
+              <button type="button" onclick="exportMedicalCertPDF()" class="btn" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; background:linear-gradient(135deg,#0284c7,#0369a1); color:white; border:none; border-radius:12px; cursor:pointer;">
+                <i class="fa-solid fa-certificate"></i> 📜 Xuất Giấy Chứng Nhận Y Tế
+              </button>
               <button type="submit" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.05rem;">
                 <i class="fa-solid fa-circle-check"></i> Lưu Chẩn Đoán & Hoàn Tất Ca Khám
               </button>
@@ -365,15 +368,31 @@
       document.getElementById('doctorPrescription').value = rxText;
     }
 
-    function appendRx(text) {
-      const rxEl = document.getElementById('doctorPrescription');
-      if (rxEl) {
-        if (rxEl.value.trim().length > 0) {
-          rxEl.value += '\n' + text;
-        } else {
-          rxEl.value = text;
-        }
+    function exportMedicalPDF() {
+      const activeId = document.getElementById('activeBookingId').value;
+      if (!activeId) {
+        alert('⚠️ Vui lòng chọn một ca khám để xuất Bệnh án PDF!');
+        return;
       }
+      window.open(`${API_BASE}/pdf/medical-record/${activeId}`, '_blank');
+    }
+
+    function exportPrescriptionPDF() {
+      const activeId = document.getElementById('activeBookingId').value;
+      if (!activeId) {
+        alert('⚠️ Vui lòng chọn một ca khám để xuất Đơn thuốc PDF!');
+        return;
+      }
+      window.open(`${API_BASE}/pdf/prescription/${activeId}`, '_blank');
+    }
+
+    function exportMedicalCertPDF() {
+      const activeId = document.getElementById('activeBookingId').value;
+      if (!activeId) {
+        alert('⚠️ Vui lòng chọn một ca khám để xuất Giấy chứng nhận Y tế PDF!');
+        return;
+      }
+      window.open(`${API_BASE}/pdf/medical-certificate/${activeId}`, '_blank');
     }
 
     async function submitDoctorDiagnosis(event) {
