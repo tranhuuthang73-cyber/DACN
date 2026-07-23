@@ -602,6 +602,9 @@
       </div>
 
       <div class="header-actions">
+        <button onclick="exportCSV()" class="btn btn-primary" style="padding: 0.45rem 0.9rem; font-size: 0.8rem; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+          <i class="fa-solid fa-file-csv"></i> Xuất Báo Cáo CSV
+        </button>
         <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn" title="Chuyển chế độ Sáng / Tối">
           <i class="fa-solid fa-moon" style="color: #38bdf8;"></i> <span>Tối</span>
         </button>
@@ -971,6 +974,12 @@
         document.getElementById('headerSubText').innerText = 'Quản lý thông tin số điện thoại cần gọi lại hỗ trợ';
         loadBookingsAndConsults();
       }
+    }
+
+    // 60M ENTERPRISE: EXPORT CSV FUNCTION
+    function exportCSV() {
+      window.open(`${API_BASE}/admin/export-csv`, '_blank');
+      showToast("📥 Đã tải xuống Báo cáo Doanh thu dạng file CSV!", "success");
     }
 
     // STATS & CHARTS API

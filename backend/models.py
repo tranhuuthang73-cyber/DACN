@@ -92,6 +92,7 @@ class FormDatLich(Base):
     anh_ton_thuong_url = Column(Text, nullable=True)
     so_tien_coc = Column(Float, default=0.0)
     da_dat_coc = Column(Boolean, default=False)
+    vi_tri_ton_thuong = Column(String(50), nullable=True, default="Mặt/Trán")
     trang_thai = Column(String(30), default="CHO_XAC_NHAN")
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -107,6 +108,7 @@ class PhieuKhamBenh(Base):
     form_dat_lich_id = Column(String(36), ForeignKey("form_dat_lich.id"), nullable=False, unique=True)
     bac_si_id = Column(String(36), ForeignKey("nhan_vien.id"), nullable=False)
     chan_doan_cuoi_cung = Column(Text, nullable=False)
+    ma_icd = Column(String(30), nullable=True, default="L70.0")
     don_thuoc_json = Column(Text, nullable=True)
     ghi_chu = Column(Text, nullable=True)
     ngay_tai_kham = Column(String(20), nullable=True)

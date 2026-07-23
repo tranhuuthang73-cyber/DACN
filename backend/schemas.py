@@ -44,6 +44,7 @@ class BookingCreate(BaseModel):
     ngay_kham: str
     loai_form: str = "THUONG"
     anh_ton_thuong_url: Optional[str] = None
+    vi_tri_ton_thuong: Optional[str] = "Mặt/Trán"
     ai_top1_class: Optional[str] = None
     ai_top1_confidence: Optional[float] = None
     ai_top3_json: Optional[str] = None
@@ -53,6 +54,7 @@ class ExaminationCreate(BaseModel):
     form_dat_lich_id: str
     bac_si_id: str
     chan_doan_cuoi_cung: str
+    ma_icd: Optional[str] = "L70.0"
     don_thuoc_json: Optional[str] = None
     ghi_chu: Optional[str] = None
     ngay_tai_kham: Optional[str] = None
