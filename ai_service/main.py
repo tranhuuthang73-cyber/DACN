@@ -162,11 +162,11 @@ def classify_lesion_features(stats: dict):
     # 4. NV (Melanocytic Nevus - Nốt ruồi sắc tố lành tính)
     # Pigmented dark spot: low luminance, low redness, smooth regular border
     darkness = max(0, 180 - (0.3*r + 0.59*g + 0.11*b))
-    scores["NV"] = darkness * 1.5 + (40 if redness < 15 else -20)
+    scores["NV"] = darkness * 1.8 + (50 if redness < 18 else -20)
 
     # 5. MEL (Melanoma - U hắc tố ác tính)
-    # High darkness + high border/color variance (>900)
-    scores["MEL"] = darkness * 1.0 + (variance * 0.15 if variance > 900 else 0)
+    # High darkness + high border/color variance (>1200)
+    scores["MEL"] = darkness * 0.9 + (variance * 0.12 if variance > 1200 else 0)
 
     # 6. BKL (Benign Keratosis - Dày sừng lành tính)
     scores["BKL"] = variance * 0.12 + darkness * 0.5
