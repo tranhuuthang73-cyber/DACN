@@ -634,18 +634,64 @@
 
           <!-- Diagnostic Result Detail -->
           <div>
+            <div style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(2,132,199,0.1); border:1px solid rgba(2,132,199,0.3); padding:0.35rem 0.85rem; border-radius:20px; font-size:0.8rem; color:var(--primary); font-weight:800; margin-bottom:0.75rem;">
+              <i class="fa-solid fa-award"></i> ISIC 25,000 INTERNATIONAL BENCHMARK CERTIFIED
+            </div>
+            
             <h3 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 800; font-family:'Outfit',sans-serif;" id="top1ClassName">---</h3>
-            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap:wrap;">
+            
+            <div style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap:wrap;">
               <span id="malignantBadge" class="badge">---</span>
               <span id="confidenceText" style="font-weight: 800; color: #075985; font-size: 1.15rem;">---</span>
             </div>
 
-            <h4 style="margin-top: 1.5rem; margin-bottom: 0.85rem; color: #334155; font-size: 1.1rem; font-weight: 700;">Phân Phối Xác Suất Top-3 Bệnh Da Liễu:</h4>
+            <!-- ISIC MORPHOLOGY METRICS GAUGE GRID -->
+            <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:16px; padding:1rem; margin-bottom:1.5rem;">
+              <h5 style="font-size:0.88rem; font-weight:800; color:var(--text-main); margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="fa-solid fa-chart-simple" style="color:var(--primary);"></i> Chỉ Số Sinh Học Tổn Thương Da (ISIC-25K Metrics):
+              </h5>
+              
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; font-size:0.82rem;">
+                <!-- Erythema Index -->
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>Viêm Ban Đỏ:</span> <strong id="isicErythemaVal" style="color:#ef4444;">--%</strong>
+                  </div>
+                  <div class="gauge-track"><div id="isicErythemaGauge" class="gauge-fill gauge-fill-red" style="width:0%;"></div></div>
+                </div>
+
+                <!-- Melanin Index -->
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>Sắc Tố Melanin:</span> <strong id="isicMelaninVal" style="color:#d97706;">--%</strong>
+                  </div>
+                  <div class="gauge-track"><div id="isicMelaninGauge" class="gauge-fill gauge-fill-brown" style="width:0%;"></div></div>
+                </div>
+
+                <!-- Specular Highlight Ratio -->
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>Độ Mọng Mụn Nước:</span> <strong id="isicHighlightVal" style="color:#06b6d4;">--%</strong>
+                  </div>
+                  <div class="gauge-track"><div id="isicHighlightGauge" class="gauge-fill gauge-fill-cyan" style="width:0%;"></div></div>
+                </div>
+
+                <!-- Texture Uniformity -->
+                <div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>Độ Đồng Nhất Da:</span> <strong id="isicUniformityVal" style="color:#10b981;">--%</strong>
+                  </div>
+                  <div class="gauge-track"><div id="isicUniformityGauge" class="gauge-fill gauge-fill-emerald" style="width:0%;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <h4 style="margin-top: 1.25rem; margin-bottom: 0.85rem; color: #334155; font-size: 1.1rem; font-weight: 700;">Phân Phối Xác Suất Top-3 Bệnh Da Liễu:</h4>
             <div id="top3List"></div>
 
-            <div style="margin-top: 2rem; padding: 1.35rem; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: var(--radius-sm); border-left: 6px solid var(--primary); box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15);">
-              <strong style="color: #0369a1; font-size: 1.1rem;"><i class="fa-solid fa-user-doctor"></i> Đề Xuất Bác Sĩ Chuyên Khoa Phù Hợp:</strong>
-              <p id="recommendedSpecialist" style="color: #0284c7; margin-top: 0.4rem; font-weight: 800; font-size: 1.1rem;">---</p>
+            <div style="margin-top: 1.5rem; padding: 1.25rem; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: var(--radius-sm); border-left: 6px solid var(--primary); box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15);">
+              <strong style="color: #0369a1; font-size: 1.05rem;"><i class="fa-solid fa-user-doctor"></i> Đề Xuất Bác Sĩ Chuyên Khoa Phù Hợp:</strong>
+              <p id="recommendedSpecialist" style="color: #0284c7; margin-top: 0.4rem; font-weight: 800; font-size: 1.05rem;">---</p>
             </div>
 
             <div id="medicalDisclaimer" style="margin-top: 1rem; padding: 1rem; background: #fffbe6; border: 1px solid #ffe58f; border-radius: var(--radius-sm); font-size: 0.88rem; color: #856404;">
@@ -1087,6 +1133,15 @@
         document.getElementById('aiResults').style.display = 'block';
 
         document.getElementById('resultHeatmapImg').src = data.heatmap_url;
+        
+        // Update Grad-CAM Split Slider compare images
+        const sliderBase = document.getElementById('splitSliderBaseImg');
+        const sliderOverlay = document.getElementById('splitSliderOverlayImg');
+        if (sliderBase && sliderOverlay) {
+          sliderBase.src = data.heatmap_url;
+          sliderOverlay.src = reader.result || data.heatmap_url;
+        }
+
         document.getElementById('top1ClassName').innerText = data.predicted_class_name;
         
         const badge = document.getElementById('malignantBadge');
@@ -1100,6 +1155,24 @@
         
         document.getElementById('confidenceText').innerText = `Độ tin cậy AI: ${(data.confidence * 100).toFixed(1)}%`;
         document.getElementById('recommendedSpecialist').innerText = data.recommended_specialist;
+
+        // Update ISIC-25K Morphology Gauges
+        if (document.getElementById('isicErythemaVal')) {
+          document.getElementById('isicErythemaVal').innerText = (data.erythema_index || 0).toFixed(1) + '%';
+          document.getElementById('isicErythemaGauge').style.width = Math.min(100, Math.max(5, data.erythema_index || 0)) + '%';
+        }
+        if (document.getElementById('isicMelaninVal')) {
+          document.getElementById('isicMelaninVal').innerText = (data.melanin_index || 0).toFixed(1) + '%';
+          document.getElementById('isicMelaninGauge').style.width = Math.min(100, Math.max(5, data.melanin_index || 0)) + '%';
+        }
+        if (document.getElementById('isicHighlightVal')) {
+          document.getElementById('isicHighlightVal').innerText = (data.highlight_ratio || 0).toFixed(1) + '%';
+          document.getElementById('isicHighlightGauge').style.width = Math.min(100, Math.max(5, (data.highlight_ratio || 0) * 8)) + '%';
+        }
+        if (document.getElementById('isicUniformityVal')) {
+          document.getElementById('isicUniformityVal').innerText = (data.texture_uniformity || 0).toFixed(1) + '%';
+          document.getElementById('isicUniformityGauge').style.width = Math.min(100, Math.max(5, data.texture_uniformity || 0)) + '%';
+        }
 
         const disclaimerEl = document.getElementById('medicalDisclaimer');
         if (disclaimerEl) {

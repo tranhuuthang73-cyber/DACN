@@ -992,3 +992,235 @@ footer {
 footer p {
   font-size: 0.95rem;
 }
+
+/* ==========================================================================
+   BIG UPDATE 2026 - COMPONENT STYLES
+   ========================================================================== */
+
+/* 1. GRAD-CAM SPLIT SLIDER COMPARE VIEW */
+.split-slider-container {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  height: 380px;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  user-select: none;
+  touch-action: none;
+  background: #000;
+}
+
+.split-slider-base,
+.split-slider-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.split-slider-base img,
+.split-slider-overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.split-slider-overlay {
+  width: 50%;
+  overflow: hidden;
+  border-right: 3px solid var(--accent-neon);
+  box-shadow: 4px 0 15px rgba(0, 245, 212, 0.6);
+  z-index: 2;
+}
+
+.split-slider-overlay img {
+  width: 520px; /* keep original width fixed */
+  max-width: none;
+}
+
+.split-slider-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  background: var(--accent-neon);
+  z-index: 3;
+  cursor: ew-resize;
+}
+
+.split-slider-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  background: #030712;
+  border: 3px solid var(--accent-neon);
+  border-radius: 50%;
+  color: var(--accent-neon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 0 20px rgba(0, 245, 212, 0.8);
+}
+
+.slider-label-badge {
+  position: absolute;
+  bottom: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  z-index: 4;
+  backdrop-filter: blur(8px);
+}
+
+.slider-label-left {
+  left: 12px;
+  background: rgba(3, 7, 18, 0.75);
+  color: var(--accent-neon);
+  border: 1px solid rgba(0, 245, 212, 0.4);
+}
+
+.slider-label-right {
+  right: 12px;
+  background: rgba(3, 7, 18, 0.75);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+/* 2. WEBCAM LIVE CAMERA OVERLAY & SCANNER MODAL */
+.webcam-container {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 360px;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+}
+
+.webcam-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.webcam-oval-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 280px;
+  border: 2px dashed var(--accent-neon);
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999px rgba(3, 7, 18, 0.55);
+  pointer-events: none;
+}
+
+.webcam-pulse-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-neon), transparent);
+  animation: webcamScan 2s linear infinite;
+}
+
+@keyframes webcamScan {
+  0% { top: 10%; opacity: 0; }
+  50% { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}
+
+/* 3. ISIC-25K MORPHOLOGY GAUGE BARS */
+.morphology-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.morphology-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(226, 232, 240, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.morphology-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.gauge-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gauge-fill-red { background: linear-gradient(90deg, #f43f5e, #ef4444); }
+.gauge-fill-brown { background: linear-gradient(90deg, #d97706, #b45309); }
+.gauge-fill-cyan { background: linear-gradient(90deg, #06b6d4, #0891b2); }
+.gauge-fill-emerald { background: linear-gradient(90deg, #10b981, #059669); }
+
+/* 4. DOCTOR APPOINTMENT BOOKING MODAL */
+.booking-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+
+.timeslot-btn {
+  padding: 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timeslot-btn:hover,
+.timeslot-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+/* PRINTABLE DIAGNOSTIC REPORT CARD */
+@media print {
+  body * { visibility: hidden; }
+  #printReportModal, #printReportModal * { visibility: visible; }
+  #printReportModal { position: absolute; left: 0; top: 0; width: 100%; }
+}
