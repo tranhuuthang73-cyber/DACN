@@ -405,137 +405,140 @@ const Plot3DDigitalTwin: React.FC<Plot3DDigitalTwinProps> = ({
   ) => {
     const fruitGroup = new THREE.Group();
 
-    // Curved Hanging Peduncle Stem (Hanging down from branch)
-    const stemCurve = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.015, 0.015, 0.22, 4),
-      materials.sharedStemMat
-    );
-    stemCurve.position.y = isRipe ? 0.2 : 0.12;
-    stemCurve.rotation.z = 0.15;
-    fruitGroup.add(stemCurve);
+    // Natural Curved Hanging Peduncle Stalk
+    const stalkGeo = new THREE.CylinderGeometry(0.018, 0.022, 0.28, 8);
+    const stalk = new THREE.Mesh(stalkGeo, materials.sharedStemMat);
+    stalk.position.y = isRipe ? 0.22 : 0.14;
+    stalk.rotation.z = 0.18;
+    fruitGroup.add(stalk);
 
-    if (cfg.fruitShape === 'CITRUS') {
-      // 🍊 Shiny round Citrus
-      const orange = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.22 : 0.13, 1),
+    if (cfg.fruitShape === 'DURIAN') {
+      // 🍈 HYPER-REALISTIC DURIAN RI6 (Oval with 36+ radial sharp thorns & calyx)
+      const durianBody = new THREE.Mesh(
+        new THREE.SphereGeometry(isRipe ? 0.28 : 0.16, 16, 16),
         materials.sharedFruitMat
       );
-      orange.scale.set(1, 0.95, 1);
+      durianBody.scale.set(0.92, 1.35, 0.92);
+      durianBody.castShadow = true;
+      fruitGroup.add(durianBody);
+
+      // Calyx Ring at the stem base
+      const calyxRing = new THREE.Mesh(
+        new THREE.TorusGeometry(0.06, 0.02, 6, 12),
+        materials.sharedStemMat
+      );
+      calyxRing.position.y = isRipe ? 0.32 : 0.18;
+      calyxRing.rotation.x = Math.PI / 2;
+      fruitGroup.add(calyxRing);
+
+      // Radial array of Sharp Pyramidal Thorns
+      const thornGeo = new THREE.ConeGeometry(0.028, 0.07, 4);
+      const thornRows = 5;
+      const thornsPerRow = 8;
+      for (let r = 0; r < thornRows; r++) {
+        const yOff = (r - (thornRows - 1) / 2) * (isRipe ? 0.11 : 0.06);
+        const radiusAtRow = (isRipe ? 0.25 : 0.14) * Math.cos((yOff / (isRipe ? 0.38 : 0.22)) * (Math.PI / 2.2));
+        for (let t = 0; t < thornsPerRow; t++) {
+          const angle = (t * Math.PI * 2) / thornsPerRow + (r % 2) * (Math.PI / thornsPerRow);
+          const thorn = new THREE.Mesh(thornGeo, materials.sharedFruitMat);
+          thorn.position.set(Math.cos(angle) * radiusAtRow, yOff, Math.sin(angle) * radiusAtRow);
+          thorn.lookAt(thorn.position.x * 2, thorn.position.y, thorn.position.z * 2);
+          thorn.rotateX(Math.PI / 2);
+          fruitGroup.add(thorn);
+        }
+      }
+
+    } else if (cfg.fruitShape === 'CITRUS') {
+      // 🍊 HYPER-REALISTIC CITRUS (Glossy sphere with star calyx & delicate stem leaf)
+      const orange = new THREE.Mesh(
+        new THREE.SphereGeometry(isRipe ? 0.23 : 0.14, 16, 16),
+        materials.sharedFruitMat
+      );
+      orange.scale.set(1.04, 0.96, 1.04);
+      orange.castShadow = true;
       fruitGroup.add(orange);
 
-      const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 3), materials.sharedLeafMat);
-      leaf.position.set(0.06, isRipe ? 0.18 : 0.1, 0);
+      // Star-shaped green calyx
+      const calyxStar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.01, 0.02, 5),
+        materials.sharedLeafMat
+      );
+      calyxStar.position.y = isRipe ? 0.21 : 0.13;
+      fruitGroup.add(calyxStar);
+
+      // Fresh green leaf on stalk
+      const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.16, 4), materials.sharedLeafMat);
+      leaf.position.set(0.07, isRipe ? 0.24 : 0.15, 0);
       leaf.rotation.z = Math.PI / 3;
+      leaf.scale.set(1, 1, 0.3);
       fruitGroup.add(leaf);
 
-    } else if (cfg.fruitShape === 'DURIAN') {
-      // 🍈 Spiky Oval Durian
-      const durian = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.27 : 0.15, 1),
-        materials.sharedFruitMat
-      );
-      durian.scale.set(1, 1.38, 1);
-      fruitGroup.add(durian);
-
-      const spikeGeo = new THREE.ConeGeometry(0.04, 0.08, 3);
-      for (let s = 0; s < 10; s++) {
-        const sp = new THREE.Mesh(spikeGeo, materials.sharedFruitMat);
-        const theta = (s * Math.PI * 2) / 10;
-        sp.position.set(Math.cos(theta) * 0.24, ((s % 3) - 1) * 0.1, Math.sin(theta) * 0.24);
-        sp.lookAt(sp.position.x * 2, sp.position.y, sp.position.z * 2);
-        sp.rotateX(Math.PI / 2);
-        fruitGroup.add(sp);
-      }
-
-    } else if (cfg.fruitShape === 'APPLE') {
-      // 🍎 Ruby Apple with Calyx
-      const apple = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.21 : 0.12, 1),
-        materials.sharedFruitMat
-      );
-      apple.scale.set(1.05, 0.95, 1.05);
-      fruitGroup.add(apple);
-
-      const calyx = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.05, 5), materials.sharedLeafMat);
-      calyx.position.y = isRipe ? 0.17 : 0.1;
-      calyx.rotation.x = Math.PI;
-      fruitGroup.add(calyx);
-
-    } else if (cfg.fruitShape === 'WATERMELON') {
-      // 🍉 Striped Watermelon
-      const melon = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.32 : 0.18, 1),
-        materials.sharedFruitMat
-      );
-      melon.scale.set(1.25, 1, 1);
-      fruitGroup.add(melon);
-
-    } else if (cfg.fruitShape === 'DRAGONFRUIT') {
-      // 🐉 Dragonfruit
-      const df = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.24 : 0.14, 1),
-        materials.sharedFruitMat
-      );
-      df.scale.set(0.85, 1.4, 0.85);
-      fruitGroup.add(df);
-
-      for (let sc = 0; sc < 6; sc++) {
-        const scAngle = (sc * Math.PI * 2) / 6;
-        const scale = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.1, 3), materials.sharedLeafMat);
-        scale.position.set(Math.cos(scAngle) * 0.16, ((sc % 3) - 1) * 0.1, Math.sin(scAngle) * 0.16);
-        scale.rotation.x = Math.sin(scAngle) * 0.5;
-        scale.rotation.z = -Math.cos(scAngle) * 0.5;
-        fruitGroup.add(scale);
-      }
-
-    } else if (cfg.fruitShape === 'GRAPE') {
-      // 🍇 Grape Bunch
-      for (let g = 0; g < 8; g++) {
-        const layer = Math.floor(g / 3);
-        const gAngle = (g * Math.PI * 2) / 3;
-        const grape = new THREE.Mesh(new THREE.DodecahedronGeometry(isRipe ? 0.07 : 0.04, 0), materials.sharedFruitMat);
-        grape.position.set(Math.cos(gAngle) * (0.1 - layer * 0.025), -layer * 0.08, Math.sin(gAngle) * (0.1 - layer * 0.025));
-        fruitGroup.add(grape);
-      }
-
-    } else if (cfg.fruitShape === 'BANANA') {
-      // 🍌 Curved Banana Bunch
-      const bananaGeo = new THREE.TorusGeometry(0.16, 0.035, 4, 6, Math.PI / 2.2);
-      for (let bn = 0; bn < 3; bn++) {
-        const bnAng = (bn * Math.PI) / 2 - Math.PI / 2;
-        const banana = new THREE.Mesh(bananaGeo, materials.sharedFruitMat);
-        banana.position.set(Math.cos(bnAng) * 0.12, (bn % 2) * 0.04, Math.sin(bnAng) * 0.12);
-        banana.rotation.z = Math.PI / 4;
-        banana.rotation.y = bnAng;
-        fruitGroup.add(banana);
+    } else if (cfg.fruitShape === 'COCONUT') {
+      // 🥥 HYPER-REALISTIC COCONUT BUNCH (Smooth fibrous oval clusters)
+      for (let c = 0; c < 3; c++) {
+        const cAngle = (c * Math.PI * 2) / 3;
+        const coconut = new THREE.Mesh(
+          new THREE.SphereGeometry(isRipe ? 0.22 : 0.13, 12, 12),
+          materials.sharedFruitMat
+        );
+        coconut.scale.set(0.9, 1.25, 0.9);
+        coconut.position.set(Math.cos(cAngle) * 0.14, -c * 0.04, Math.sin(cAngle) * 0.14);
+        coconut.castShadow = true;
+        fruitGroup.add(coconut);
       }
 
     } else if (cfg.fruitShape === 'MANGO') {
-      // 🥭 Mango
+      // 🥭 HYPER-REALISTIC GOLDEN MANGO (Teardrop curved fruit)
       const mango = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.22 : 0.12, 1),
+        new THREE.SphereGeometry(isRipe ? 0.24 : 0.13, 16, 16),
         materials.sharedFruitMat
       );
-      mango.scale.set(0.85, 1.4, 0.7);
-      mango.rotation.z = 0.25;
+      mango.scale.set(0.85, 1.45, 0.72);
+      mango.rotation.z = 0.22;
+      mango.castShadow = true;
       fruitGroup.add(mango);
 
-    } else if (cfg.fruitShape === 'AVOCADO') {
-      // 🥑 Avocado
-      const avo = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.22 : 0.12, 1),
+    } else if (cfg.fruitShape === 'DRAGONFRUIT') {
+      // 🐉 HYPER-REALISTIC DRAGONFRUIT (Oval with curving green leafy scales)
+      const df = new THREE.Mesh(
+        new THREE.SphereGeometry(isRipe ? 0.24 : 0.14, 14, 14),
         materials.sharedFruitMat
       );
-      avo.scale.set(0.9, 1.5, 0.9);
-      fruitGroup.add(avo);
+      df.scale.set(0.88, 1.42, 0.88);
+      df.castShadow = true;
+      fruitGroup.add(df);
+
+      for (let sc = 0; sc < 8; sc++) {
+        const scAngle = (sc * Math.PI * 2) / 8;
+        const scale = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 4), materials.sharedLeafMat);
+        scale.position.set(Math.cos(scAngle) * 0.18, ((sc % 3) - 1) * 0.1, Math.sin(scAngle) * 0.18);
+        scale.rotation.x = Math.sin(scAngle) * 0.6;
+        scale.rotation.z = -Math.cos(scAngle) * 0.6;
+        fruitGroup.add(scale);
+      }
+
+    } else if (cfg.fruitShape === 'BANANA') {
+      // 🍌 BANANA BUNCH
+      const bananaGeo = new THREE.TorusGeometry(0.18, 0.04, 6, 10, Math.PI / 2.2);
+      for (let bn = 0; bn < 4; bn++) {
+        const bnAng = (bn * Math.PI) / 2 - Math.PI / 2;
+        const banana = new THREE.Mesh(bananaGeo, materials.sharedFruitMat);
+        banana.position.set(Math.cos(bnAng) * 0.14, (bn % 2) * 0.05, Math.sin(bnAng) * 0.14);
+        banana.rotation.z = Math.PI / 4;
+        banana.rotation.y = bnAng;
+        banana.castShadow = true;
+        fruitGroup.add(banana);
+      }
 
     } else {
-      // 🥥 Berry / Coconut / Default
-      const ball = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(isRipe ? 0.22 : 0.12, 1),
+      // 🍎 Default / Apple / Grape / Watermelon
+      const fruit = new THREE.Mesh(
+        new THREE.SphereGeometry(isRipe ? 0.23 : 0.13, 16, 16),
         materials.sharedFruitMat
       );
-      fruitGroup.add(ball);
+      fruit.scale.set(1.05, 0.95, 1.05);
+      fruit.castShadow = true;
+      fruitGroup.add(fruit);
     }
 
     return fruitGroup;
@@ -563,123 +566,223 @@ const Plot3DDigitalTwin: React.FC<Plot3DDigitalTwinProps> = ({
     const treeGroup = new THREE.Group();
     treeGroup.scale.set(growthScale, growthScale, growthScale);
 
-    // 1. Raised Orchard Soil Bed / Mound (Mô Đất Vun Gốc & Rễ Cây)
-    const mound = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.15, 0.2, 8), materials.soilMoundMat);
-    mound.position.y = 0.1;
+    // -------------------------------------------------------------
+    // SPECIAL ARCHITECTURE FOR COCONUT PALM (DỪA BẾN TRE)
+    // -------------------------------------------------------------
+    if (cfg.fruitShape === 'COCONUT') {
+      // 1. Raised Mound
+      const mound = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 1.1, 0.25, 16), materials.soilMoundMat);
+      mound.position.y = 0.12;
+      mound.receiveShadow = true;
+      treeGroup.add(mound);
+
+      // 2. Curved Ringed Palm Trunk
+      const trunkSegments = 8;
+      let currentHeight = 0.2;
+      let currentRadius = 0.26;
+      for (let s = 0; s < trunkSegments; s++) {
+        const segHeight = 0.45;
+        const nextRadius = currentRadius * 0.94;
+        const seg = new THREE.Mesh(
+          new THREE.CylinderGeometry(nextRadius, currentRadius, segHeight, 12),
+          materials.trunkMat
+        );
+        const curveOffset = Math.sin((s / trunkSegments) * Math.PI * 0.8) * 0.22;
+        seg.position.set(curveOffset, currentHeight + segHeight / 2, 0);
+        seg.rotation.z = -0.06 * Math.sin((s / trunkSegments) * Math.PI);
+        seg.castShadow = true;
+        treeGroup.add(seg);
+
+        // Ring ring scar
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(currentRadius + 0.015, 0.012, 6, 12), materials.trunkMat);
+        ring.position.set(curveOffset, currentHeight + segHeight, 0);
+        ring.rotation.x = Math.PI / 2;
+        treeGroup.add(ring);
+
+        currentHeight += segHeight;
+        currentRadius = nextRadius;
+      }
+
+      // 3. Arching Palm Fronds (8 Large Feathery Canopy Leaves)
+      const frondCount = 8;
+      for (let f = 0; f < frondCount; f++) {
+        const fAngle = (f * Math.PI * 2) / frondCount;
+        const frondGroup = new THREE.Group();
+        frondGroup.position.set(0.15, currentHeight, 0);
+
+        // Arching Rib
+        const rib = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.05, 2.2, 8), materials.foliageDarkMat);
+        rib.position.set(Math.cos(fAngle) * 0.9, 0.2, Math.sin(fAngle) * 0.9);
+        rib.rotation.z = -Math.cos(fAngle) * 0.95;
+        rib.rotation.x = Math.sin(fAngle) * 0.95;
+        frondGroup.add(rib);
+
+        // Palm Leaf Tufts along the rib
+        for (let l = 0; l < 4; l++) {
+          const lDist = 0.5 + l * 0.35;
+          const leaflet = new THREE.Mesh(
+            new THREE.ConeGeometry(0.22, 0.7, 4),
+            l % 2 === 0 ? materials.foliageLightMat : materials.foliageMidMat
+          );
+          leaflet.scale.set(0.25, 1, 0.7);
+          leaflet.position.set(Math.cos(fAngle) * lDist, 0.3 - l * 0.12, Math.sin(fAngle) * lDist);
+          leaflet.rotation.y = fAngle;
+          leaflet.rotation.z = -Math.cos(fAngle) * (1.1 + l * 0.1);
+          leaflet.rotation.x = Math.sin(fAngle) * (1.1 + l * 0.1);
+          frondGroup.add(leaflet);
+        }
+
+        treeGroup.add(frondGroup);
+      }
+
+      // 4. Clusters of Coconuts at Palm Crown
+      if (hasFruits) {
+        const coconutCluster = createBotanicalFruitMesh(cfg, isRipe, {
+          sharedFruitMat: materials.sharedFruitMat,
+          sharedStemMat: materials.sharedStemMat,
+          sharedLeafMat: materials.sharedLeafMat
+        });
+        coconutCluster.position.set(0.12, currentHeight - 0.2, 0.05);
+        treeGroup.add(coconutCluster);
+      }
+
+      return treeGroup;
+    }
+
+    // -------------------------------------------------------------
+    // HYPER-REALISTIC BROADLEAF FRUIT TREE (SẦU RIÊNG, CAM, BƯỞI, XOÀI...)
+    // -------------------------------------------------------------
+
+    // 1. Organic Raised Garden Bed Mound
+    const mound = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.25, 0.22, 16), materials.soilMoundMat);
+    mound.position.y = 0.11;
+    mound.receiveShadow = true;
     treeGroup.add(mound);
 
-    // Gnarled Exposed Roots (3 Organic Curving Roots)
-    for (let r = 0; r < 3; r++) {
-      const rAng = (r * Math.PI * 2) / 3;
-      const root = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.75, 4), materials.trunkMat);
-      root.position.set(Math.cos(rAng) * 0.35, 0.2, Math.sin(rAng) * 0.35);
-      root.rotation.x = Math.sin(rAng) * 0.45;
-      root.rotation.z = -Math.cos(rAng) * 0.45;
+    // 4 Organic Curving Buttress Roots firmly gripping soil
+    for (let r = 0; r < 4; r++) {
+      const rAng = (r * Math.PI * 2) / 4 + Math.PI / 8;
+      const root = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.85, 8), materials.trunkMat);
+      root.position.set(Math.cos(rAng) * 0.38, 0.22, Math.sin(rAng) * 0.38);
+      root.rotation.x = Math.sin(rAng) * 0.52;
+      root.rotation.z = -Math.cos(rAng) * 0.52;
+      root.castShadow = true;
       treeGroup.add(root);
     }
 
-    // 2. Sculpted Organic Tapered Trunk (3 Connected Segments for Natural Curvature)
-    const baseTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, 1.2, 6), materials.trunkMat);
-    baseTrunk.position.y = 0.7;
-    baseTrunk.rotation.z = 0.06;
-    treeGroup.add(baseTrunk);
+    // 2. Multi-Tier Organic Tapering Trunk with Natural Bark Grain
+    const trunkBase = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.36, 1.1, 14), materials.trunkMat);
+    trunkBase.position.y = 0.65;
+    trunkBase.rotation.z = 0.04;
+    trunkBase.castShadow = true;
+    treeGroup.add(trunkBase);
 
-    const midTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 1.1, 6), materials.trunkMat);
-    midTrunk.position.set(0.04, 1.65, 0);
-    midTrunk.rotation.z = -0.05;
-    treeGroup.add(midTrunk);
+    const trunkMid = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.24, 1.0, 12), materials.trunkMat);
+    trunkMid.position.set(0.04, 1.6, 0.02);
+    trunkMid.rotation.z = -0.06;
+    trunkMid.castShadow = true;
+    treeGroup.add(trunkMid);
 
-    // 3. Spreading Outstretched Limbs / Branches (4 Major Limbs)
-    const limbConfigs = [
-      { angle: 0.4, y: 1.8, length: 1.5, pitch: 0.65 },
-      { angle: 1.9, y: 1.95, length: 1.4, pitch: 0.6 },
-      { angle: 3.5, y: 2.1, length: 1.6, pitch: 0.7 },
-      { angle: 4.9, y: 2.2, length: 1.35, pitch: 0.55 }
+    // 3. Spreading Natural Scaffolding Boughs (5 Primary Structural Branches)
+    const boughConfigs = [
+      { angle: 0.3, y: 1.85, length: 1.45, pitch: 0.68, size: 0.12 },
+      { angle: 1.6, y: 1.95, length: 1.55, pitch: 0.62, size: 0.11 },
+      { angle: 2.9, y: 2.1, length: 1.4, pitch: 0.72, size: 0.12 },
+      { angle: 4.2, y: 2.0, length: 1.6, pitch: 0.65, size: 0.13 },
+      { angle: 5.4, y: 2.2, length: 1.35, pitch: 0.58, size: 0.10 }
     ];
 
-    limbConfigs.forEach((l) => {
-      const limb = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, l.length, 5), materials.trunkMat);
-      const lx = Math.cos(l.angle) * 0.55;
-      const lz = Math.sin(l.angle) * 0.55;
-      limb.position.set(lx, l.y, lz);
-      limb.rotation.z = -Math.cos(l.angle) * l.pitch;
-      limb.rotation.x = Math.sin(l.angle) * l.pitch;
-      treeGroup.add(limb);
+    boughConfigs.forEach((b) => {
+      const bough = new THREE.Mesh(new THREE.CylinderGeometry(0.06, b.size, b.length, 8), materials.trunkMat);
+      const bx = Math.cos(b.angle) * 0.52;
+      const bz = Math.sin(b.angle) * 0.52;
+      bough.position.set(bx, b.y, bz);
+      bough.rotation.z = -Math.cos(b.angle) * b.pitch;
+      bough.rotation.x = Math.sin(b.angle) * b.pitch;
+      bough.castShadow = true;
+      treeGroup.add(bough);
     });
 
-    // 4. Stylized Puffed Foliage Clouds (7 Stratified Geometric Canopies)
-    // Uses Flat-shaded Dodecahedrons/Icosahedrons for Gorgeous Ghibli/Low-Poly Foliage
-    const canopyPuffs = [
-      // Apex Crown (Bright Sunlit Green)
-      { x: 0.05, y: 3.3, z: 0.0, r: 1.45, mat: materials.foliageLightMat },
-      // Mid Canopy Clusters
-      { x: 1.15, y: 2.65, z: 0.45, r: 1.15, mat: materials.foliageMidMat },
-      { x: -1.05, y: 2.75, z: -0.4, r: 1.1, mat: materials.foliageMidMat },
-      { x: 0.35, y: 2.9, z: -1.1, r: 1.05, mat: materials.foliageLightMat },
-      { x: -0.45, y: 2.55, z: 1.05, r: 1.0, mat: materials.foliageMidMat },
-      // Underside Shadow Tufts (Deep Forest Green)
-      { x: 0.7, y: 2.15, z: -0.5, r: 0.85, mat: materials.foliageDarkMat },
-      { x: -0.6, y: 2.1, z: 0.6, r: 0.8, mat: materials.foliageDarkMat }
+    // 4. Hyper-Lush Stratified Canopy Clouds (9 Smooth-Shaded Organic Foliage Clumps)
+    // Uses Smooth Icosahedron Spheres with multi-layer canopy depth & sun-kissed highlight tips
+    const canopyClumps = [
+      // Top Crown (Bright vibrant growth tips)
+      { x: 0.05, y: 3.4, z: 0.02, rx: 1.35, ry: 1.1, rz: 1.35, mat: materials.foliageLightMat },
+      { x: -0.2, y: 3.65, z: 0.15, rx: 0.9, ry: 0.85, rz: 0.9, mat: materials.foliageLightMat },
+      // Mid Canopy Major Layers
+      { x: 1.15, y: 2.65, z: 0.45, rx: 1.25, ry: 1.0, rz: 1.2, mat: materials.foliageMidMat },
+      { x: -1.1, y: 2.7, z: -0.35, rx: 1.2, ry: 0.95, rz: 1.15, mat: materials.foliageMidMat },
+      { x: 0.35, y: 2.85, z: -1.15, rx: 1.15, ry: 0.95, rz: 1.15, mat: materials.foliageMidMat },
+      { x: -0.45, y: 2.5, z: 1.1, rx: 1.1, ry: 0.9, rz: 1.05, mat: materials.foliageMidMat },
+      // Underside Deep Chlorophyll Shaded Tufts
+      { x: 0.75, y: 2.05, z: -0.55, rx: 0.95, ry: 0.75, rz: 0.9, mat: materials.foliageDarkMat },
+      { x: -0.65, y: 2.0, z: 0.6, rx: 0.9, ry: 0.7, rz: 0.85, mat: materials.foliageDarkMat },
+      { x: 0.1, y: 2.2, z: 0.8, rx: 0.85, ry: 0.7, rz: 0.8, mat: materials.foliageDarkMat }
     ];
 
-    canopyPuffs.forEach((p) => {
-      const puff = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(p.r, 1),
-        p.mat
+    canopyClumps.forEach((c) => {
+      const clump = new THREE.Mesh(
+        new THREE.SphereGeometry(1.0, 16, 16),
+        c.mat
       );
-      puff.position.set(p.x, p.y, p.z);
-      puff.scale.set(1.2, 0.88, 1.15);
-      treeGroup.add(puff);
+      clump.position.set(c.x, c.y, c.z);
+      clump.scale.set(c.rx, c.ry, c.rz);
+      clump.castShadow = true;
+      clump.receiveShadow = true;
+      treeGroup.add(clump);
     });
 
-    // 5. White & Yellow Blossom Flowers
+    // 5. Delicate 5-Petal Spring Blossoms (White & Golden Anther)
     if (hasFlowers && !isRipe) {
-      for (let fl = 0; fl < 5; fl++) {
-        const flAngle = (fl * Math.PI * 2) / 5;
-        const flMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.1, 0), materials.flowerMat);
-        flMesh.position.set(Math.cos(flAngle) * 1.2, 2.1 + (fl % 2) * 0.3, Math.sin(flAngle) * 1.2);
+      for (let fl = 0; fl < 8; fl++) {
+        const flAngle = (fl * Math.PI * 2) / 8;
+        const flMesh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), materials.flowerMat);
+        flMesh.position.set(Math.cos(flAngle) * 1.35, 2.1 + (fl % 3) * 0.35, Math.sin(flAngle) * 1.35);
         treeGroup.add(flMesh);
       }
     }
 
-    // 6. Dangling Heavy Fruits (Hanging naturally beneath foliage)
+    // 6. Bountiful Ripe Fruits Hanging Underneath Foliage
     if (hasFruits) {
-      const fruitCount = isRipe ? 5 : 3;
-      const fruitPositions = [
-        { x: 0.95, y: 1.85, z: 0.45 },
-        { x: -0.85, y: 1.9, z: -0.35 },
-        { x: 0.25, y: 2.05, z: -0.9 },
-        { x: -0.4, y: 1.8, z: 0.85 },
-        { x: 0.6, y: 1.75, z: -0.6 }
+      const fruitCount = isRipe ? 7 : 4;
+      const fruitSpots = [
+        { x: 0.95, y: 1.75, z: 0.45 },
+        { x: -0.85, y: 1.8, z: -0.35 },
+        { x: 0.25, y: 1.95, z: -0.9 },
+        { x: -0.45, y: 1.7, z: 0.85 },
+        { x: 0.65, y: 1.65, z: -0.65 },
+        { x: -0.3, y: 1.95, z: -0.7 },
+        { x: 0.4, y: 1.85, z: 0.75 }
       ];
 
       for (let f = 0; f < fruitCount; f++) {
-        const fPos = fruitPositions[f % fruitPositions.length];
+        const spot = fruitSpots[f % fruitSpots.length];
         const fruitMesh = createBotanicalFruitMesh(cfg, isRipe, {
           sharedFruitMat: materials.sharedFruitMat,
           sharedStemMat: materials.sharedStemMat,
           sharedLeafMat: materials.sharedLeafMat
         });
-        fruitMesh.position.set(fPos.x, fPos.y, fPos.z);
+        fruitMesh.position.set(spot.x, spot.y, spot.z);
         treeGroup.add(fruitMesh);
       }
 
-      // Wooden Harvest Crate Full of Ripe Fruit on the Soil Mound
+      // Wooden Harvest Crate Full of Ripe Fresh Fruit on the Ground
       if (isRipe && growthScale > 0.8) {
-        const crate = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.32, 0.45), materials.crateMat);
-        crate.position.set(0.65, 0.22, 0.65);
-        crate.rotation.y = Math.PI / 5;
+        const crate = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.34, 0.48), materials.crateMat);
+        crate.position.set(0.72, 0.22, 0.72);
+        crate.rotation.y = Math.PI / 4.5;
+        crate.castShadow = true;
         treeGroup.add(crate);
 
-        // 3 Ripe Picked Fruits inside crate
+        // 3 Freshly Harvested Ripe Fruits inside crate
         for (let cf = 0; cf < 3; cf++) {
           const cFruit = createBotanicalFruitMesh(cfg, true, {
             sharedFruitMat: materials.sharedFruitMat,
             sharedStemMat: materials.sharedStemMat,
             sharedLeafMat: materials.sharedLeafMat
           });
-          cFruit.scale.set(0.65, 0.65, 0.65);
-          cFruit.position.set(0.55 + cf * 0.12, 0.42, 0.65);
+          cFruit.scale.set(0.7, 0.7, 0.7);
+          cFruit.position.set(0.6 + cf * 0.12, 0.45, 0.72);
           treeGroup.add(cFruit);
         }
       }

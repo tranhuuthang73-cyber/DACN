@@ -44,7 +44,7 @@ export const getSeasons = async (req: AuthRequest, res: Response) => {
 export const updateSeason = async (req: AuthRequest, res: Response) => {
   try {
     const seasonId = Number(req.params.id);
-    const { actual_yield, actual_harvest_date, quality, status } = req.body;
+    const { actual_yield, actual_harvest_date, quality, status, unit_price_vnd, revenue_vnd } = req.body;
 
     const season = await prisma.season.findUnique({ where: { id: seasonId }, include: { plot: true } });
     if (!season) return res.status(404).json({ error: 'Season not found' });
@@ -56,7 +56,9 @@ export const updateSeason = async (req: AuthRequest, res: Response) => {
         actual_yield,
         actual_harvest_date: actual_harvest_date ? new Date(actual_harvest_date) : undefined,
         quality,
-        status: status || (actual_yield ? 'HARVESTED' : undefined)
+        status: status || (actual_yield ? 'HARVESTED' : undefined),
+        unit_price_vnd: unit_price_vnd !== undefined ? Number(unit_price_vnd) : undefined,
+        revenue_vnd: revenue_vnd !== undefined ? Number(revenue_vnd) : (actual_yield && unit_price_vnd ? Number(actual_yield) * Number(unit_price_vnd) : undefined)
       }
     });
 

@@ -30,6 +30,8 @@ import AIRealTimeCropTracker from '../components/AIRealTimeCropTracker';
 import CropPhysiologyVPDStudio from '../components/CropPhysiologyVPDStudio';
 import ZaloAgriBotModal from '../components/ZaloAgriBotModal';
 import PlotCreationLocationAdvisorModal from '../components/PlotCreationLocationAdvisorModal';
+import HarvestSettlementModal from '../components/HarvestSettlementModal';
+import { BanknotesIcon } from '@heroicons/react/24/outline';
 
 interface DashboardProps {
   plots: any[];
@@ -51,6 +53,7 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
   const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isTelegramBotOpen, setIsTelegramBotOpen] = useState(false);
+  const [isHarvestModalOpen, setIsHarvestModalOpen] = useState(false);
 
   // Forms state
   const [showPlotForm, setShowPlotForm] = useState(false);
@@ -283,6 +286,19 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
                   </div>
                   <span>Trợ Lý Zalo OA</span>
                 </button>
+
+                {/* Harvest & Financial Settlement */}
+                {activeSeason && (
+                  <button
+                    type="button"
+                    onClick={() => setIsHarvestModalOpen(true)}
+                    className="px-3.5 py-3 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-stone-950 font-black rounded-2xl shadow-lg text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 min-h-[48px] border border-amber-300/60 animate-pulse"
+                    title="Quyết toán thu hoạch vụ mùa, tính doanh thu trừ đi chi phí gốc ra tiền lãi ròng"
+                  >
+                    <BanknotesIcon className="w-5 h-5 text-stone-950" />
+                    <span>Thu Hoạch & Tính Lãi</span>
+                  </button>
+                )}
 
                 {activeSeason && (
                   <button
@@ -648,6 +664,21 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
           seasonId={activeSeason?.id}
           plotName={selectedPlot?.name}
           cropType={activeSeason?.crop_type}
+        />
+
+        {/* Harvest & Financial Settlement Modal */}
+        <HarvestSettlementModal
+          isOpen={isHarvestModalOpen}
+          onClose={() => setIsHarvestModalOpen(false)}
+          plot={selectedPlot}
+          season={activeSeason}
+          logs={logs}
+          onHarvestCompleted={() => {
+            if (selectedPlot) {
+              handleSelectPlot(selectedPlot);
+              onRefreshPlots();
+            }
+          }}
         />
       </section>
     </div>
