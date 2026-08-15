@@ -6,6 +6,10 @@ import plotRoutes from './routes/plots';
 import seasonRoutes from './routes/seasons';
 import logRoutes from './routes/logs';
 import aiRoutes from './routes/ai';
+import adminRoutes from './routes/admin';
+import financialsRoutes from './routes/financials';
+import iotRoutes from './routes/iot';
+import expertRoutes from './routes/expert';
 
 dotenv.config();
 
@@ -21,6 +25,11 @@ app.use('/api/plots', plotRoutes);
 app.use('/api/seasons', seasonRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/financials', financialsRoutes);
+app.use('/api/iot', iotRoutes);
+app.use('/api/expert', expertRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });

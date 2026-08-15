@@ -10,6 +10,11 @@ export const createLog = async (req: AuthRequest, res: Response) => {
     if (!season) return res.status(404).json({ error: 'Season not found' });
     if (req.user!.role !== 'ADMIN' && season.plot.user_id !== req.user!.id) return res.status(403).json({ error: 'Forbidden' });
 
+    let costVnd = 0;
+    if (type === 'WATER') costVnd = amount * 10;
+    else if (type === 'FERTILIZER') costVnd = amount * 25000;
+    else costVnd = (amount || 1) * 50000;
+
     const log = await prisma.farmingLog.create({
       data: {
         season_id,
@@ -19,6 +24,7 @@ export const createLog = async (req: AuthRequest, res: Response) => {
         unit,
         method,
         note,
+        cost_vnd: costVnd,
         logged_at: logged_at ? new Date(logged_at) : undefined
       }
     });

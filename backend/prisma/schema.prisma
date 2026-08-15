@@ -3,41 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  FARMER
-  ADMIN
-}
-
-enum SeasonStatus {
-  PLANNING
-  GROWING
-  HARVESTED
-}
-
-enum LogType {
-  WATER
-  FERTILIZER
-  OTHER
-}
-
-enum RecommendationType {
-  WATER
-  FERTILIZER
-}
-
-enum FeedbackAction {
-  ACCEPTED
-  REJECTED
-  MODIFIED
-}
-
-enum ModelUpdateTrigger {
-  ON_FEEDBACK
-  ON_HARVEST
 }
 
 model User {
@@ -46,7 +13,7 @@ model User {
   phone         String?
   email         String   @unique
   password_hash String
-  role          Role     @default(FARMER)
+  role          String   @default("FARMER")
   created_at    DateTime @default(now())
 
   plots         Plot[]
@@ -64,7 +31,7 @@ model Plot {
   longitude  Float?
   created_at DateTime @default(now())
 
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   seasons    Season[]
   logs       FarmingLog[]
   recommendations Recommendation[]
@@ -82,10 +49,13 @@ model Season {
   target_yield          Float?
   actual_yield          Float?
   actual_harvest_date   DateTime?
-  status                SeasonStatus @default(PLANNING)
+  quality               String?      // A | B | C
+  status                String       @default("PLANNING")
+  unit_price_vnd        Float        @default(0)
+  revenue_vnd           Float        @default(0)
   created_at            DateTime     @default(now())
 
-  plot                  Plot         @relation(fields: [plot_id], references: [id])
+  plot                  Plot         @relation(fields: [plot_id], references: [id], onDelete: Cascade)
   logs                  FarmingLog[]
   recommendations       Recommendation[]
 
@@ -96,16 +66,17 @@ model FarmingLog {
   id         Int      @id @default(autoincrement())
   season_id  Int
   plot_id    Int
-  type       LogType
+  type       String   // WATER | FERTILIZER | OTHER
   amount     Float
   unit       String
   method     String?
   note       String?
+  cost_vnd   Float    @default(0)
   logged_at  DateTime @default(now())
   created_at DateTime @default(now())
 
-  season     Season   @relation(fields: [season_id], references: [id])
-  plot       Plot     @relation(fields: [plot_id], references: [id])
+  season     Season   @relation(fields: [season_id], references: [id], onDelete: Cascade)
+  plot       Plot     @relation(fields: [plot_id], references: [id], onDelete: Cascade)
 
   @@map("farming_logs")
 }
@@ -114,15 +85,16 @@ model Recommendation {
   id               Int                @id @default(autoincrement())
   season_id        Int
   plot_id          Int
-  type             RecommendationType
+  type             String             // WATER | FERTILIZER
   suggested_amount Float
   suggested_time   DateTime?
   confidence_score Float?
+  reason           String?            // Explainable AI reason (SRS Section 6)
   model_version    Int
   created_at       DateTime           @default(now())
 
-  season           Season             @relation(fields: [season_id], references: [id])
-  plot             Plot               @relation(fields: [plot_id], references: [id])
+  season           Season             @relation(fields: [season_id], references: [id], onDelete: Cascade)
+  plot             Plot               @relation(fields: [plot_id], references: [id], onDelete: Cascade)
   feedbacks        RecommendationFeedback[]
 
   @@map("recommendations")
@@ -131,11 +103,11 @@ model Recommendation {
 model RecommendationFeedback {
   id                Int            @id @default(autoincrement())
   recommendation_id Int
-  action            FeedbackAction
+  action            String         // ACCEPTED | REJECTED | MODIFIED
   actual_value      Float?
   responded_at      DateTime       @default(now())
 
-  recommendation    Recommendation @relation(fields: [recommendation_id], references: [id])
+  recommendation    Recommendation @relation(fields: [recommendation_id], references: [id], onDelete: Cascade)
 
   @@map("recommendation_feedback")
 }
@@ -144,10 +116,10 @@ model ModelUpdate {
   id            Int                @id @default(autoincrement())
   plot_id       Int
   model_version Int
-  trigger       ModelUpdateTrigger
+  trigger       String             // ON_FEEDBACK | ON_HARVEST
   updated_at    DateTime           @default(now())
 
-  plot          Plot               @relation(fields: [plot_id], references: [id])
+  plot          Plot               @relation(fields: [plot_id], references: [id], onDelete: Cascade)
 
   @@map("model_updates")
 }
