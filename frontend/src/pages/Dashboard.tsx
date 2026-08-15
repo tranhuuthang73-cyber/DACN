@@ -28,6 +28,7 @@ import NotificationCenterDrawer from '../components/NotificationCenterDrawer';
 import VietGAPDossierModal from '../components/VietGAPDossierModal';
 import AIRealTimeCropTracker from '../components/AIRealTimeCropTracker';
 import CropPhysiologyVPDStudio from '../components/CropPhysiologyVPDStudio';
+import ZaloAgriBotModal from '../components/ZaloAgriBotModal';
 
 interface DashboardProps {
   plots: any[];
@@ -48,6 +49,7 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
   const [isVoiceCopilotOpen, setIsVoiceCopilotOpen] = useState(false);
   const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+  const [isTelegramBotOpen, setIsTelegramBotOpen] = useState(false);
 
   // Forms state
   const [showPlotForm, setShowPlotForm] = useState(false);
@@ -287,6 +289,19 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
                 >
                   <DocumentTextIcon className="w-5 h-5 text-emerald-400" />
                   <span>Hồ Sơ VietGAP PDF</span>
+                </button>
+
+                {/* Zalo OA Official Bot Assistant */}
+                <button
+                  type="button"
+                  onClick={() => setIsTelegramBotOpen(true)}
+                  className="px-3.5 py-3 bg-gradient-to-r from-[#0068FF] to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-black rounded-2xl shadow-md text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 min-h-[48px] border border-blue-400/40"
+                  title="Mở Trợ lý Zalo OA điều khiển vườn và nhận bản tin Zalo ZNS sáng tự động"
+                >
+                  <div className="w-5 h-5 bg-white rounded-md flex items-center justify-center p-0.5">
+                    <span className="text-[#0068FF] font-black text-[10px] leading-none">Zalo</span>
+                  </div>
+                  <span>Trợ Lý Zalo OA</span>
                 </button>
 
                 {activeSeason && (
@@ -704,6 +719,16 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
           plot={selectedPlot}
           season={activeSeason}
           logs={logs}
+        />
+
+        {/* Zalo Official Account Assistant Modal */}
+        <ZaloAgriBotModal
+          isOpen={isTelegramBotOpen}
+          onClose={() => setIsTelegramBotOpen(false)}
+          plotId={selectedPlot?.id}
+          seasonId={activeSeason?.id}
+          plotName={selectedPlot?.name}
+          cropType={activeSeason?.crop_type}
         />
       </section>
     </div>

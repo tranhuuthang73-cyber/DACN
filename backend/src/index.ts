@@ -12,6 +12,8 @@ import iotRoutes from './routes/iot';
 import expertRoutes from './routes/expert';
 import cropTrackerRoutes from './routes/cropTracker';
 import cropPhysicsRoutes from './routes/cropPhysics';
+import telegramBotRoutes from './routes/telegramBot';
+import zaloBotRoutes from './routes/zaloBot';
 
 dotenv.config();
 
@@ -33,6 +35,8 @@ app.use('/api/iot', iotRoutes);
 app.use('/api/expert', expertRoutes);
 app.use('/api/crop-tracker', cropTrackerRoutes);
 app.use('/api/crop-physics', cropPhysicsRoutes);
+app.use('/api/telegram-bot', telegramBotRoutes);
+app.use('/api/zalo-bot', zaloBotRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
