@@ -11,9 +11,9 @@ export const getCropFarmingMemory = async (req: Request, res: Response): Promise
       where: { id: parseInt(plotId) },
       include: {
         seasons: {
-          where: { is_active: true },
+          orderBy: { created_at: 'desc' },
           include: {
-            farming_logs: true,
+            logs: true,
             recommendations: {
               include: { feedbacks: true }
             }
@@ -29,7 +29,7 @@ export const getCropFarmingMemory = async (req: Request, res: Response): Promise
     }
 
     const activeSeason = plot.seasons[0];
-    const logs = activeSeason?.farming_logs || [];
+    const logs = activeSeason?.logs || [];
     const waterLogs = logs.filter((l) => l.type === 'WATER');
     const fertLogs = logs.filter((l) => l.type === 'FERTILIZER');
 
@@ -114,7 +114,7 @@ export const getCropGrowthTracker = async (req: Request, res: Response): Promise
       where: { id: parseInt(seasonId) },
       include: {
         plot: true,
-        farming_logs: true
+        logs: true
       }
     });
 

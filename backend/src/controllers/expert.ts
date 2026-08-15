@@ -12,8 +12,8 @@ export const getNutrientOptimization = async (req: Request, res: Response): Prom
       where: { id: parseInt(plotId) },
       include: {
         seasons: {
-          where: { is_active: true },
-          include: { farming_logs: true }
+          orderBy: { created_at: 'desc' },
+          include: { logs: true }
         }
       }
     });
@@ -27,7 +27,7 @@ export const getNutrientOptimization = async (req: Request, res: Response): Prom
     const cropType = activeSeason?.crop_type || 'Cây ăn trái';
     const areaM2 = plot.area_m2;
 
-    const fertilizerLogs = activeSeason?.farming_logs.filter((l) => l.type === 'FERTILIZER') || [];
+    const fertilizerLogs = activeSeason?.logs.filter((l) => l.type === 'FERTILIZER') || [];
     const totalAppliedKg = fertilizerLogs.reduce((sum, l) => sum + l.amount, 0);
 
     const isFruitTree =
@@ -253,16 +253,22 @@ export const processVoiceCommand = async (req: Request, res: Response): Promise<
 
     let createdLog = null;
     if (seasonId) {
-      createdLog = await prisma.farmingLog.create({
-        data: {
-          season_id: parseInt(seasonId),
-          type: logType,
-          amount: amount,
-          unit: unit,
-          method: text.includes('phun sương') ? 'Phun sương' : text.includes('gốc') ? 'Bón gốc' : 'Tự động qua giọng nói AI',
-          note: `🎙️ Ghi nhận qua Giọng nói AI: "${transcript}"`
-        }
+      const season = await prisma.season.findUnique({
+        where: { id: parseInt(seasonId) }
       });
+      if (season) {
+        createdLog = await prisma.farmingLog.create({
+          data: {
+            season_id: season.id,
+            plot_id: season.plot_id,
+            type: logType,
+            amount: amount,
+            unit: unit,
+            method: text.includes('phun sương') ? 'Phun sương' : text.includes('gốc') ? 'Bón gốc' : 'Tự động qua giọng nói AI',
+            note: `🎙️ Ghi nhận qua Giọng nói AI: "${transcript}"`
+          }
+        });
+      }
     }
 
     const aiVoiceResponse =

@@ -10,7 +10,7 @@ export const getVPDMetrics = async (req: Request, res: Response): Promise<void> 
     const { plotId } = req.params;
     const plot = await prisma.plot.findUnique({
       where: { id: parseInt(plotId) },
-      include: { seasons: { where: { is_active: true } } }
+      include: { seasons: { orderBy: { created_at: 'desc' } } }
     });
 
     if (!plot) {
@@ -112,7 +112,7 @@ export const getFAO56Evapotranspiration = async (req: Request, res: Response): P
     const { plotId } = req.params;
     const plot = await prisma.plot.findUnique({
       where: { id: parseInt(plotId) },
-      include: { seasons: { where: { is_active: true } } }
+      include: { seasons: { orderBy: { created_at: 'desc' } } }
     });
 
     if (!plot) {
@@ -206,7 +206,7 @@ export const getParetoOptimizationScenarios = async (req: Request, res: Response
     const { plotId } = req.params;
     const plot = await prisma.plot.findUnique({
       where: { id: parseInt(plotId) },
-      include: { seasons: { where: { is_active: true } } }
+      include: { seasons: { orderBy: { created_at: 'desc' } } }
     });
 
     if (!plot) {
