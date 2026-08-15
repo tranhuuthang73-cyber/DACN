@@ -26,6 +26,7 @@ import VoiceAICopilotModal from '../components/VoiceAICopilotModal';
 import AgronomyExpertOptimizer from '../components/AgronomyExpertOptimizer';
 import NotificationCenterDrawer from '../components/NotificationCenterDrawer';
 import VietGAPDossierModal from '../components/VietGAPDossierModal';
+import AIRealTimeCropTracker from '../components/AIRealTimeCropTracker';
 
 interface DashboardProps {
   plots: any[];
@@ -320,6 +321,14 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
               plotName={selectedPlot.name}
               cropType={activeSeason?.crop_type || 'Sầu riêng'}
               areaM2={selectedPlot.area_m2}
+            />
+
+            {/* AI Crop Memory & Real-Time Growth Phenology Tracker */}
+            <AIRealTimeCropTracker
+              plotId={selectedPlot.id}
+              seasonId={activeSeason?.id}
+              plotName={selectedPlot.name}
+              cropType={activeSeason?.crop_type || 'Sầu riêng Ri6'}
             />
 
             {/* 7-Day Rain Radar & Agronomic Weather Advisory */}

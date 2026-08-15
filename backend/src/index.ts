@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin';
 import financialsRoutes from './routes/financials';
 import iotRoutes from './routes/iot';
 import expertRoutes from './routes/expert';
+import cropTrackerRoutes from './routes/cropTracker';
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/financials', financialsRoutes);
 app.use('/api/iot', iotRoutes);
 app.use('/api/expert', expertRoutes);
-
+app.use('/api/crop-tracker', cropTrackerRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
