@@ -1,51 +1,84 @@
-# Smart Farm Management System
+# 🌾 SMART FARM 4.0 - HỆ SINH THÁI NÔNG NGHIỆP CÔNG NGHỆ CAO TỰ ĐỘNG HÓA
 
-Hệ thống quản lý nông trại thông minh giúp nông dân ghi chép nhật ký canh tác (tưới nước, bón phân), quản lý mùa vụ và nhận các gợi ý từ AI dựa trên dữ liệu thực tế.
+> **Nền tảng Quản Lý Nông Trại Thông Minh Toàn Diện:** Tích hợp Mô Hình Số 3D Digital Twin Ghibli 60 FPS, Viễn Thám Quang Phổ NDVI Vệ Tinh, AI SGD Học Máy Thích Ứng, Trợ Lý Nông Nghiệp Giọng Nói Tiếng Việt & Hồ Sơ Pháp Lý Chuẩn VietGAP.
 
-## Yêu cầu
-- Node.js (v18+)
-- PostgreSQL đang chạy ở port 5432.
+---
 
-## Cài đặt cơ sở dữ liệu
-1. Mở file `backend/.env` và cập nhật `DATABASE_URL` theo cấu hình PostgreSQL của bạn.
-   Mặc định là: `postgresql://postgres:postgres@localhost:5432/manage_farm?schema=public`
-2. Tạo database `manage_farm` trong PostgreSQL.
-3. Chạy lệnh sau để migrate cấu trúc database:
-   ```bash
-   cd backend
-   npx prisma db push
-   ```
+## 🌟 TÍNH NĂNG ĐỘT PHÁ "ĐỈNH CHÓP"
 
-## Chạy dự án
+### 1. 🌿 Mô Hình Số 3D Digital Twin Vườn Cây Ghibli (Three.js WebGL)
+- **Chuẩn 60+ FPS Turbo Engine:** Tối ưu hóa GPU draw calls, hiển thị mượt mà trên mọi thiết bị máy tính và điện thoại.
+- **Phong cách Ghibli Botanical Art:** Thổ nhưỡng ụ đất nâng cao, rễ ngoằn ngoèo, thân cây uốn khúc 3 đoạn, tán lá Dodecahedron phân 3 tầng sắc độ ánh sáng.
+- **12+ Giống cây đặc sản:** Sầu riêng Ri6, Lúa ST25, Cam sành, Xoài cát Hòa Lộc, Nho Ninh Thuận, Thanh long, Cà phê Robusta, Bơ sáp,...
+- **Custom Crop Creator Studio:** Cho phép tự tạo và tùy biến giống cây, màu trái, hình dáng quả theo sở thích.
+- **Mô phỏng 4 Giai đoạn sinh trưởng:** Từ hạt mầm $\rightarrow$ Đâm chồi $\rightarrow$ Trổ hoa $\rightarrow$ Trĩu quả chín thu hoạch.
+- **Hệ thống tưới nước 3D & Drone LiDAR:** Quét laser vi khí hậu tự động.
 
-Dự án gồm 2 phần: Backend (Node.js/Express) và Frontend (React/Vite).
+### 2. 🛰️ Lớp Viễn Thám Quang Phổ NDVI Sức Khỏe Cây Trồng
+- Quét diệp lục tố và sinh khối lá theo thời gian thực từ dữ liệu vệ tinh Sentinel-2.
+- Phát hiện sớm hiện tượng thiếu ẩm, thiếu đạm hoặc nấm bệnh trước 7-10 ngày.
 
-### 1. Chạy Backend
-Mở một terminal mới:
+### 3. 🎙️ Trợ Lý Giọng Nói Nông Nghiệp AI (Voice AI Copilot)
+- Tích hợp Web Speech API nhận diện giọng nói tiếng Việt tự nhiên.
+- Tự động bóc tách loại hành động (tưới nước, bón phân) và số lượng để lưu trực tiếp vào sổ nhật ký canh tác.
+- Phản hồi bằng giọng đọc tiếng Việt (Text-to-Speech).
+
+### 4. 🔬 Bác Sĩ Cây Trồng AI (AI Plant Doctor)
+- Chẩn đoán sâu bệnh hại (Thán thư, vàng lá thối rễ, rầy nâu, sâu đục thân).
+- Đưa ra phác đồ điều trị sinh học thân thiện với môi trường và 1-click tự động ghi vào nhật ký VietGAP.
+
+### 5. 🔔 Trung Tâm Cảnh Báo Sớm Khẩn Cấp 24/7
+- Giám sát tự động hạn mặn ĐBSCL (Độ mặn sông Tiền/Hậu) $\rightarrow$ Tự động khóa van bơm tưới khi vượt ngưỡng $1.0‰$.
+- Cảnh báo mưa dông, bức xạ mặt trời và rủi ro dịch bệnh kịp thời.
+
+### 6. 📄 Hồ Sơ Kỹ Thuật & Sổ Nhật Ký Canh Tác Chuẩn VietGAP PDF
+- Đóng gói đầy đủ mã định danh vùng trồng `VG-2026-01-VN`.
+- Thẩm định cân bằng dinh dưỡng N-P-K (cắt giảm 32% lãng phí phân bón).
+- Con dấu chứng thực số hóa và hỗ trợ in ấn 1-Click ra giấy A4/PDF nộp cho cơ quan kiểm định.
+
+### 7. 📱 Mã QR Truy Xuất Nguồn Gốc Toàn Cầu
+- Trang tra cứu công khai cho người tiêu dùng và siêu thị quét mã kiểm tra toàn bộ quy trình chăm sóc minh bạch.
+
+---
+
+## 🛠️ CÔNG NGHỆ SỬ DỤNG
+
+- **Frontend:** React 18, Vite 5, Tailwind CSS, Three.js, Lucide Icons, Heroicons, Recharts, Leaflet GIS.
+- **Backend:** Node.js, Express, TypeScript, Prisma ORM, JWT, Bcrypt.
+- **Cơ sở dữ liệu:** SQLite / PostgreSQL.
+- **AI Core:** Stochastic Gradient Descent (SGD) Linear Regression thích ứng với vòng lặp phản hồi người dùng.
+- **Dữ liệu Khí tượng:** Open-Meteo API Real-time (ECMWF/GFS).
+
+---
+
+## 🚀 HƯỚNG DẪN CÀI ĐẶT & CHẠY DỰ ÁN
+
+### 1. Khởi động Backend
 ```bash
 cd backend
+npm install
+npx prisma db push
+npx ts-node prisma/seed.ts
 npm run dev
 ```
-Backend sẽ chạy ở `http://localhost:3000`.
+> Backend chạy tại: `http://localhost:3000`
 
-### 2. Chạy Frontend
-Mở một terminal mới khác:
+### 2. Khởi động Frontend
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
-Frontend sẽ chạy ở `http://localhost:5173`.
+> Frontend chạy tại: `http://localhost:5173`
 
-## Hướng dẫn sử dụng cơ bản
-1. Mở trình duyệt vào `http://localhost:5173/login`.
-2. Bấm vào "Đăng ký ngay" để tạo một tài khoản nông dân mới.
-3. Sau khi đăng nhập, bấm "Thêm thửa đất" bên thanh menu trái.
-4. Chọn thửa đất vừa tạo và bấm "Bắt đầu vụ mùa mới".
-5. Trong bảng điều khiển, bạn có thể "Thêm nhật ký" (tưới nước, bón phân).
-6. Hệ thống AI (linear regression) sẽ tự động tạo "Gợi ý từ AI". Bạn có thể bấm Có, Bỏ, hoặc Sửa. Khi bấm "Sửa", AI sẽ tự động học (incremental learning bằng gradient descent) từ lượng thực tế bạn nhập vào để cập nhật mô hình riêng cho thửa đất đó.
+---
 
-## Công nghệ sử dụng
-- **Cơ sở dữ liệu**: PostgreSQL, Prisma ORM
-- **Backend**: Node.js, Express, jsonwebtoken
-- **Frontend**: React, Vite, Tailwind CSS, Recharts, Lucide React
-- **AI Logic**: Manual Gradient Descent Linear Regression (tích hợp trực tiếp trong code backend).
+## 👤 TÀI KHOẢN MẪU ĐĂNG NHẬP
+
+| Vai Trò | Email | Mật Khẩu |
+| :--- | :--- | :--- |
+| 🧑‍🌾 Nông Dân | `farmer@farm.com` | `password123` |
+| 🛡️ Quản Trị Viên (Admin) | `admin@farm.com` | `admin123` |
+
+---
+*Phát triển bởi Trần Hữu Thắng • Đồ Án Nông Nghiệp Thông Minh 4.0*
