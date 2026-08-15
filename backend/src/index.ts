@@ -11,6 +11,7 @@ import financialsRoutes from './routes/financials';
 import iotRoutes from './routes/iot';
 import expertRoutes from './routes/expert';
 import cropTrackerRoutes from './routes/cropTracker';
+import cropPhysicsRoutes from './routes/cropPhysics';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/financials', financialsRoutes);
 app.use('/api/iot', iotRoutes);
 app.use('/api/expert', expertRoutes);
 app.use('/api/crop-tracker', cropTrackerRoutes);
+app.use('/api/crop-physics', cropPhysicsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });

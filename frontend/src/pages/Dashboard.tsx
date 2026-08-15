@@ -27,6 +27,7 @@ import AgronomyExpertOptimizer from '../components/AgronomyExpertOptimizer';
 import NotificationCenterDrawer from '../components/NotificationCenterDrawer';
 import VietGAPDossierModal from '../components/VietGAPDossierModal';
 import AIRealTimeCropTracker from '../components/AIRealTimeCropTracker';
+import CropPhysiologyVPDStudio from '../components/CropPhysiologyVPDStudio';
 
 interface DashboardProps {
   plots: any[];
@@ -329,6 +330,14 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
               seasonId={activeSeason?.id}
               plotName={selectedPlot.name}
               cropType={activeSeason?.crop_type || 'Sầu riêng Ri6'}
+            />
+
+            {/* Advanced Biophysics & Thermodynamics Studio: VPD + FAO-56 + Pareto NSGA-II */}
+            <CropPhysiologyVPDStudio
+              plotId={selectedPlot.id}
+              plotName={selectedPlot.name}
+              cropType={activeSeason?.crop_type || 'Sầu riêng Ri6'}
+              areaM2={selectedPlot.area_m2}
             />
 
             {/* 7-Day Rain Radar & Agronomic Weather Advisory */}
