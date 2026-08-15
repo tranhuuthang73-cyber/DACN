@@ -29,6 +29,7 @@ import VietGAPDossierModal from '../components/VietGAPDossierModal';
 import AIRealTimeCropTracker from '../components/AIRealTimeCropTracker';
 import CropPhysiologyVPDStudio from '../components/CropPhysiologyVPDStudio';
 import ZaloAgriBotModal from '../components/ZaloAgriBotModal';
+import PlotCreationLocationAdvisorModal from '../components/PlotCreationLocationAdvisorModal';
 
 interface DashboardProps {
   plots: any[];
@@ -53,10 +54,6 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
 
   // Forms state
   const [showPlotForm, setShowPlotForm] = useState(false);
-  const [newPlotName, setNewPlotName] = useState('');
-  const [newPlotArea, setNewPlotArea] = useState('');
-  const [newSoilType, setNewSoilType] = useState('Đất phù sa');
-
   const [showLogForm, setShowLogForm] = useState(false);
   const [logType, setLogType] = useState('WATER');
   const [logAmount, setLogAmount] = useState('');
@@ -108,23 +105,6 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
       handleSelectPlot(selectedPlot);
     }
   }, [selectedPlot?.id]);
-
-  const handleCreatePlot = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await api.post('/plots', {
-        name: newPlotName,
-        area_m2: parseFloat(newPlotArea) || 1000,
-        soil_type: newSoilType
-      });
-      setShowPlotForm(false);
-      setNewPlotName('');
-      setNewPlotArea('');
-      onRefreshPlots();
-    } catch (err) {
-      alert('Lỗi tạo thửa đất mới');
-    }
-  };
 
   const handleCreateSeasonQuick = async () => {
     if (!selectedPlot) return;
@@ -603,76 +583,15 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
           <div className="text-center py-20 text-stone-400 font-bold text-lg">Vui lòng chọn hoặc thêm thửa đất ở thanh bên trái</div>
         )}
 
-        {/* Modal Create Plot */}
-        {showPlotForm && (
-          <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="glass-card rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-200">
-              <h2 className="text-xl font-black text-stone-900">Thêm Thửa Đất Mới</h2>
-
-              <form onSubmit={handleCreatePlot} className="space-y-4" aria-label="Form Thêm Thửa đất">
-                <div>
-                  <label htmlFor="new-plot-name" className="block text-xs font-bold text-stone-700 mb-1">
-                    Tên thửa đất
-                  </label>
-                  <input
-                    id="new-plot-name"
-                    type="text"
-                    required
-                    placeholder="Ví dụ: Vườn Sầu Riêng B1"
-                    value={newPlotName}
-                    onChange={(e) => setNewPlotName(e.target.value)}
-                    className="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-medium"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="new-plot-area" className="block text-xs font-bold text-stone-700 mb-1">
-                    Diện tích (m²)
-                  </label>
-                  <input
-                    id="new-plot-area"
-                    type="number"
-                    required
-                    placeholder="5000"
-                    value={newPlotArea}
-                    onChange={(e) => setNewPlotArea(e.target.value)}
-                    className="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-medium"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="new-plot-soil" className="block text-xs font-bold text-stone-700 mb-1">
-                    Loại đất
-                  </label>
-                  <input
-                    id="new-plot-soil"
-                    type="text"
-                    placeholder="Đất phù sa / Đất thịt..."
-                    value={newSoilType}
-                    onChange={(e) => setNewSoilType(e.target.value)}
-                    className="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-medium"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowPlotForm(false)}
-                    className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-bold text-xs min-h-[44px]"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn-gradient-primary px-5 py-2 rounded-xl text-xs min-h-[44px]"
-                  >
-                    Lưu Thửa Đất
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Real-Time GIS Location & Agronomy Advisor Modal */}
+        <PlotCreationLocationAdvisorModal
+          isOpen={showPlotForm}
+          onClose={() => setShowPlotForm(false)}
+          onPlotCreated={(newPlot) => {
+            onRefreshPlots();
+            onPlotSelect(newPlot);
+          }}
+        />
 
         {/* AI Crop Doctor Modal */}
         <CropDoctorModal

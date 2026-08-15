@@ -14,6 +14,7 @@ import cropTrackerRoutes from './routes/cropTracker';
 import cropPhysicsRoutes from './routes/cropPhysics';
 import telegramBotRoutes from './routes/telegramBot';
 import zaloBotRoutes from './routes/zaloBot';
+import plotLocationAdvisorRoutes from './routes/plotLocationAdvisor';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/crop-tracker', cropTrackerRoutes);
 app.use('/api/crop-physics', cropPhysicsRoutes);
 app.use('/api/telegram-bot', telegramBotRoutes);
 app.use('/api/zalo-bot', zaloBotRoutes);
+app.use('/api/location-advisor', plotLocationAdvisorRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
