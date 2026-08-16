@@ -1577,55 +1577,55 @@ const Plot3DDigitalTwin: React.FC<Plot3DDigitalTwinProps> = ({
       </div>
 
       {/* Three.js 3D Viewport */}
-      <div className="relative w-full h-[460px] sm:h-[540px] rounded-3xl bg-stone-950 border border-stone-800 overflow-hidden shadow-2xl flex items-center justify-center">
+      <div className="relative w-full h-[360px] sm:h-[460px] lg:h-[520px] rounded-3xl bg-stone-950 border border-stone-800 overflow-hidden shadow-2xl flex items-center justify-center touch-pan-y">
         {/* Sky / Weather State Pill */}
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+        <div className="absolute top-3 left-3 z-20 flex items-center gap-2 max-w-[55%] sm:max-w-none">
           {isRaining ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-950/85 border border-sky-500/50 rounded-full text-xs font-black text-sky-300 backdrop-blur-md shadow-xl">
-              <CloudIcon className="w-4 h-4 animate-bounce" />
-              <span>MƯA VỆ TINH REAL-TIME (HẠT MƯA 3D ĐANG RƠI)</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-sky-950/85 border border-sky-500/50 rounded-full text-[10px] sm:text-xs font-black text-sky-300 backdrop-blur-md shadow-xl truncate">
+              <CloudIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-bounce shrink-0" />
+              <span className="truncate">MƯA REAL-TIME</span>
             </div>
           ) : isNightMode ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-950/85 border border-indigo-500/50 rounded-full text-xs font-black text-indigo-300 backdrop-blur-md shadow-xl">
-              <MoonIcon className="w-4 h-4" />
-              <span>BAN ĐÊM • DRONE & CẢM BIẾN IOT PHÁT QUANG</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-indigo-950/85 border border-indigo-500/50 rounded-full text-[10px] sm:text-xs font-black text-indigo-300 backdrop-blur-md shadow-xl truncate">
+              <MoonIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="truncate">BAN ĐÊM • IOT</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-950/85 border border-amber-500/50 rounded-full text-xs font-black text-amber-300 backdrop-blur-md shadow-xl">
-              <SunIcon className="w-4 h-4 text-amber-400" />
-              <span>NẮNG RÁO • QUANG HỢP {growthProgress}%</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-amber-950/85 border border-amber-500/50 rounded-full text-[10px] sm:text-xs font-black text-amber-300 backdrop-blur-md shadow-xl truncate">
+              <SunIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+              <span className="truncate">NẮNG {growthProgress}%</span>
             </div>
           )}
         </div>
 
         {/* Floating 3D Telemetry HUD */}
-        <div className="absolute top-4 right-4 z-20 bg-stone-900/90 border border-stone-700/80 rounded-2xl p-4 text-xs space-y-2 shadow-2xl backdrop-blur-md min-w-[185px]">
-          <div className="text-[10px] text-stone-400 font-extrabold uppercase tracking-wider flex items-center justify-between">
-            <span>Cảm biến Digital Twin</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+        <div className="absolute top-3 right-3 z-20 bg-stone-900/90 border border-stone-700/80 rounded-2xl p-2.5 sm:p-4 text-[10px] sm:text-xs space-y-1 sm:space-y-2 shadow-2xl backdrop-blur-md max-w-[45%] sm:min-w-[185px]">
+          <div className="text-[9px] sm:text-[10px] text-stone-400 font-extrabold uppercase tracking-wider flex items-center justify-between">
+            <span>Cảm biến 3D</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-stone-300 font-medium">Giống cây:</span>
-            <strong className="text-amber-400 font-black">{currentFruitConfig.emoji} {currentFruitConfig.label}</strong>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-stone-300 font-medium truncate">Cây:</span>
+            <strong className="text-amber-400 font-black truncate">{currentFruitConfig.emoji} {currentFruitConfig.label}</strong>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-stone-300 font-medium">Tiến độ sinh trưởng:</span>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-stone-300 font-medium">Tiến độ:</span>
             <strong className="text-emerald-400 font-black">{growthProgress}%</strong>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-stone-300 font-medium">Độ ẩm tầng đất:</span>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-stone-300 font-medium">Ẩm đất:</span>
             <strong className={`font-black ${moisturePercent < 35 ? 'text-rose-400' : 'text-emerald-400'}`}>
               {moisturePercent}%
             </strong>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-stone-300 font-medium">Độ pH đất:</span>
+          <div className="hidden sm:flex items-center justify-between gap-1">
+            <span className="text-stone-300 font-medium">pH đất:</span>
             <strong className="text-emerald-400 font-black">{soilPh} pH</strong>
           </div>
-          <div className="flex items-center justify-between pt-1.5 border-t border-stone-800">
-            <span className="text-stone-400 text-[10px]">Năng suất dự kiến:</span>
-            <span className="font-mono text-emerald-300 font-bold">
-              {Math.round((targetYield * growthProgress) / 100)} / {targetYield} kg
+          <div className="flex items-center justify-between pt-1 border-t border-stone-800">
+            <span className="text-stone-400 text-[9px] sm:text-[10px]">Dự kiến:</span>
+            <span className="font-mono text-emerald-300 font-bold text-[10px] sm:text-xs">
+              {Math.round((targetYield * growthProgress) / 100)} kg
             </span>
           </div>
         </div>

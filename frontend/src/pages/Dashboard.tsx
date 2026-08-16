@@ -165,32 +165,32 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
     .reverse();
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-stone-50 text-stone-800 flex flex-col md:flex-row font-sans">
-      {/* Friendly Light Sidebar */}
-      <aside aria-label="Danh sách thửa đất" className="w-full md:w-80 bg-white p-6 flex flex-col shrink-0 border-r border-emerald-100 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)] bg-stone-50 text-stone-800 flex flex-col md:flex-row font-sans pb-24 md:pb-8">
+      {/* Friendly Light Sidebar / Mobile Plot Bar */}
+      <aside aria-label="Danh sách thửa đất" className="w-full md:w-80 bg-white p-4 sm:p-6 flex flex-col shrink-0 border-b md:border-b-0 md:border-r border-emerald-100 shadow-sm">
+        <div className="flex items-center justify-between mb-3 md:mb-6">
           <h2 className="text-xs uppercase text-emerald-800 font-black tracking-widest">Thửa đất của tôi</h2>
           <span className="badge-emerald">{plots.length} thửa</span>
         </div>
 
-        <nav aria-label="Thửa đất" className="flex-1 space-y-2.5 overflow-y-auto pr-1">
+        <nav aria-label="Thửa đất" className="flex md:flex-col gap-2 md:space-y-2.5 overflow-x-auto md:overflow-y-auto no-scrollbar pb-2 md:pb-0">
           {plots.map((plot) => (
             <button
               key={plot.id}
               type="button"
               onClick={() => handleSelectPlot(plot)}
               aria-current={selectedPlot?.id === plot.id ? 'true' : 'false'}
-              className={`w-full text-left p-4 rounded-2xl flex items-center justify-between transition-all duration-200 min-h-[48px] ${
+              className={`text-left p-3 sm:p-4 rounded-2xl flex items-center justify-between transition-all duration-200 min-h-[44px] sm:min-h-[48px] shrink-0 md:w-full md:shrink ${
                 selectedPlot?.id === plot.id
                   ? 'bg-emerald-700 text-white shadow-md font-extrabold'
-                  : 'hover:bg-emerald-50 text-stone-700 font-semibold border border-transparent hover:border-emerald-200'
+                  : 'bg-stone-50 md:bg-transparent hover:bg-emerald-50 text-stone-700 font-semibold border border-stone-200 md:border-transparent hover:border-emerald-200'
               }`}
             >
-              <div className="flex items-center gap-3 truncate">
-                <MapPinIcon className={`w-5 h-5 shrink-0 ${selectedPlot?.id === plot.id ? 'text-amber-300' : 'text-emerald-600'}`} aria-hidden="true" />
-                <span className="truncate">{plot.name}</span>
+              <div className="flex items-center gap-2 sm:gap-3 truncate max-w-[140px] sm:max-w-none">
+                <MapPinIcon className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${selectedPlot?.id === plot.id ? 'text-amber-300' : 'text-emerald-600'}`} aria-hidden="true" />
+                <span className="truncate text-xs sm:text-sm">{plot.name}</span>
               </div>
-              <span className={`text-xs font-bold opacity-90 shrink-0 px-2.5 py-1 rounded-lg ${selectedPlot?.id === plot.id ? 'bg-emerald-800 text-white' : 'bg-stone-100 text-stone-700'}`}>
+              <span className={`text-[10px] sm:text-xs font-bold opacity-90 shrink-0 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg ml-2 ${selectedPlot?.id === plot.id ? 'bg-emerald-800 text-white' : 'bg-stone-200/70 text-stone-700'}`}>
                 {plot.area_m2} m²
               </span>
             </button>
@@ -199,23 +199,23 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
           <button
             type="button"
             onClick={() => setShowPlotForm(true)}
-            className="w-full mt-4 flex items-center justify-center gap-2 py-3.5 border-2 border-dashed border-emerald-300 text-emerald-800 rounded-2xl hover:bg-emerald-50 font-extrabold transition-all duration-200 min-h-[48px] text-xs sm:text-sm"
+            className="flex items-center justify-center gap-1.5 sm:gap-2 px-4 py-2.5 md:py-3.5 border-2 border-dashed border-emerald-300 text-emerald-800 rounded-2xl hover:bg-emerald-50 font-extrabold transition-all duration-200 min-h-[44px] text-xs sm:text-sm shrink-0 md:w-full md:mt-4"
           >
-            <PlusIcon className="w-5 h-5" aria-hidden="true" />
-            <span>Thêm thửa đất mới</span>
+            <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+            <span className="whitespace-nowrap">+ Thêm thửa</span>
           </button>
         </nav>
       </aside>
 
       {/* Main Workspace */}
-      <section aria-labelledby="dashboard-heading" className="flex-1 p-4 sm:p-6 md:p-8 space-y-6 overflow-y-auto">
+      <section aria-labelledby="dashboard-heading" className="flex-1 p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 overflow-y-auto">
         {selectedPlot ? (
           <>
             {/* Header Banner & Super Action Toolbar */}
-            <header className="glass-card p-6 sm:p-8 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
+            <header className="glass-card p-4 sm:p-8 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 relative overflow-hidden">
               <div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 id="dashboard-heading" className="text-2xl sm:text-4xl font-black text-stone-900 tracking-tight">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                  <h1 id="dashboard-heading" className="text-xl sm:text-4xl font-black text-stone-900 tracking-tight">
                     {selectedPlot.name}
                   </h1>
                   <span className="badge-emerald">{selectedPlot.soil_type || 'Đất phù sa'}</span>
@@ -229,62 +229,62 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
               </div>
 
               {/* Quick Super Action Toolbar */}
-              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto shrink-0">
                 {/* Emergency Alert Bell */}
                 <button
                   type="button"
                   onClick={() => setIsNotificationDrawerOpen(true)}
-                  className="px-3.5 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 font-black rounded-2xl border border-amber-400/60 shadow-sm text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 min-h-[48px]"
+                  className="px-3 sm:px-3.5 py-2.5 sm:py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 font-black rounded-xl sm:rounded-2xl border border-amber-400/60 shadow-sm text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
                   title="Trung tâm cảnh báo sớm hạn mặn & dịch hại"
                 >
-                  <div className="relative">
-                    <BellIcon className="w-5 h-5 text-amber-600 animate-bounce" />
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping" />
+                  <div className="relative shrink-0">
+                    <BellIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 animate-bounce" />
+                    <span className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-rose-500 rounded-full animate-ping" />
                   </div>
-                  <span>Cảnh Báo Sớm</span>
+                  <span className="truncate">Cảnh Báo Sớm</span>
                 </button>
 
                 {/* Voice Copilot */}
                 <button
                   type="button"
                   onClick={() => setIsVoiceCopilotOpen(true)}
-                  className="px-3.5 py-3 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-500 hover:to-emerald-600 text-white font-black rounded-2xl shadow-md text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 min-h-[48px]"
+                  className="px-3 sm:px-3.5 py-2.5 sm:py-3 bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-500 hover:to-emerald-600 text-white font-black rounded-xl sm:rounded-2xl shadow-md text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
                 >
-                  <MicrophoneIcon className="w-5 h-5 text-emerald-200 animate-pulse" />
-                  <span>Trợ Lý Giọng Nói</span>
+                  <MicrophoneIcon className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-200 animate-pulse shrink-0" />
+                  <span className="truncate">Trợ Lý Giọng Nói</span>
                 </button>
 
                 {/* Crop Doctor */}
                 <button
                   type="button"
                   onClick={() => setIsCropDoctorOpen(true)}
-                  className="px-3.5 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black rounded-2xl shadow-md text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 min-h-[48px]"
+                  className="px-3 sm:px-3.5 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black rounded-xl sm:rounded-2xl shadow-md text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
                 >
-                  <SparklesIcon className="w-5 h-5 text-amber-300" />
-                  <span>Bác Sĩ Cây Trồng</span>
+                  <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 shrink-0" />
+                  <span className="truncate">Bác Sĩ Cây Trồng</span>
                 </button>
 
                 {/* Official Printable VietGAP Dossier */}
                 <button
                   type="button"
                   onClick={() => setIsDossierOpen(true)}
-                  className="px-3.5 py-3 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-black rounded-2xl shadow-md text-xs sm:text-sm flex items-center gap-2 border border-emerald-500/50 transition-all active:scale-95 min-h-[48px]"
+                  className="px-3 sm:px-3.5 py-2.5 sm:py-3 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-black rounded-xl sm:rounded-2xl shadow-md text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 border border-emerald-500/50 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
                 >
-                  <DocumentTextIcon className="w-5 h-5 text-emerald-400" />
-                  <span>Hồ Sơ VietGAP PDF</span>
+                  <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
+                  <span className="truncate">Hồ Sơ VietGAP</span>
                 </button>
 
                 {/* Zalo OA Official Bot Assistant */}
                 <button
                   type="button"
                   onClick={() => setIsTelegramBotOpen(true)}
-                  className="px-3.5 py-3 bg-gradient-to-r from-[#0068FF] to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-black rounded-2xl shadow-md text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 min-h-[48px] border border-blue-400/40"
+                  className="px-3 sm:px-3.5 py-2.5 sm:py-3 bg-gradient-to-r from-[#0068FF] to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-black rounded-xl sm:rounded-2xl shadow-md text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px] border border-blue-400/40"
                   title="Mở Trợ lý Zalo OA điều khiển vườn và nhận bản tin Zalo ZNS sáng tự động"
                 >
-                  <div className="w-5 h-5 bg-white rounded-md flex items-center justify-center p-0.5">
-                    <span className="text-[#0068FF] font-black text-[10px] leading-none">Zalo</span>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-md flex items-center justify-center p-0.5 shrink-0">
+                    <span className="text-[#0068FF] font-black text-[9px] sm:text-[10px] leading-none">Zalo</span>
                   </div>
-                  <span>Trợ Lý Zalo OA</span>
+                  <span className="truncate">Trợ Lý Zalo OA</span>
                 </button>
 
                 {/* Harvest & Financial Settlement */}
@@ -292,11 +292,11 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
                   <button
                     type="button"
                     onClick={() => setIsHarvestModalOpen(true)}
-                    className="px-3.5 py-3 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-stone-950 font-black rounded-2xl shadow-lg text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 min-h-[48px] border border-amber-300/60 animate-pulse"
+                    className="px-3 sm:px-3.5 py-2.5 sm:py-3 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-stone-950 font-black rounded-xl sm:rounded-2xl shadow-lg text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px] border border-amber-300/60 animate-pulse"
                     title="Quyết toán thu hoạch vụ mùa, tính doanh thu trừ đi chi phí gốc ra tiền lãi ròng"
                   >
-                    <BanknotesIcon className="w-5 h-5 text-stone-950" />
-                    <span>Thu Hoạch & Tính Lãi</span>
+                    <BanknotesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-stone-950 shrink-0" />
+                    <span className="truncate">Thu Hoạch & Lãi</span>
                   </button>
                 )}
 
@@ -304,10 +304,10 @@ const Dashboard: React.FC<DashboardProps> = ({ plots, selectedPlot, onPlotSelect
                   <button
                     type="button"
                     onClick={() => setIsTraceabilityOpen(true)}
-                    className="px-3.5 py-3 bg-stone-900 hover:bg-stone-800 text-white font-black rounded-2xl shadow-md text-xs sm:text-sm flex items-center gap-2 border border-stone-700 transition-all active:scale-95 min-h-[48px]"
+                    className="px-3 sm:px-3.5 py-2.5 sm:py-3 bg-stone-900 hover:bg-stone-800 text-white font-black rounded-xl sm:rounded-2xl shadow-md text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 border border-stone-700 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
                   >
-                    <QrCodeIcon className="w-5 h-5 text-amber-400" />
-                    <span>Mã QR</span>
+                    <QrCodeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0" />
+                    <span className="truncate">Mã QR</span>
                   </button>
                 )}
               </div>
