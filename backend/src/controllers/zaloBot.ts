@@ -40,7 +40,7 @@ export const generateZaloDailyZNS = async (req: Request, res: Response): Promise
     const cropName = activeSeason?.crop_type || 'Sầu riêng Ri6';
     const weather = await getWeatherForecast(plot.latitude || 10.36, plot.longitude || 106.36);
 
-    const temp = weather.temperature || 32.5;
+    const temp = weather.temp || 32.5;
     const humidity = weather.humidity || 65;
 
     // VPD thermodynamic calculation

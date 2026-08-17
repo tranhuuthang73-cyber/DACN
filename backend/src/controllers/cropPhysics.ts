@@ -20,9 +20,9 @@ export const getVPDMetrics = async (req: Request, res: Response): Promise<void> 
 
     // Get live ambient weather
     const weather = await getWeatherForecast(plot.latitude || 10.36, plot.longitude || 106.36);
-    const airTempC = weather.temperature || 31.5;
+    const airTempC = weather.temp || 31.5;
     const relativeHumidity = weather.humidity || 68;
-    const solarRadiationWm2 = (weather.cloud_cover !== undefined ? (100 - weather.cloud_cover) * 8.5 : 650);
+    const solarRadiationWm2 = 650;
 
     // Leaf Temperature estimation: Transpiration cools leaf by 1.5°C - 2.5°C under sufficient moisture
     const leafTempOffset = relativeHumidity > 80 ? -0.5 : relativeHumidity < 40 ? 1.2 : -1.8;
@@ -121,7 +121,7 @@ export const getFAO56Evapotranspiration = async (req: Request, res: Response): P
     }
 
     const weather = await getWeatherForecast(plot.latitude || 10.36, plot.longitude || 106.36);
-    const T = weather.temperature || 31.5;
+    const T = weather.temp || 31.5;
     const RH = weather.humidity || 68;
     const windSpeedKmh = weather.wind_speed_kmh || 12;
     const u2 = Math.max(0.5, (windSpeedKmh * 1000) / 3600); // wind speed at 2m height in m/s

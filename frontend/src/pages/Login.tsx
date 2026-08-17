@@ -63,7 +63,7 @@ const Login: React.FC = () => {
 
       {/* Main Split Container */}
       <div className="w-full max-w-5xl bg-white/90 backdrop-blur-xl border border-emerald-100 rounded-3xl sm:rounded-[36px] shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10">
-        
+
         {/* Left Column: Visual Showcase (lg:col-span-7) */}
         <section
           aria-label="Thông tin ứng dụng Smart Farm"
@@ -145,18 +145,16 @@ const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => { setIsRegister(false); setErrorMsg(''); }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[36px] ${
-                    !isRegister ? 'bg-emerald-700 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[36px] ${!isRegister ? 'bg-emerald-700 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
+                    }`}
                 >
                   Đăng nhập
                 </button>
                 <button
                   type="button"
                   onClick={() => { setIsRegister(true); setErrorMsg(''); }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[36px] ${
-                    isRegister ? 'bg-emerald-700 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[36px] ${isRegister ? 'bg-emerald-700 text-white shadow-sm' : 'text-stone-600 hover:text-stone-900'
+                    }`}
                 >
                   Đăng ký
                 </button>

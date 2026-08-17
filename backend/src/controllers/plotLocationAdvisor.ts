@@ -44,7 +44,7 @@ export const analyzePlotLocation = async (req: Request, res: Response): Promise<
 
     // 1. Fetch Real-time Live Weather from Open-Meteo Satellite API
     const weather = await getWeatherForecast(lat, lng);
-    const temp = weather.temperature || 31.5;
+    const temp = weather.temp || 31.5;
     const humidity = weather.humidity || 68;
     const windSpeed = weather.wind_speed_kmh || 12;
 
