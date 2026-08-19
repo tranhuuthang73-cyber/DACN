@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
@@ -76,7 +76,7 @@ model FarmingLog {
   created_at DateTime @default(now())
 
   season     Season   @relation(fields: [season_id], references: [id], onDelete: Cascade)
-  plot       Plot     @relation(fields: [plot_id], references: [id], onDelete: Cascade)
+  plot       Plot     @relation(fields: [plot_id], references: [id], onDelete: NoAction)
 
   @@map("farming_logs")
 }
@@ -94,7 +94,7 @@ model Recommendation {
   created_at       DateTime           @default(now())
 
   season           Season             @relation(fields: [season_id], references: [id], onDelete: Cascade)
-  plot             Plot               @relation(fields: [plot_id], references: [id], onDelete: Cascade)
+  plot             Plot               @relation(fields: [plot_id], references: [id], onDelete: NoAction)
   feedbacks        RecommendationFeedback[]
 
   @@map("recommendations")
