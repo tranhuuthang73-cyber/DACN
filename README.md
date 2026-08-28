@@ -1,84 +1,103 @@
-# 🌾 SMART FARM 4.0 - HỆ SINH THÁI NÔNG NGHIỆP CÔNG NGHỆ CAO TỰ ĐỘNG HÓA
+# 🚀 TravelGo - Nền tảng Đặt chỗ Du lịch Tích hợp Dashboard Dữ liệu
 
-> **Nền tảng Quản Lý Nông Trại Thông Minh Toàn Diện:** Tích hợp Mô Hình Số 3D Digital Twin Ghibli 60 FPS, Viễn Thám Quang Phổ NDVI Vệ Tinh, AI SGD Học Máy Thích Ứng, Trợ Lý Nông Nghiệp Giọng Nói Tiếng Việt & Hồ Sơ Pháp Lý Chuẩn VietGAP.
-
----
-
-## 🌟 TÍNH NĂNG ĐỘT PHÁ "ĐỈNH CHÓP"
-
-### 1. 🌿 Mô Hình Số 3D Digital Twin Vườn Cây Ghibli (Three.js WebGL)
-- **Chuẩn 60+ FPS Turbo Engine:** Tối ưu hóa GPU draw calls, hiển thị mượt mà trên mọi thiết bị máy tính và điện thoại.
-- **Phong cách Ghibli Botanical Art:** Thổ nhưỡng ụ đất nâng cao, rễ ngoằn ngoèo, thân cây uốn khúc 3 đoạn, tán lá Dodecahedron phân 3 tầng sắc độ ánh sáng.
-- **12+ Giống cây đặc sản:** Sầu riêng Ri6, Lúa ST25, Cam sành, Xoài cát Hòa Lộc, Nho Ninh Thuận, Thanh long, Cà phê Robusta, Bơ sáp,...
-- **Custom Crop Creator Studio:** Cho phép tự tạo và tùy biến giống cây, màu trái, hình dáng quả theo sở thích.
-- **Mô phỏng 4 Giai đoạn sinh trưởng:** Từ hạt mầm $\rightarrow$ Đâm chồi $\rightarrow$ Trổ hoa $\rightarrow$ Trĩu quả chín thu hoạch.
-- **Hệ thống tưới nước 3D & Drone LiDAR:** Quét laser vi khí hậu tự động.
-
-### 2. 🛰️ Lớp Viễn Thám Quang Phổ NDVI Sức Khỏe Cây Trồng
-- Quét diệp lục tố và sinh khối lá theo thời gian thực từ dữ liệu vệ tinh Sentinel-2.
-- Phát hiện sớm hiện tượng thiếu ẩm, thiếu đạm hoặc nấm bệnh trước 7-10 ngày.
-
-### 3. 🎙️ Trợ Lý Giọng Nói Nông Nghiệp AI (Voice AI Copilot)
-- Tích hợp Web Speech API nhận diện giọng nói tiếng Việt tự nhiên.
-- Tự động bóc tách loại hành động (tưới nước, bón phân) và số lượng để lưu trực tiếp vào sổ nhật ký canh tác.
-- Phản hồi bằng giọng đọc tiếng Việt (Text-to-Speech).
-
-### 4. 🔬 Bác Sĩ Cây Trồng AI (AI Plant Doctor)
-- Chẩn đoán sâu bệnh hại (Thán thư, vàng lá thối rễ, rầy nâu, sâu đục thân).
-- Đưa ra phác đồ điều trị sinh học thân thiện với môi trường và 1-click tự động ghi vào nhật ký VietGAP.
-
-### 5. 🔔 Trung Tâm Cảnh Báo Sớm Khẩn Cấp 24/7
-- Giám sát tự động hạn mặn ĐBSCL (Độ mặn sông Tiền/Hậu) $\rightarrow$ Tự động khóa van bơm tưới khi vượt ngưỡng $1.0‰$.
-- Cảnh báo mưa dông, bức xạ mặt trời và rủi ro dịch bệnh kịp thời.
-
-### 6. 📄 Hồ Sơ Kỹ Thuật & Sổ Nhật Ký Canh Tác Chuẩn VietGAP PDF
-- Đóng gói đầy đủ mã định danh vùng trồng `VG-2026-01-VN`.
-- Thẩm định cân bằng dinh dưỡng N-P-K (cắt giảm 32% lãng phí phân bón).
-- Con dấu chứng thực số hóa và hỗ trợ in ấn 1-Click ra giấy A4/PDF nộp cho cơ quan kiểm định.
-
-### 7. 📱 Mã QR Truy Xuất Nguồn Gốc Toàn Cầu
-- Trang tra cứu công khai cho người tiêu dùng và siêu thị quét mã kiểm tra toàn bộ quy trình chăm sóc minh bạch.
+> **Đề tài**: LV13-062 – Phần mềm đặt lịch/đặt chỗ tích hợp dashboard dữ liệu cho du lịch.  
+> **Kiến trúc**: PHP Thuần (Mô hình MVC chuẩn, không framework nặng nề, bảo mật cao) + MySQL 8.0 + HTML5 / CSS3 (Design System độc quyền) + JavaScript Vanilla (Fetch API, Chart.js, Lucide Icons).
 
 ---
 
-## 🛠️ CÔNG NGHỆ SỬ DỤNG
+## 📌 1. Danh sách Tài khoản Demo (Tất cả mật khẩu: `password123`)
 
-- **Frontend:** React 18, Vite 5, Tailwind CSS, Three.js, Lucide Icons, Heroicons, Recharts, Leaflet GIS.
-- **Backend:** Node.js, Express, TypeScript, Prisma ORM, JWT, Bcrypt.
-- **Cơ sở dữ liệu:** SQLite / PostgreSQL.
-- **AI Core:** Stochastic Gradient Descent (SGD) Linear Regression thích ứng với vòng lặp phản hồi người dùng.
-- **Dữ liệu Khí tượng:** Open-Meteo API Real-time (ECMWF/GFS).
+| Vai trò (Role) | Username | Email | Quyền hạn & Chức năng kiểm thử |
+|---|---|---|---|
+| 👑 **Admin** | `admin` | `admin@travelgo.vn` | Toàn quyền hệ thống, tạo chuyến đi mới, duyệt doanh nghiệp đối tác, xem Dashboard tổng quan GMV toàn sàn. |
+| 💼 **Nhân viên (Employee)** | `nv_hoa` | `hoa.nguyen@travelgo.vn` | Duyệt mở bán chuyến đi (do Admin tạo), duyệt khách sạn đối tác, duyệt yêu cầu hoàn tiền vé. |
+| 🤝 **Đối tác Xe (Partner)** | `dt_saigontour` | `saigontourist@travelgo.vn` | Quản lý đội xe, theo dõi doanh thu riêng của công ty, xem danh sách hành khách. |
+| 🤝 **Đối tác Khách sạn (Partner)** | `dt_vinpearl` | `vinpearl@travelgo.vn` | Quản lý danh sách khách sạn & các loại phòng, cập nhật số phòng trống, theo dõi doanh thu phòng. |
+| 👤 **Khách hàng (Customer)** | `kh_an` | `an.nguyen@gmail.com` | Tìm kiếm chuyến & phòng, thêm vào giỏ hàng kết hợp, đặt giữ chỗ 15 phút, xem vé điện tử, yêu cầu hủy hoàn tiền. |
+
+*(💡 Mẹo: Trên trang Đăng nhập `/auth/login` có sẵn các nút **1-Click Autofill** để đăng nhập thử nghiệm ngay lập tức).*
 
 ---
 
-## 🚀 HƯỚNG DẪN CÀI ĐẶT & CHẠY DỰ ÁN
+## ⚙️ 2. Hướng dẫn Cài đặt & Khởi chạy (XAMPP / Laragon / PHP CLI)
 
-### 1. Khởi động Backend
-```bash
-cd backend
-npm install
-npx prisma db push
-npx ts-node prisma/seed.ts
-npm run dev
+### Bước 1: Clone hoặc tải thư mục mã nguồn
+Đặt thư mục `DULICH` vào thư mục web server (ví dụ `C:\xampp\htdocs\DULICH` hoặc `D:\DULICH`).
+
+### Bước 2: Tạo Cơ sở dữ liệu MySQL
+1. Mở **phpMyAdmin** (hoặc MySQL Workbench / Navicat / HeidiSQL).
+2. Tạo CSDL mới tên là `travelgo` với collation `utf8mb4_unicode_ci`.
+3. Import file `database/schema.sql` để tạo cấu trúc 20 bảng, stored procedure và views.
+4. Import file `database/seed.sql` để nạp dữ liệu mẫu (15 địa điểm Việt Nam, 9 chuyến đi, 5 khách sạn, tài khoản demo).
+
+### Bước 3: Cấu hình Môi trường `.env`
+Đổi tên file `.env.example` thành `.env` (hoặc kiểm tra file `.env` hiện có):
+```ini
+APP_NAME=TravelGo
+APP_ENV=development
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=travelgo
+DB_USER=root
+DB_PASS=
 ```
-> Backend chạy tại: `http://localhost:3000`
 
-### 2. Khởi động Frontend
+### Bước 4: Khởi chạy máy chủ Web
+Mở Terminal / PowerShell tại thư mục dự án và chạy:
 ```bash
-cd frontend
-npm install
-npm run dev
+php -S localhost:8000 -t public
 ```
-> Frontend chạy tại: `http://localhost:5173`
+Truy cập trình duyệt: **`http://localhost:8000`**
 
 ---
 
-## 👤 TÀI KHOẢN MẪU ĐĂNG NHẬP
+## 🔄 3. Cấu hình Cron Job Tự động Xử lý Hết hạn Giữ chỗ (15 Phút)
 
-| Vai Trò | Email | Mật Khẩu |
-| :--- | :--- | :--- |
-| 🧑‍🌾 Nông Dân | `farmer@farm.com` | `password123` |
-| 🛡️ Quản Trị Viên (Admin) | `admin@farm.com` | `admin123` |
+Hệ thống có cơ chế **giữ chỗ 15 phút chống Race Condition** (`SELECT ... FOR UPDATE`). Để tự động hủy các booking chưa thanh toán quá 15 phút và hoàn trả số lượng ghế trống:
+
+- **Chạy thủ công bằng lệnh**:
+  ```bash
+  php cron/expire_bookings.php
+  ```
+- **Thiết lập Cron Job (Linux / Windows Task Scheduler)**: Chạy định kỳ mỗi 1 hoặc 5 phút.
 
 ---
-*Phát triển bởi Trần Hữu Thắng • Đồ Án Nông Nghiệp Thông Minh 4.0*
+
+## 🏗️ 4. Cấu trúc Thư mục Dự án
+
+```
+DULICH/
+├── app/
+│   ├── config/             # Cấu hình Database & Ứng dụng
+│   ├── controllers/        # Bộ điều khiển MVC
+│   │   ├── admin/          # Admin Dashboard, Chuyến đi, Duyệt đối tác
+│   │   ├── employee/       # Bảng điều hành nhân viên, Duyệt chuyến & KS
+│   │   ├── partner/        # Dashboard đối tác, Quản lý KS & Phòng
+│   │   └── api/            # API Live Auto-suggest & Smart Recommendations
+│   ├── core/               # Core Framework (App, Router, Database PDO, Validator, Session, Helper)
+│   ├── middleware/         # Phân quyền 4 cấp (Auth, Admin, Employee, Partner)
+│   ├── models/             # Data Models (User, Trip, Hotel, Room, Order, Booking, Partner...)
+│   ├── services/           # Nghiệp vụ phức tạp (BookingService - SELECT FOR UPDATE, RecommendationService)
+│   └── views/              # Giao diện người dùng theo chuẩn Design System
+├── cron/                   # Script xử lý background tác vụ hết hạn
+├── database/               # File DDL schema.sql (20 bảng) và DML seed.sql
+├── public/                 # Web Root (index.php, .htaccess, assets CSS/JS/Images)
+│   └── assets/
+│       ├── css/style.css   # Hệ thống CSS Design System chuẩn UX/UI
+│       └── js/             # Script Auto-suggest, Interactive logic
+├── .env                    # Biến môi trường
+└── README.md               # Hướng dẫn đồ án
+```
+
+---
+
+## 🔒 5. Điểm nhấn Kỹ thuật & Bảo mật trong Đồ án
+
+1. **Khóa dòng chống Race Condition (`SELECT ... FOR UPDATE`)**: Khi nhiều khách hàng cùng đặt các ghế cuối cùng trong cùng 1 giây, Database Transaction sẽ khóa và kiểm tra số chỗ trước khi trừ chỗ, ngăn chặn hoàn toàn hiện tượng Overbooking.
+2. **Chính sách Hoàn tiền Tự động bậc thang**: Tính toán tự động theo thời gian hủy trước ngày khởi hành (≥7 ngày: 100%, 3-6 ngày: 50%, 1-2 ngày: 20%, <1 ngày: 0%).
+3. **Bảo vệ Brute-Force & Session Security**: Tự động khóa đăng nhập 15 phút nếu nhập sai mật khẩu quá 5 lần; sinh mã CSRF One-time Token chống giả mạo request.
+4. **Dashboard Đa phân hệ**: Tích hợp Chart.js phân tích doanh thu theo tháng, cơ cấu dịch vụ Chuyến đi vs Khách sạn, tỷ lệ lấp đầy tuyến đường, hàng đợi tác vụ cho nhân viên.
+5. **Động cơ Gợi ý Thông minh (Recommendation Engine)**: Tự động gợi ý chuyến thay thế lân cận khi chuyến chính hết vé, kết hợp gợi ý Combo Khách sạn tại điểm đến.
