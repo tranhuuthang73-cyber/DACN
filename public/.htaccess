@@ -1,0 +1,22 @@
+RewriteEngine On
+
+# Redirect tất cả request không phải file/thư mục thật về index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Bảo mật: chặn truy cập file nhạy cảm
+<FilesMatch "\.(env|sql|md|json|lock|log)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Headers bảo mật
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Tắt hiển thị thư mục
+Options -Indexes
