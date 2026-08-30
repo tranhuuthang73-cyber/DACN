@@ -12,7 +12,17 @@ const REPO_NAME = 'DACN';
 const ROOT_DIR = path.resolve(__dirname, '..');
 
 // Danh sách file/thư mục bỏ qua
-const IGNORE_LIST = ['.git', 'node_modules', '.env', '.DS_Store', 'Thumbs.db', '.vscode', '.idea'];
+const IGNORE_LIST = [
+    '.git',
+    'node_modules',
+    '.env',
+    '.DS_Store',
+    'Thumbs.db',
+    '.vscode',
+    '.idea',
+    'bin',
+    'mingit.zip'
+];
 
 function getAllFiles(dirPath, arrayOfFiles = []) {
     const files = fs.readdirSync(dirPath);
@@ -37,12 +47,12 @@ async function uploadFile(filePath, token) {
 
     const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${relativePath}`;
 
-    // Kiểm tra SHA cũ nếu file đã tồn tại
+    // Kiểm tra SHA cũ nếu file đã tồn tại để update ghi đè
     let sha = null;
     try {
         const checkRes = await fetch(url, {
             headers: {
-                'Authorization': `token ${token}`,
+                'Authorization': `Bearer ${token}`,
                 'User-Agent': 'TravelGo-Uploader',
                 'Accept': 'application/vnd.github.v3+json'
             }
@@ -54,64 +64,84 @@ async function uploadFile(filePath, token) {
     } catch (e) {}
 
     const body = {
-        message: `Upload ${relativePath}`,
+        message: `Update ${relativePath} (Phase 3 Google Maps Live GPS & Domestic Routes)`,
         content: base64Content,
         branch: 'main'
     };
     if (sha) body.sha = sha;
 
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `token ${token}`,
-            'User-Agent': 'TravelGo-Uploader',
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
+    try {
+        const res = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'User-Agent': 'TravelGo-Uploader',
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
 
-    if (res.ok) {
-        console.log(`[OK] Đã tải lên: ${relativePath}`);
-    } else {
-        const err = await res.text();
-        console.error(`[FAIL] Không thể tải ${relativePath}:`, err);
+        if (res.ok) {
+            console.log(`[✓ Tải lên thành công]: ${relativePath}`);
+            return true;
+        } else {
+            const err = await res.text();
+            console.error(`[✗ Lỗi khi tải ${relativePath}]:`, err);
+            return false;
+        }
+    } catch (err) {
+        console.error(`[✗ Lỗi mạng ${relativePath}]:`, err.message);
+        return false;
     }
 }
 
 async function main() {
     console.log(`\n======================================================`);
-    console.log(`🚀 TRAVELGO - GITHUB UPLOADER DIRECT TO:`);
-    console.log(`   https://github.com/${REPO_OWNER}/${REPO_NAME}`);
+    console.log(`🚀 TRAVELGO - GITHUB UPLOADER (PHASE 3 GOOGLE MAPS)`);
+    console.log(`   Repo: https://github.com/${REPO_OWNER}/${REPO_NAME}`);
     console.log(`======================================================\n`);
+
+    const tokenArg = process.argv[2];
+
+    if (tokenArg) {
+        await startUpload(tokenArg.trim());
+        return;
+    }
 
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
 
-    rl.question('Nhập GitHub Personal Access Token (PAT) của bạn: ', async (token) => {
+    rl.question('Nhập mã GitHub Token của bạn (Click chuột phải để dán): ', async (token) => {
         token = token.trim();
         if (!token) {
             console.log('Lỗi: Bạn chưa nhập GitHub Token.');
             rl.close();
             return;
         }
-
-        console.log('\n[*] Đang quét toàn bộ file dự án...');
-        const files = getAllFiles(ROOT_DIR);
-        console.log(`[*] Tìm thấy ${files.length} files. Đang tiến hành tải lên GitHub...\n`);
-
-        for (const file of files) {
-            await uploadFile(file, token);
-        }
-
-        console.log(`\n======================================================`);
-        console.log(`🎉 ĐÃ ĐẨY TOÀN BỘ SOURCE CODE LÊN GITHUB THÀNH CÔNG!`);
-        console.log(`👉 Xem repo: https://github.com/${REPO_OWNER}/${REPO_NAME}`);
-        console.log(`======================================================\n`);
+        await startUpload(token);
         rl.close();
     });
+}
+
+async function startUpload(token) {
+    console.log('\n[*] Đang quét toàn bộ file dự án...');
+    const files = getAllFiles(ROOT_DIR);
+    console.log(`[*] Tìm thấy tổng cộng ${files.length} files. Đang tiến hành tải lên GitHub...\n`);
+
+    let successCount = 0;
+    for (const file of files) {
+        const ok = await uploadFile(file, token);
+        if (ok) successCount++;
+        await new Promise(r => setTimeout(r, 80));
+    }
+
+    console.log(`\n======================================================`);
+    console.log(`🎉 HOÀN TẤT! Đã đồng bộ thành công ${successCount}/${files.length} files lên GitHub!`);
+    console.log(`👉 Xem repo: https://github.com/${REPO_OWNER}/${REPO_NAME}`);
+    console.log(`======================================================\n`);
 }
 
 main();
