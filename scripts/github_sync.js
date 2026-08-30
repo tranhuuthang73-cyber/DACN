@@ -16,6 +16,7 @@ const IGNORE_LIST = [
     '.git',
     'node_modules',
     '.env',
+    '.token',
     '.DS_Store',
     'Thumbs.db',
     '.vscode',
@@ -102,10 +103,18 @@ async function main() {
     console.log(`   Repo: https://github.com/${REPO_OWNER}/${REPO_NAME}`);
     console.log(`======================================================\n`);
 
-    const tokenArg = process.argv[2];
+    let token = process.argv[2];
 
-    if (tokenArg) {
-        await startUpload(tokenArg.trim());
+    if (!token) {
+        const tokenFilePath = path.join(ROOT_DIR, '.token');
+        if (fs.existsSync(tokenFilePath)) {
+            token = fs.readFileSync(tokenFilePath, 'utf8').trim();
+            console.log('[*] Đã tự động nhận diện mã Token từ tệp cục bộ (.token).');
+        }
+    }
+
+    if (token) {
+        await startUpload(token.trim());
         return;
     }
 
@@ -114,14 +123,14 @@ async function main() {
         output: process.stdout
     });
 
-    rl.question('Nhập mã GitHub Token của bạn (Click chuột phải để dán): ', async (token) => {
-        token = token.trim();
-        if (!token) {
+    rl.question('Nhập mã GitHub Token của bạn (Click chuột phải để dán): ', async (inputToken) => {
+        inputToken = inputToken.trim();
+        if (!inputToken) {
             console.log('Lỗi: Bạn chưa nhập GitHub Token.');
             rl.close();
             return;
         }
-        await startUpload(token);
+        await startUpload(inputToken);
         rl.close();
     });
 }
