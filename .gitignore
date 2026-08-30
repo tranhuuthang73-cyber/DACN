@@ -1,5 +1,6 @@
 # TravelGo - Git Ignore
 .env
+.token
 *.log
 /vendor/
 .DS_Store
