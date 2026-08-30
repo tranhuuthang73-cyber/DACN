@@ -100,4 +100,21 @@ class TripController extends Controller
             'comboHotels'  => $comboHotels,
         ]);
     }
+
+    /**
+     * Giai đoạn 3: Theo dõi Định vị GPS Xe thời gian thực
+     */
+    public function tracking(int|string $id = 1): void
+    {
+        $id = (int)$id;
+        $trip = $this->tripModel->getDetail($id);
+        if (!$trip) {
+            $trip = $this->tripModel->find(1);
+        }
+
+        $this->view('trips/tracking', [
+            'pageTitle' => "Theo dõi GPS Trực tiếp: {$trip->departure_name} → {$trip->arrival_name}",
+            'trip'      => $trip,
+        ]);
+    }
 }
