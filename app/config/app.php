@@ -3,9 +3,30 @@
  * TravelGo - App Configuration
  */
 
+// Tự động nhận diện URL đang chạy (tương thích mọi máy, mọi thư mục XAMPP/Laragon/PHP CLI)
+$autoAppUrl = (function() {
+    $envUrl = getenv('APP_URL');
+    if ($envUrl && $envUrl !== 'http://localhost/DULICH/public') {
+        return rtrim($envUrl, '/');
+    }
+
+    if (!empty($_SERVER['HTTP_HOST'])) {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'];
+        
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $dir = dirname($scriptName);
+        $dir = ($dir === '/' || $dir === '\\') ? '' : rtrim(str_replace('\\', '/', $dir), '/');
+        
+        return $scheme . '://' . $host . $dir;
+    }
+
+    return $envUrl ?: 'http://localhost/DULICH/public';
+})();
+
 return [
     'name'    => 'TravelGo',
-    'url'     => getenv('APP_URL') ?: 'http://localhost/DULICH/public',
+    'url'     => $autoAppUrl,
     'env'     => getenv('APP_ENV') ?: 'development',
     'debug'   => getenv('APP_DEBUG') === 'true',
     'key'     => getenv('APP_KEY') ?: 'travelgo_default_key',
