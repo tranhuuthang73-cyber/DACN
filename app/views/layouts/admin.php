@@ -12,9 +12,11 @@
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>window.lucide || document.write('<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"><\/script>')</script>
 
     <!-- Style -->
     <link rel="stylesheet" href="<?= $appUrl ?>/assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
     <style>
         .admin-layout {
