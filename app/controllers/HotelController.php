@@ -75,11 +75,20 @@ class HotelController extends Controller
             return;
         }
 
+        // Đánh giá & Social Proof
+        $reviewModel = new \App\Models\ReviewModel();
+        $reviews = $reviewModel->getReviewsFor('hotel', $id);
+        $ratingSummary = $reviewModel->getRatingSummary('hotel', $id);
+        $canReview = \App\Core\Auth::check() ? $reviewModel->canUserReview(\App\Core\Auth::id(), 'hotel', $id) : null;
+
         $this->view('hotels/detail', [
-            'pageTitle' => $hotel->name . ' - Khách sạn ' . $hotel->star_rating . ' sao',
-            'hotel'     => $hotel,
-            'checkIn'   => $checkIn,
-            'checkOut'  => $checkOut,
+            'pageTitle'     => $hotel->name . ' - Khách sạn ' . $hotel->star_rating . ' sao',
+            'hotel'         => $hotel,
+            'checkIn'       => $checkIn,
+            'checkOut'      => $checkOut,
+            'reviews'       => $reviews,
+            'ratingSummary' => $ratingSummary,
+            'canReview'     => $canReview,
         ]);
     }
 }
