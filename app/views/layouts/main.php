@@ -64,14 +64,46 @@
                             <?= $cartCount ?>
                         </span>
                     <?php endif; ?>
-                </a>
+                    <!-- Dark / Light Mode Toggle -->
+                    <button type="button" id="themeToggleBtn" onclick="toggleTheme()" title="Chuyển giao diện Sáng / Tối" style="background:none; border:none; cursor:pointer; padding:8px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--gray-700);">
+                        <i data-lucide="moon" id="themeIcon" style="width:20px;height:20px"></i>
+                    </button>
+
+                    <script>
+                        if (localStorage.getItem('travelgo_theme') === 'dark') {
+                            document.body.classList.add('dark-theme');
+                        }
+                    </script>
 
                 <?php if ($currentUser): ?>
-                    <!-- Notification Bell -->
-                    <button class="notification-bell" id="notificationBell" title="Thông báo">
-                        <i data-lucide="bell" style="width:20px;height:20px"></i>
-                        <span class="badge" id="notifCount" style="display:none">0</span>
-                    </button>
+                    <!-- Notification Bell with Dropdown -->
+                    <div style="position:relative">
+                        <button class="notification-bell" id="notificationBell" title="Thông báo" style="position:relative; background:none; border:none; cursor:pointer; padding:8px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--gray-700);">
+                            <i data-lucide="bell" style="width:20px;height:20px"></i>
+                            <span class="badge" id="notifCount" style="display:none; position:absolute; top:-2px; right:-2px; background:var(--danger); color:white; font-size:0.7rem; padding:2px 6px; border-radius:10px; font-weight:800;">0</span>
+                        </button>
+
+                        <div class="dropdown-menu" id="notifDropdown" style="display:none; position:absolute; right:-50px; top:48px; background:white; border-radius:18px; box-shadow:0 12px 36px rgba(0,0,0,0.15); border:1px solid var(--gray-200); width:360px; z-index:1000; overflow:hidden;">
+                            <div style="padding:14px 18px; border-bottom:1px solid var(--gray-100); display:flex; justify-content:space-between; align-items:center; background:#FAFAFA;">
+                                <span style="font-weight:800; font-size:0.95rem; color:var(--gray-900);">🔔 Thông báo</span>
+                                <button onclick="markAllNotificationsReadDropdown()" style="background:none; border:none; color:var(--primary); font-size:0.8rem; font-weight:700; cursor:pointer;">
+                                    Đọc tất cả
+                                </button>
+                            </div>
+                            
+                            <div id="notifList" style="max-height:340px; overflow-y:auto; padding:6px 0;">
+                                <div style="text-align:center; padding:24px; color:var(--gray-400); font-size:0.88rem;">
+                                    Đang tải thông báo...
+                                </div>
+                            </div>
+
+                            <div style="padding:10px; border-top:1px solid var(--gray-100); text-align:center; background:#FAFAFA;">
+                                <a href="<?= $appUrl ?>/notifications" style="font-size:0.85rem; font-weight:800; color:var(--primary); text-decoration:none;">
+                                    Xem tất cả thông báo →
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- User Menu -->
                     <div style="position:relative">
@@ -241,6 +273,86 @@
                 setTimeout(() => alert.remove(), 300);
             }, 5000);
         });
+
+        // Notification Bell & Dropdown Logic
+        const notifBell = document.getElementById('notificationBell');
+        const notifDropdown = document.getElementById('notifDropdown');
+        const notifCount = document.getElementById('notifCount');
+        const notifList = document.getElementById('notifList');
+
+        function fetchUnreadCount() {
+            fetch('<?= $appUrl ?>/notifications/unreadCount')
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.count > 0) {
+                        notifCount.textContent = data.count > 99 ? '99+' : data.count;
+                        notifCount.style.display = 'block';
+                    } else if (notifCount) {
+                        notifCount.style.display = 'none';
+                    }
+                }).catch(() => {});
+        }
+
+        function loadNotificationsDropdown() {
+            fetch('<?= $appUrl ?>/notifications/latest')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data || !data.notifications || data.notifications.length === 0) {
+                        notifList.innerHTML = '<div style="text-align:center; padding:24px; color:var(--gray-400); font-size:0.88rem;">Không có thông báo mới</div>';
+                        return;
+                    }
+
+                    notifList.innerHTML = data.notifications.map(n => `
+                        <div style="padding:10px 16px; border-bottom:1px solid var(--gray-100); background:${n.is_read ? 'white' : '#F0F9FF'};">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <strong style="font-size:0.86rem; color:var(--gray-900);">${n.title}</strong>
+                                <span style="font-size:0.72rem; color:var(--gray-400);">${n.created_at ? n.created_at.substring(11, 16) : ''}</span>
+                            </div>
+                            <div style="font-size:0.82rem; color:var(--gray-600); margin-top:2px; line-height:1.4;">${n.message}</div>
+                        </div>
+                    `).join('');
+                }).catch(() => {
+                    notifList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger); font-size:0.85rem;">Không thể tải thông báo</div>';
+                });
+        }
+
+        if (notifBell) {
+            notifBell.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = notifDropdown.style.display === 'none';
+                notifDropdown.style.display = isHidden ? 'block' : 'none';
+                if (isHidden) {
+                    loadNotificationsDropdown();
+                }
+            });
+
+            document.addEventListener('click', () => {
+                if (notifDropdown) notifDropdown.style.display = 'none';
+            });
+
+            // Polling số thông báo mỗi 30 giây
+            fetchUnreadCount();
+            setInterval(fetchUnreadCount, 30000);
+        }
+
+        function markAllNotificationsReadDropdown() {
+            fetch('<?= $appUrl ?>/notifications/markAllRead', { method: 'POST' })
+                .then(r => r.json())
+                .then(() => {
+                    if (notifCount) notifCount.style.display = 'none';
+                    loadNotificationsDropdown();
+                });
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('travelgo_theme', isDark ? 'dark' : 'light');
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+                lucide.createIcons();
+            }
+        }
     </script>
     <script src="<?= $appUrl ?>/assets/js/search-suggest.js"></script>
 
