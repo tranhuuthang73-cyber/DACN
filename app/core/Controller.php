@@ -34,6 +34,14 @@ class Controller
         // Thông tin chung
         $appName = $this->appConfig['name'];
         $appUrl = $this->appConfig['url'];
+        if (!empty($_SERVER['HTTP_HOST'])) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'];
+            $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+            $dir = dirname($scriptName);
+            $dir = ($dir === '/' || $dir === '\\') ? '' : rtrim(str_replace('\\', '/', $dir), '/');
+            $appUrl = $scheme . '://' . $host . $dir;
+        }
         $currentUser = Session::get('user');
         $flashSuccess = Session::flash('success');
         $flashError = Session::flash('error');
