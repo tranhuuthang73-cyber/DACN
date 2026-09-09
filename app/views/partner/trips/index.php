@@ -2,11 +2,14 @@
 use App\Core\Helper;
 ?>
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-xl);">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-xl); flex-wrap:wrap; gap:16px;">
     <div>
-        <h2 style="font-size:1.5rem;">Chuyến đi của Đơn vị</h2>
-        <p style="color:var(--gray-500); font-size:0.9rem;">Các chuyến đi do Ban Quản trị hệ thống liên kết với đơn vị vận tải của bạn</p>
+        <h2 style="font-size:1.5rem; font-weight:800;">Chuyến đi của Đơn vị</h2>
+        <p style="color:var(--gray-500); font-size:0.9rem;">Danh sách chuyến xe do đơn vị vận tải của bạn đăng ký và quản lý</p>
     </div>
+    <a href="<?= $appUrl ?>/partner/trips/create" class="btn btn-primary" style="display:flex; align-items:center; gap:8px;">
+        <i data-lucide="plus-circle" style="width:18px;height:18px;"></i> + Đăng ký chuyến mới
+    </a>
 </div>
 
 <div class="table-responsive">
@@ -47,7 +50,7 @@ use App\Core\Helper;
             <?php else: ?>
                 <tr>
                     <td colspan="9" style="text-align:center; padding:var(--space-2xl); color:var(--gray-500);">
-                        Chưa có chuyến đi nào được liên kết với đơn vị của bạn.
+                        Chưa có chuyến đi nào được đăng ký. Hãy bấm "+ Đăng ký chuyến mới" để bắt đầu!
                     </td>
                 </tr>
             <?php endif; ?>
