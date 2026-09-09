@@ -168,6 +168,50 @@ const MOCK_DATA = {
             room_name: 'Phòng Club Peninsula Ocean View',
             room_price: 4200000
         }
+    ],
+    reviews: [
+        {
+            id: 1,
+            type: 'trip',
+            item_id: 1,
+            customer_name: 'Lê Anh Tuấn',
+            rating: 5,
+            title: 'Chuyến đi êm ái, dịch vụ đẳng cấp!',
+            comment: 'Xe Limousine 9 chỗ rất rộng rãi, ghế massage bọc da êm ái. Bác tài Saigontourist chạy cực kỳ cẩn thận, đón đúng giờ tại Quận 1. Đầy đủ khăn lạnh, nước suối và wifi tốc độ cao.',
+            created_at: '08/09/2026',
+            partner_reply: 'Saigontourist Transport chân thành cảm ơn anh Tuấn đã tin tưởng lựa chọn dịch vụ. Rất mong được tiếp tục phục vụ anh trong những hành trình kế tiếp!',
+            partner_replied_at: '08/09/2026 14:30'
+        },
+        {
+            id: 2,
+            type: 'hotel',
+            item_id: 1,
+            customer_name: 'Trần Thị Mai',
+            rating: 5,
+            title: 'Khách sạn view biển xuất sắc, nhân viên nhiệt tình',
+            comment: 'Phòng Deluxe hướng trọn vịnh Nha Trang, ngắm bình minh từ ban công phòng ngủ quá đẹp. Buffet sáng rất phong phú món Á - Âu, hồ bơi vô cực sạch sẽ.',
+            created_at: '07/09/2026',
+            partner_reply: 'Vinpearl Resort & Spa Nha Trang xin cảm ơn chị Mai! Chúc chị và gia đình luôn có những chuyến du lịch trọn vẹn niềm vui.',
+            partner_replied_at: '07/09/2026 16:00'
+        },
+        {
+            id: 3,
+            type: 'trip',
+            item_id: 2,
+            customer_name: 'Hoàng Minh Trí',
+            rating: 4,
+            title: 'Xe sạch đẹp, giường phòng riêng tư',
+            comment: 'Xe giường nằm 34 phòng có rèm che riêng tư, máy lạnh mát mẻ. Đoạn qua đèo wifi có hơi chập chờn một chút nhưng tổng thể chuyến đi rất hài lòng.',
+            created_at: '06/09/2026',
+            partner_reply: null,
+            partner_replied_at: null
+        }
+    ],
+    notifications: [
+        { id: 1, title: 'Thanh toán thành công 🎉', message: 'Đơn hàng #TG-2026-8899 đã được xác nhận. Chỗ ngồi được bảo lưu an toàn 100%!', type: 'payment', is_read: 0, created_at: '10/09/2026 00:15' },
+        { id: 2, title: 'Nhắc nhở giờ khởi hành 🚌', message: 'Chuyến xe SG-DL-01 sẽ xuất bến lúc 07:30 ngày 05/09/2026. Quý khách vui lòng có mặt trước 15 phút.', type: 'trip', is_read: 0, created_at: '09/09/2026 20:00' },
+        { id: 3, title: 'Ưu đãi thành viên mới 🎁', message: 'TravelGo tặng bạn voucher giảm 100.000₫ cho chuyến đi kế tiếp!', type: 'promotion', is_read: 1, created_at: '08/09/2026 14:00' },
+        { id: 4, title: 'Duyệt yêu cầu hoàn tiền 💸', message: 'Yêu cầu hoàn tiền #RF-001 của bạn đã được phê duyệt thành công (350.000₫).', type: 'system', is_read: 1, created_at: '07/09/2026 11:30' }
     ]
 };
 
@@ -250,12 +294,57 @@ function renderLayout(title, content, activeTab = '') {
             </div>
 
             <div style="display:flex; align-items:center; gap:16px;">
+                <!-- Notification Bell with Dropdown -->
+                <div style="position:relative;">
+                    <button onclick="togglePreviewNotif()" id="btnPreviewNotif" title="Thông báo hệ thống" style="position:relative; width:46px; height:46px; border-radius:var(--radius-md); background:var(--gray-100); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--gray-800); transition:all 0.2s;" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--gray-100)'">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span id="previewNotifBadge" style="position:absolute; top:-4px; right:-4px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; font-size:0.72rem; font-weight:900; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 3px 8px rgba(239,68,68,0.4);">
+                            ${MOCK_DATA.notifications.filter(n => !n.is_read).length}
+                        </span>
+                    </button>
+
+                    <div id="previewNotifDropdown" style="display:none; position:absolute; right:0; top:54px; width:360px; background:white; border-radius:20px; box-shadow:var(--shadow-xl); border:1px solid var(--gray-200); z-index:9999; overflow:hidden;">
+                        <div style="padding:14px 18px; border-bottom:1px solid var(--gray-100); display:flex; justify-content:space-between; align-items:center; background:#FAFAFA;">
+                            <span style="font-weight:900; font-size:0.95rem; color:var(--gray-900);">🔔 Thông báo của bạn</span>
+                            <button onclick="markAllPreviewNotifRead()" style="background:none; border:none; color:var(--primary); font-size:0.8rem; font-weight:700; cursor:pointer;">
+                                Đọc tất cả
+                            </button>
+                        </div>
+                        <div style="max-height:320px; overflow-y:auto; padding:6px 0;">
+                            ${MOCK_DATA.notifications.map(n => `
+                                <div style="padding:12px 16px; border-bottom:1px solid var(--gray-100); background:${n.is_read ? 'white' : '#F0F9FF'};">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                        <strong style="font-size:0.88rem; color:var(--gray-900);">${n.title}</strong>
+                                        <span style="font-size:0.72rem; color:var(--gray-400);">${n.created_at.slice(-5)}</span>
+                                    </div>
+                                    <div style="font-size:0.82rem; color:var(--gray-600); margin-top:3px; line-height:1.4;">${n.message}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="padding:10px; border-top:1px solid var(--gray-100); text-align:center; background:#FAFAFA;">
+                            <a href="/notifications" style="font-size:0.85rem; font-weight:800; color:var(--primary); text-decoration:none;">
+                                Xem tất cả thông báo →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dark / Light Theme Toggle -->
+                <button onclick="togglePreviewTheme()" id="btnPreviewTheme" title="Chuyển giao diện Sáng / Tối" style="width:46px; height:46px; border-radius:var(--radius-md); background:var(--gray-100); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--gray-800); transition:all 0.2s;" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--gray-100)'">
+                    <i data-lucide="moon" id="previewThemeIcon" style="width:20px;height:20px;"></i>
+                </button>
+
                 <a href="/cart" style="position:relative; width:46px; height:46px; border-radius:var(--radius-md); background:var(--gray-100); display:flex; align-items:center; justify-content:center; color:var(--gray-800); text-decoration:none; transition:all 0.2s;" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--gray-100)'">
                     <i data-lucide="shopping-cart" style="width:20px;height:20px;"></i>
                     <span id="navCartBadge" style="position:absolute; top:-4px; right:-4px; background:var(--secondary); color:white; width:22px; height:22px; border-radius:50%; font-size:0.72rem; font-weight:900; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 3px 8px rgba(255,90,54,0.4);">${cartCount}</span>
                 </a>
-                <a href="/auth/login" class="btn btn-outline btn-sm">Đăng nhập</a>
-                <a href="/auth/register" class="btn btn-primary btn-sm">Đăng ký</a>
+
+                <a href="/profile" style="display:flex; align-items:center; gap:8px; text-decoration:none; background:var(--gray-100); padding:6px 14px 6px 8px; border-radius:var(--radius-full);">
+                    <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--primary), #00F5D4); color:white; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:0.85rem;">
+                        A
+                    </div>
+                    <span style="font-size:0.88rem; font-weight:800; color:var(--gray-800);">Hồ sơ</span>
+                </a>
             </div>
         </div>
     </nav>
@@ -332,6 +421,46 @@ function renderLayout(title, content, activeTab = '') {
                 toast.style.transition = 'all 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
+        }
+
+        function togglePreviewNotif() {
+            const dropdown = document.getElementById('previewNotifDropdown');
+            if (dropdown) {
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function markAllPreviewNotifRead() {
+            const badge = document.getElementById('previewNotifBadge');
+            if (badge) badge.style.display = 'none';
+            showToast('Đã đánh dấu tất cả thông báo là đã đọc');
+            setTimeout(() => {
+                const dropdown = document.getElementById('previewNotifDropdown');
+                if (dropdown) dropdown.style.display = 'none';
+            }, 500);
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = document.getElementById('btnPreviewNotif');
+            const dropdown = document.getElementById('previewNotifDropdown');
+            if (dropdown && btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        function togglePreviewTheme() {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('travelgo_theme', isDark ? 'dark' : 'light');
+            const icon = document.getElementById('previewThemeIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+                lucide.createIcons();
+            }
+            showToast(isDark ? '🌙 Đã kích hoạt Dark Mode' : '☀️ Đã chuyển sang Light Mode');
+        }
+
+        if (localStorage.getItem('travelgo_theme') === 'dark') {
+            document.body.classList.add('dark-theme');
         }
     </script>
 </body>
@@ -678,19 +807,90 @@ function handleCart() {
 
                         <div style="display:flex; justify-content:space-between; margin-bottom:18px; font-size:0.95rem; color:var(--gray-600);">
                             <span>Tạm tính:</span>
-                            <strong style="color:var(--gray-900);">${formatMoney(totalAmount)}</strong>
+                            <strong id="cartPreviewSubtotal" style="color:var(--gray-900);">${formatMoney(totalAmount)}</strong>
+                        </div>
+
+                        <!-- Coupon Input Block -->
+                        <div style="background:var(--gray-50); padding:16px; border-radius:16px; margin-bottom:18px; border:1px solid var(--gray-200);">
+                            <label style="display:block; font-size:0.85rem; font-weight:700; color:var(--gray-700); margin-bottom:6px;">
+                                <i data-lucide="tag" style="width:14px;height:14px;display:inline-block;vertical-align:middle;color:var(--primary);"></i> Mã khuyến mãi (Voucher)
+                            </label>
+                            
+                            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                                <input type="text" id="previewCouponInput" class="form-control" placeholder="Nhập mã (VD: TRAVELGO100)..." style="text-transform:uppercase; font-weight:800; font-size:0.9rem; padding:8px 12px;">
+                                <button type="button" onclick="applyPreviewCoupon()" class="btn btn-primary btn-sm" style="font-weight:800; padding:8px 14px; white-space:nowrap;">
+                                    Áp dụng
+                                </button>
+                            </div>
+
+                            <div id="previewCouponMsg" style="font-size:0.8rem; margin-bottom:6px;"></div>
+
+                            <!-- Quick Badges -->
+                            <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                                <span style="font-size:0.75rem; color:var(--gray-500);">Gợi ý:</span>
+                                <button type="button" onclick="document.getElementById('previewCouponInput').value='TRAVELGO100'; applyPreviewCoupon();" class="badge badge-primary" style="border:none; cursor:pointer; font-size:0.75rem; padding:2px 8px;">
+                                    TRAVELGO100 (-100k)
+                                </button>
+                                <button type="button" onclick="document.getElementById('previewCouponInput').value='SUMMER20'; applyPreviewCoupon();" class="badge badge-secondary" style="border:none; cursor:pointer; font-size:0.75rem; padding:2px 8px;">
+                                    SUMMER20 (-20%)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Discount Line -->
+                        <div id="previewDiscountLine" style="display:none; justify-content:space-between; margin-bottom:14px; font-size:0.95rem; color:var(--success);">
+                            <span style="font-weight:700;">Giảm giá voucher:</span>
+                            <strong id="previewDiscountValue">-0₫</strong>
                         </div>
 
                         <div style="display:flex; justify-content:space-between; align-items:baseline; padding-top:16px; border-top:2px solid var(--gray-100); margin-bottom:24px;">
                             <span style="font-weight:800; font-size:1.1rem;">Tổng thanh toán:</span>
-                            <span style="font-size:2rem; font-weight:900; color:var(--secondary);">
+                            <span id="previewCartFinal" style="font-size:2rem; font-weight:900; color:var(--secondary);">
                                 ${formatMoney(totalAmount)}
                             </span>
                         </div>
 
-                        <a href="/booking/checkout" class="btn btn-primary btn-lg btn-full" style="font-weight:900; padding:15px;">
+                        <a href="/booking/checkout" class="btn btn-primary btn-lg btn-full" style="font-weight:900; padding:15px; border-radius:16px; text-decoration:none; display:block; text-align:center;">
                             Tiến hành Giữ chỗ 15 phút →
                         </a>
+
+                        <script>
+                            const originalTotal = ${totalAmount};
+                            function applyPreviewCoupon() {
+                                const input = document.getElementById('previewCouponInput');
+                                const msg = document.getElementById('previewCouponMsg');
+                                const discLine = document.getElementById('previewDiscountLine');
+                                const discVal = document.getElementById('previewDiscountValue');
+                                const finalEl = document.getElementById('previewCartFinal');
+                                const code = input.value.trim().toUpperCase();
+
+                                if (!code) {
+                                    msg.innerHTML = '<span style="color:var(--danger)">Vui lòng nhập mã voucher</span>';
+                                    return;
+                                }
+
+                                let discount = 0;
+                                if (code === 'TRAVELGO100') {
+                                    discount = 100000;
+                                } else if (code === 'SUMMER20') {
+                                    discount = Math.min(200000, Math.round(originalTotal * 0.2));
+                                } else if (code === 'VIPLUXURY') {
+                                    discount = 300000;
+                                } else {
+                                    msg.innerHTML = '<span style="color:var(--danger)">✕ Mã voucher không hợp lệ hoặc đã hết hạn</span>';
+                                    discLine.style.display = 'none';
+                                    finalEl.textContent = originalTotal.toLocaleString('vi-VN') + '₫';
+                                    return;
+                                }
+
+                                const finalAmt = Math.max(0, originalTotal - discount);
+                                discLine.style.display = 'flex';
+                                discVal.textContent = '-' + discount.toLocaleString('vi-VN') + '₫';
+                                finalEl.textContent = finalAmt.toLocaleString('vi-VN') + '₫';
+                                msg.innerHTML = '<span style="color:var(--success);font-weight:700;">✓ Áp dụng thành công mã ' + code + '! Tiết kiệm ' + discount.toLocaleString('vi-VN') + '₫</span>';
+                                showToast('Đã áp dụng mã giảm giá ' + code + ' thành công!');
+                            }
+                        </script>
 
                         <div style="font-size:0.8rem; color:var(--gray-500); text-align:center; margin-top:16px; line-height:1.5;">
                             <i data-lucide="shield-check" style="width:15px;height:15px;display:inline-block;vertical-align:middle;color:var(--success);"></i>
@@ -722,7 +922,7 @@ function handleCheckout() {
                 <div class="card" style="padding:36px; background:white; border-radius:24px;">
                     <h3 style="font-size:1.3rem; font-weight:900; margin-bottom:20px;">👤 Thông tin Người liên hệ nhận vé</h3>
 
-                    <form onsubmit="event.preventDefault(); window.location.href='/booking/detail/TG-2026-8899';">
+                    <form onsubmit="event.preventDefault(); window.location.href='/payment/checkout';">
                         <div class="form-group">
                             <label>Họ và tên hành khách</label>
                             <input type="text" class="form-control" value="Nguyễn Văn An" required>
@@ -745,11 +945,11 @@ function handleCheckout() {
                         </div>
 
                         <div style="background:var(--primary-50); padding:16px; border-radius:var(--radius-md); margin-bottom:20px; font-size:0.85rem; color:var(--gray-700); line-height:1.6;">
-                            ⏱️ <strong>Cơ chế Giữ chỗ 15 phút:</strong> Khi bấm nút bên dưới, hệ thống sẽ tự động khóa ghế và phòng cho bạn trong 15 phút. Bạn có thể thanh toán hoặc mở vé ngay.
+                            ⏱️ <strong>Cơ chế Giữ chỗ 15 phút:</strong> Khi bấm nút bên dưới, hệ thống sẽ tự động khóa ghế và phòng cho bạn trong 15 phút để bạn tiến hành thanh toán an toàn.
                         </div>
 
                         <button type="submit" class="btn btn-secondary btn-lg btn-full" style="font-weight:900; padding:16px;">
-                            ⚡ Xác nhận Đặt chỗ & Khóa vé 15 phút
+                            ⚡ Xác nhận Giữ chỗ 15 phút & Tiến hành Thanh toán
                         </button>
                     </form>
                 </div>
@@ -1503,6 +1703,1807 @@ function handleCustomerDashboard() {
     `;
 }
 
+// 10. PARTNER DASHBOARD (Đối tác Xe & Khách sạn)
+function handlePartnerDashboard() {
+    return `
+        <div style="max-width:1260px; margin:40px auto; padding:0 24px;">
+
+            <!-- Greeting Banner -->
+            <div class="card" style="padding:40px; background:linear-gradient(135deg, #1A0A00 0%, #2D1600 40%, #CC6600 100%); color:white; border-radius:28px; margin-bottom:36px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+                    <div style="display:flex; align-items:center; gap:24px;">
+                        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #FB923C, #FBBF24); display:flex; align-items:center; justify-content:center; font-size:2.4rem; font-weight:900; border:3px solid rgba(255,255,255,0.3); color:#1A0A00;">
+                            S
+                        </div>
+                        <div>
+                            <span style="font-size:0.88rem; color:#FDBA74; text-transform:uppercase; letter-spacing:0.04em;">CỔNG ĐỐI TÁC DOANH NGHIỆP</span>
+                            <h1 style="color:white; font-size:2.4rem; font-weight:900; margin-bottom:4px;">Saigontourist Transport</h1>
+                            <div style="color:#FED7AA; font-weight:700; font-size:0.95rem;">🤝 Đối tác Vàng (Gold Partner) • MST: 0301234567 • dt_saigontour@travelgo.vn</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:14px;">
+                        <button onclick="showToast('Đã gửi yêu cầu thêm chuyến mới đến Admin!')" class="btn btn-accent btn-sm" style="font-weight:900;">+ Thêm chuyến mới</button>
+                        <button onclick="showToast('Đã cập nhật trạng thái phòng!')" class="btn btn-primary btn-sm" style="font-weight:900;">Cập nhật phòng trống</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="stats-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:24px; margin-bottom:36px;">
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid #FB923C; background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">DOANH THU THÁNG NÀY</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:var(--gray-900); margin-bottom:4px;">45.650.000₫</div>
+                    <div style="font-size:0.85rem; color:var(--success); font-weight:800;"><i data-lucide="trending-up" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> +23.5% so tháng trước</div>
+                </div>
+
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid var(--primary); background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">VÉ ĐÃ BÁN</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:var(--primary); margin-bottom:4px;">128 vé</div>
+                    <div style="font-size:0.85rem; color:var(--gray-500);">Trong tháng 09/2026</div>
+                </div>
+
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid var(--success); background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">TỶ LỆ LẤP ĐẦY</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:var(--success); margin-bottom:4px;">78.4%</div>
+                    <div style="font-size:0.85rem; color:var(--gray-500);">Trung bình các chuyến</div>
+                </div>
+
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid #8B5CF6; background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">ĐÁNH GIÁ TRUNG BÌNH</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:#8B5CF6; margin-bottom:4px;">4.85 ⭐</div>
+                    <div style="font-size:0.85rem; color:var(--gray-500);">Từ 128 lượt đánh giá</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div style="display:grid; grid-template-columns:2fr 1fr; gap:28px; margin-bottom:36px;">
+                <div class="card" style="padding:32px; background:white; border-radius:24px;">
+                    <h3 style="font-size:1.3rem; margin-bottom:20px;"><i data-lucide="bar-chart-3" style="width:22px;height:22px;color:#FB923C;display:inline-block;vertical-align:middle;"></i> Doanh thu theo tháng (VND)</h3>
+                    <div style="height:280px;">
+                        <canvas id="partnerRevenueChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:32px; background:white; border-radius:24px;">
+                    <h3 style="font-size:1.3rem; margin-bottom:20px;"><i data-lucide="pie-chart" style="width:22px;height:22px;color:#8B5CF6;display:inline-block;vertical-align:middle;"></i> Cơ cấu Doanh thu</h3>
+                    <div style="height:280px; display:flex; align-items:center; justify-content:center;">
+                        <canvas id="partnerShareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Trips Table -->
+            <div class="card" style="padding:32px; background:white; border-radius:24px; margin-bottom:36px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                    <h3 style="font-size:1.3rem; font-weight:900; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="bus" style="color:#FB923C;width:22px;height:22px;"></i> Chuyến xe đang hoạt động
+                    </h3>
+                    <span class="badge badge-primary">3 chuyến</span>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:separate; border-spacing:0 8px;">
+                        <thead>
+                            <tr style="font-size:0.82rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.04em;">
+                                <th style="padding:12px 16px; text-align:left;">Mã chuyến</th>
+                                <th style="padding:12px 16px; text-align:left;">Tuyến đường</th>
+                                <th style="padding:12px 16px; text-align:left;">Khởi hành</th>
+                                <th style="padding:12px 16px; text-align:center;">Vé bán / Tổng</th>
+                                <th style="padding:12px 16px; text-align:right;">Doanh thu</th>
+                                <th style="padding:12px 16px; text-align:center;">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background:var(--gray-50); border-radius:16px;">
+                                <td style="padding:16px; font-weight:800; color:var(--primary); border-radius:16px 0 0 16px;">SG-DL-01</td>
+                                <td style="padding:16px;"><strong>TP. HCM → Đà Lạt</strong><br><span style="font-size:0.82rem; color:var(--gray-500);">Limousine 9 chỗ VIP</span></td>
+                                <td style="padding:16px; font-size:0.92rem;">05/09/2026<br><span style="color:var(--primary); font-weight:700;">07:30</span></td>
+                                <td style="padding:16px; text-align:center;">
+                                    <div style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                                        <div style="width:80px; height:8px; background:var(--gray-200); border-radius:8px; overflow:hidden;">
+                                            <div style="width:33%; height:100%; background:var(--success); border-radius:8px;"></div>
+                                        </div>
+                                        <span style="font-weight:800; font-size:0.88rem;">3/9</span>
+                                    </div>
+                                </td>
+                                <td style="padding:16px; text-align:right; font-weight:900; color:var(--gray-900);">1.050.000₫</td>
+                                <td style="padding:16px; text-align:center; border-radius:0 16px 16px 0;"><span class="badge badge-success">Mở bán</span></td>
+                            </tr>
+                            <tr style="background:var(--gray-50); border-radius:16px;">
+                                <td style="padding:16px; font-weight:800; color:var(--primary); border-radius:16px 0 0 16px;">SG-NT-02</td>
+                                <td style="padding:16px;"><strong>TP. HCM → Nha Trang</strong><br><span style="font-size:0.82rem; color:var(--gray-500);">Giường nằm 34 phòng VIP</span></td>
+                                <td style="padding:16px; font-size:0.92rem;">06/09/2026<br><span style="color:var(--primary); font-weight:700;">20:00</span></td>
+                                <td style="padding:16px; text-align:center;">
+                                    <div style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                                        <div style="width:80px; height:8px; background:var(--gray-200); border-radius:8px; overflow:hidden;">
+                                            <div style="width:65%; height:100%; background:var(--primary); border-radius:8px;"></div>
+                                        </div>
+                                        <span style="font-weight:800; font-size:0.88rem;">22/34</span>
+                                    </div>
+                                </td>
+                                <td style="padding:16px; text-align:right; font-weight:900; color:var(--gray-900);">6.160.000₫</td>
+                                <td style="padding:16px; text-align:center; border-radius:0 16px 16px 0;"><span class="badge badge-success">Mở bán</span></td>
+                            </tr>
+                            <tr style="background:var(--gray-50); border-radius:16px;">
+                                <td style="padding:16px; font-weight:800; color:var(--gray-500); border-radius:16px 0 0 16px;">SG-PQ-04</td>
+                                <td style="padding:16px;"><strong>TP. HCM → Phú Quốc</strong><br><span style="font-size:0.82rem; color:var(--gray-500);">Xe ghế ngồi 45 chỗ</span></td>
+                                <td style="padding:16px; font-size:0.92rem;">10/09/2026<br><span style="color:var(--primary); font-weight:700;">06:00</span></td>
+                                <td style="padding:16px; text-align:center;">
+                                    <div style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                                        <div style="width:80px; height:8px; background:var(--gray-200); border-radius:8px; overflow:hidden;">
+                                            <div style="width:89%; height:100%; background:#FB923C; border-radius:8px;"></div>
+                                        </div>
+                                        <span style="font-weight:800; font-size:0.88rem; color:#FB923C;">40/45</span>
+                                    </div>
+                                </td>
+                                <td style="padding:16px; text-align:right; font-weight:900; color:var(--gray-900);">8.000.000₫</td>
+                                <td style="padding:16px; text-align:center; border-radius:0 16px 16px 0;"><span class="badge" style="background:rgba(251,146,60,0.12); color:#EA580C; font-weight:800;">Sắp đầy</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hotel & Room Status -->
+            <div class="card" style="padding:32px; background:white; border-radius:24px; margin-bottom:36px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                    <h3 style="font-size:1.3rem; font-weight:900; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="building-2" style="color:var(--primary);width:22px;height:22px;"></i> Khách sạn & Phòng trống
+                    </h3>
+                    <span class="badge badge-primary">2 khách sạn</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+                    <div style="background:var(--gray-50); border-radius:20px; padding:28px;">
+                        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=120&h=120&fit=crop" style="width:60px; height:60px; border-radius:16px; object-fit:cover;" alt="">
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:800; margin-bottom:2px;">Vinpearl Resort Nha Trang</h4>
+                                <div style="font-size:0.85rem; color:var(--gray-500);">⭐⭐⭐⭐⭐ 5 sao • Nha Trang</div>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div style="background:white; padding:16px; border-radius:14px; text-align:center;">
+                                <div style="font-size:0.78rem; color:var(--gray-500); margin-bottom:4px;">Deluxe Biển</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:var(--success);">8</div>
+                                <div style="font-size:0.75rem; color:var(--gray-500);">/ 15 phòng</div>
+                            </div>
+                            <div style="background:white; padding:16px; border-radius:14px; text-align:center;">
+                                <div style="font-size:0.78rem; color:var(--gray-500); margin-bottom:4px;">Suite VIP</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:#FB923C;">2</div>
+                                <div style="font-size:0.75rem; color:var(--gray-500);">/ 5 phòng</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--gray-50); border-radius:20px; padding:28px;">
+                        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+                            <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=120&h=120&fit=crop" style="width:60px; height:60px; border-radius:16px; object-fit:cover;" alt="">
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:800; margin-bottom:2px;">Dalat Palace Heritage</h4>
+                                <div style="font-size:0.85rem; color:var(--gray-500);">⭐⭐⭐⭐⭐ 5 sao • Đà Lạt</div>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div style="background:white; padding:16px; border-radius:14px; text-align:center;">
+                                <div style="font-size:0.78rem; color:var(--gray-500); margin-bottom:4px;">Heritage Suite</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:var(--success);">5</div>
+                                <div style="font-size:0.75rem; color:var(--gray-500);">/ 10 phòng</div>
+                            </div>
+                            <div style="background:white; padding:16px; border-radius:14px; text-align:center;">
+                                <div style="font-size:0.78rem; color:var(--gray-500); margin-bottom:4px;">Phòng Đôi</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:var(--success);">12</div>
+                                <div style="font-size:0.75rem; color:var(--gray-500);">/ 20 phòng</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings -->
+            <div class="card" style="padding:32px; background:white; border-radius:24px;">
+                <h3 style="font-size:1.3rem; font-weight:900; margin-bottom:24px; display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="clipboard-list" style="color:var(--secondary);width:22px;height:22px;"></i> Đơn đặt chỗ mới nhất
+                </h3>
+
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:separate; border-spacing:0 8px;">
+                        <thead>
+                            <tr style="font-size:0.82rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.04em;">
+                                <th style="padding:12px 16px; text-align:left;">Mã booking</th>
+                                <th style="padding:12px 16px; text-align:left;">Khách hàng</th>
+                                <th style="padding:12px 16px; text-align:left;">Dịch vụ</th>
+                                <th style="padding:12px 16px; text-align:right;">Giá trị</th>
+                                <th style="padding:12px 16px; text-align:center;">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background:var(--gray-50); border-radius:16px;">
+                                <td style="padding:16px; font-weight:800; color:var(--primary); border-radius:16px 0 0 16px;">BK-20260905-001</td>
+                                <td style="padding:16px;">Nguyễn Văn An<br><span style="font-size:0.82rem; color:var(--gray-500);">an.nguyen@gmail.com</span></td>
+                                <td style="padding:16px;">SG-DL-01 • 2 vé<br><span style="font-size:0.82rem; color:var(--gray-500);">Limousine HCM→Đà Lạt</span></td>
+                                <td style="padding:16px; text-align:right; font-weight:900;">700.000₫</td>
+                                <td style="padding:16px; text-align:center; border-radius:0 16px 16px 0;"><span class="badge badge-success">Đã thanh toán</span></td>
+                            </tr>
+                            <tr style="background:var(--gray-50); border-radius:16px;">
+                                <td style="padding:16px; font-weight:800; color:var(--primary); border-radius:16px 0 0 16px;">BK-20260905-002</td>
+                                <td style="padding:16px;">Trần Thị Bích<br><span style="font-size:0.82rem; color:var(--gray-500);">bich.tran@gmail.com</span></td>
+                                <td style="padding:16px;">Vinpearl Deluxe • 1 phòng<br><span style="font-size:0.82rem; color:var(--gray-500);">2 đêm (05-07/09)</span></td>
+                                <td style="padding:16px; text-align:right; font-weight:900;">4.900.000₫</td>
+                                <td style="padding:16px; text-align:center; border-radius:0 16px 16px 0;"><span class="badge badge-success">Đã xác nhận</span></td>
+                            </tr>
+                            <tr style="background:var(--gray-50); border-radius:16px;">
+                                <td style="padding:16px; font-weight:800; color:var(--gray-500); border-radius:16px 0 0 16px;">BK-20260906-003</td>
+                                <td style="padding:16px;">Lê Minh Tuấn<br><span style="font-size:0.82rem; color:var(--gray-500);">tuan.le@gmail.com</span></td>
+                                <td style="padding:16px;">SG-NT-02 • 4 vé<br><span style="font-size:0.82rem; color:var(--gray-500);">Giường nằm HCM→Nha Trang</span></td>
+                                <td style="padding:16px; text-align:right; font-weight:900;">1.120.000₫</td>
+                                <td style="padding:16px; text-align:center; border-radius:0 16px 16px 0;"><span class="badge" style="background:rgba(251,146,60,0.12); color:#EA580C;">Chờ thanh toán</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            setTimeout(() => {
+                new Chart(document.getElementById('partnerRevenueChart'), {
+                    type: 'line',
+                    data: {
+                        labels: ['T4', 'T5', 'T6', 'T7', 'T8', 'T9'],
+                        datasets: [{
+                            label: 'Doanh thu xe (VND)',
+                            data: [8200000, 12500000, 18400000, 24300000, 35800000, 38500000],
+                            borderColor: '#FB923C',
+                            backgroundColor: 'rgba(251,146,60,0.08)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#FB923C'
+                        }, {
+                            label: 'Doanh thu phòng (VND)',
+                            data: [2100000, 4800000, 3600000, 8200000, 5800000, 7150000],
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139,92,246,0.08)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#8B5CF6'
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+
+                new Chart(document.getElementById('partnerShareChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Vé chuyến đi', 'Phòng khách sạn'],
+                        datasets: [{
+                            data: [38500000, 7150000],
+                            backgroundColor: ['#FB923C', '#8B5CF6'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            }, 100);
+        </script>
+    `;
+}
+
+// 11. EMPLOYEE DASHBOARD (Nhân viên Duyệt & Nghiệp vụ)
+function handleEmployeeDashboard() {
+    return `
+        <div style="max-width:1260px; margin:40px auto; padding:0 24px;">
+
+            <!-- Greeting Banner -->
+            <div class="card" style="padding:40px; background:linear-gradient(135deg, #0D0024 0%, #1E0040 40%, #7C3AED 100%); color:white; border-radius:28px; margin-bottom:36px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+                    <div style="display:flex; align-items:center; gap:24px;">
+                        <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #A78BFA, #E879F9); display:flex; align-items:center; justify-content:center; font-size:2.4rem; font-weight:900; border:3px solid rgba(255,255,255,0.3); color:#0D0024;">
+                            H
+                        </div>
+                        <div>
+                            <span style="font-size:0.88rem; color:#C4B5FD; text-transform:uppercase; letter-spacing:0.04em;">BẢNG ĐIỀU HÀNH NGHIỆP VỤ</span>
+                            <h1 style="color:white; font-size:2.4rem; font-weight:900; margin-bottom:4px;">Nguyễn Thị Hoa</h1>
+                            <div style="color:#DDD6FE; font-weight:700; font-size:0.95rem;">💼 Nhân viên Kiểm duyệt • ID: NV-003 • hoa.nguyen@travelgo.vn</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:14px; align-items:center;">
+                        <div style="background:rgba(255,255,255,0.15); padding:12px 24px; border-radius:16px; text-align:center;">
+                            <div style="font-size:0.78rem; color:#C4B5FD;">Việc chờ xử lý</div>
+                            <div style="font-size:2rem; font-weight:900; color:#FBBF24;">7</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="stats-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:24px; margin-bottom:36px;">
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid #FBBF24; background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">CHỜ DUYỆT CHUYẾN ĐI</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:#FBBF24; margin-bottom:4px;">3</div>
+                    <div style="font-size:0.85rem; color:var(--gray-500);">Cần xét duyệt ngay</div>
+                </div>
+
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid #FB923C; background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">CHỜ DUYỆT KHÁCH SẠN</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:#FB923C; margin-bottom:4px;">2</div>
+                    <div style="font-size:0.85rem; color:var(--gray-500);">Đối tác mới gửi</div>
+                </div>
+
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid var(--secondary); background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">YÊU CẦU HOÀN TIỀN</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:var(--secondary); margin-bottom:4px;">2</div>
+                    <div style="font-size:0.85rem; color:var(--gray-500);">Đang chờ phê duyệt</div>
+                </div>
+
+                <div class="stat-card" style="padding:26px; text-align:left; border-left:4px solid var(--success); background:white; border-radius:20px; box-shadow:var(--shadow-md);">
+                    <div style="font-size:0.85rem; color:var(--gray-500); font-weight:800; margin-bottom:6px; text-transform:uppercase;">ĐÃ XỬ LÝ HÔM NAY</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:var(--success); margin-bottom:4px;">12</div>
+                    <div style="font-size:0.85rem; color:var(--gray-500);">Duyệt + Hoàn tiền</div>
+                </div>
+            </div>
+
+            <!-- Pending Trips Approval Queue -->
+            <div class="card" style="padding:32px; background:white; border-radius:24px; margin-bottom:36px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                    <h3 style="font-size:1.3rem; font-weight:900; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="clock" style="color:#FBBF24;width:22px;height:22px;"></i> Hàng đợi Duyệt Chuyến đi
+                    </h3>
+                    <span class="badge" style="background:rgba(251,191,36,0.12); color:#B45309; font-weight:800;">3 chờ duyệt</span>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    <div style="background:var(--gray-50); border-radius:20px; padding:24px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #FBBF24;">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <span style="font-weight:900; color:var(--primary); font-size:1.05rem;">SG-HP-05</span>
+                                <span class="badge" style="background:rgba(251,191,36,0.12); color:#B45309; font-size:0.72rem;">Chờ duyệt</span>
+                            </div>
+                            <div style="font-weight:700; font-size:1.05rem; margin-bottom:4px;">TP. HCM → Hải Phòng</div>
+                            <div style="font-size:0.88rem; color:var(--gray-500);">Đối tác: <strong>Hoàng Long Express</strong> • Xe giường nằm 40 chỗ • 12/09/2026 lúc 19:00 • <strong>450.000₫/vé</strong></div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="this.closest('div[style*=gray-50]').style.borderLeftColor='var(--success)'; this.closest('div[style*=gray-50]').querySelector('.badge').textContent='✅ Đã duyệt'; this.closest('div[style*=gray-50]').querySelector('.badge').style.background='rgba(16,185,129,0.12)'; this.closest('div[style*=gray-50]').querySelector('.badge').style.color='#059669'; this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900>✅ Đã duyệt</span>'; showToast('Đã duyệt chuyến SG-HP-05 thành công!');" class="btn btn-primary btn-sm" style="font-weight:800; padding:10px 20px;">✓ Duyệt</button>
+                            <button onclick="this.closest('div[style*=gray-50]').style.borderLeftColor='var(--secondary)'; this.closest('div[style*=gray-50]').querySelector('.badge').textContent='❌ Từ chối'; this.closest('div[style*=gray-50]').querySelector('.badge').style.background='rgba(239,68,68,0.12)'; this.closest('div[style*=gray-50]').querySelector('.badge').style.color='#DC2626'; this.parentElement.innerHTML='<span style=color:var(--secondary);font-weight:900>❌ Từ chối</span>'; showToast('Đã từ chối chuyến SG-HP-05', 'error');" class="btn btn-outline btn-sm" style="font-weight:800; padding:10px 20px; color:var(--secondary); border-color:var(--secondary);">✕ Từ chối</button>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--gray-50); border-radius:20px; padding:24px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #FBBF24;">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <span style="font-weight:900; color:var(--primary); font-size:1.05rem;">HN-SPA-06</span>
+                                <span class="badge" style="background:rgba(251,191,36,0.12); color:#B45309; font-size:0.72rem;">Chờ duyệt</span>
+                            </div>
+                            <div style="font-weight:700; font-size:1.05rem; margin-bottom:4px;">Hà Nội → Sa Pa</div>
+                            <div style="font-size:0.88rem; color:var(--gray-500);">Đối tác: <strong>Sapa Express</strong> • Limousine 9 chỗ • 15/09/2026 lúc 06:30 • <strong>380.000₫/vé</strong></div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="this.closest('div[style*=gray-50]').style.borderLeftColor='var(--success)'; this.closest('div[style*=gray-50]').querySelector('.badge').textContent='✅ Đã duyệt'; this.closest('div[style*=gray-50]').querySelector('.badge').style.background='rgba(16,185,129,0.12)'; this.closest('div[style*=gray-50]').querySelector('.badge').style.color='#059669'; this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900>✅ Đã duyệt</span>'; showToast('Đã duyệt chuyến HN-SPA-06 thành công!');" class="btn btn-primary btn-sm" style="font-weight:800; padding:10px 20px;">✓ Duyệt</button>
+                            <button onclick="this.closest('div[style*=gray-50]').style.borderLeftColor='var(--secondary)'; this.closest('div[style*=gray-50]').querySelector('.badge').textContent='❌ Từ chối'; this.closest('div[style*=gray-50]').querySelector('.badge').style.background='rgba(239,68,68,0.12)'; this.closest('div[style*=gray-50]').querySelector('.badge').style.color='#DC2626'; this.parentElement.innerHTML='<span style=color:var(--secondary);font-weight:900>❌ Từ chối</span>'; showToast('Đã từ chối chuyến HN-SPA-06', 'error');" class="btn btn-outline btn-sm" style="font-weight:800; padding:10px 20px; color:var(--secondary); border-color:var(--secondary);">✕ Từ chối</button>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--gray-50); border-radius:20px; padding:24px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #FBBF24;">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <span style="font-weight:900; color:var(--primary); font-size:1.05rem;">DN-HUE-07</span>
+                                <span class="badge" style="background:rgba(251,191,36,0.12); color:#B45309; font-size:0.72rem;">Chờ duyệt</span>
+                            </div>
+                            <div style="font-weight:700; font-size:1.05rem; margin-bottom:4px;">Đà Nẵng → Huế</div>
+                            <div style="font-size:0.88rem; color:var(--gray-500);">Đối tác: <strong>Hội An Express</strong> • Xe 16 chỗ • 18/09/2026 lúc 08:00 • <strong>220.000₫/vé</strong></div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="this.closest('div[style*=gray-50]').style.borderLeftColor='var(--success)'; this.closest('div[style*=gray-50]').querySelector('.badge').textContent='✅ Đã duyệt'; this.closest('div[style*=gray-50]').querySelector('.badge').style.background='rgba(16,185,129,0.12)'; this.closest('div[style*=gray-50]').querySelector('.badge').style.color='#059669'; this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900>✅ Đã duyệt</span>'; showToast('Đã duyệt chuyến DN-HUE-07 thành công!');" class="btn btn-primary btn-sm" style="font-weight:800; padding:10px 20px;">✓ Duyệt</button>
+                            <button onclick="this.closest('div[style*=gray-50]').style.borderLeftColor='var(--secondary)'; this.closest('div[style*=gray-50]').querySelector('.badge').textContent='❌ Từ chối'; this.closest('div[style*=gray-50]').querySelector('.badge').style.background='rgba(239,68,68,0.12)'; this.closest('div[style*=gray-50]').querySelector('.badge').style.color='#DC2626'; this.parentElement.innerHTML='<span style=color:var(--secondary);font-weight:900>❌ Từ chối</span>'; showToast('Đã từ chối chuyến DN-HUE-07', 'error');" class="btn btn-outline btn-sm" style="font-weight:800; padding:10px 20px; color:var(--secondary); border-color:var(--secondary);">✕ Từ chối</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Hotels Approval Queue -->
+            <div class="card" style="padding:32px; background:white; border-radius:24px; margin-bottom:36px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                    <h3 style="font-size:1.3rem; font-weight:900; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="building-2" style="color:#FB923C;width:22px;height:22px;"></i> Hàng đợi Duyệt Khách sạn
+                    </h3>
+                    <span class="badge" style="background:rgba(251,146,60,0.12); color:#EA580C; font-weight:800;">2 chờ duyệt</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                    <div style="background:var(--gray-50); border-radius:20px; padding:24px; border-left:4px solid #FB923C;">
+                        <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+                            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=120&h=120&fit=crop" style="width:50px; height:50px; border-radius:14px; object-fit:cover;" alt="">
+                            <div>
+                                <h4 style="font-size:1rem; font-weight:800;">Mường Thanh Grand Đà Nẵng</h4>
+                                <div style="font-size:0.82rem; color:var(--gray-500);">⭐⭐⭐⭐ 4 sao • Đà Nẵng • 45 phòng</div>
+                            </div>
+                        </div>
+                        <div style="font-size:0.88rem; color:var(--gray-500); margin-bottom:14px;">Đối tác: <strong>Mường Thanh Group</strong> — Đăng ký: 07/09/2026</div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900;font-size:1.05rem>✅ Đã duyệt khách sạn</span>'; showToast('Đã duyệt Mường Thanh Grand Đà Nẵng!');" class="btn btn-primary btn-sm" style="font-weight:800; flex:1;">✓ Duyệt</button>
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--secondary);font-weight:900;font-size:1.05rem>❌ Từ chối</span>'; showToast('Đã từ chối Mường Thanh Grand Đà Nẵng', 'error');" class="btn btn-outline btn-sm" style="font-weight:800; flex:1; color:var(--secondary); border-color:var(--secondary);">✕ Từ chối</button>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--gray-50); border-radius:20px; padding:24px; border-left:4px solid #FB923C;">
+                        <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+                            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=120&h=120&fit=crop" style="width:50px; height:50px; border-radius:14px; object-fit:cover;" alt="">
+                            <div>
+                                <h4 style="font-size:1rem; font-weight:800;">Sapa Jade Hill Resort</h4>
+                                <div style="font-size:0.82rem; color:var(--gray-500);">⭐⭐⭐⭐⭐ 5 sao • Sa Pa • 28 phòng</div>
+                            </div>
+                        </div>
+                        <div style="font-size:0.88rem; color:var(--gray-500); margin-bottom:14px;">Đối tác: <strong>Jade Hill Hospitality</strong> — Đăng ký: 08/09/2026</div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900;font-size:1.05rem>✅ Đã duyệt khách sạn</span>'; showToast('Đã duyệt Sapa Jade Hill Resort!');" class="btn btn-primary btn-sm" style="font-weight:800; flex:1;">✓ Duyệt</button>
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--secondary);font-weight:900;font-size:1.05rem>❌ Từ chối</span>'; showToast('Đã từ chối Sapa Jade Hill Resort', 'error');" class="btn btn-outline btn-sm" style="font-weight:800; flex:1; color:var(--secondary); border-color:var(--secondary);">✕ Từ chối</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Refund Requests Queue -->
+            <div class="card" style="padding:32px; background:white; border-radius:24px; margin-bottom:36px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                    <h3 style="font-size:1.3rem; font-weight:900; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="rotate-ccw" style="color:var(--secondary);width:22px;height:22px;"></i> Yêu cầu Hoàn tiền Vé
+                    </h3>
+                    <span class="badge" style="background:rgba(255,90,54,0.12); color:var(--secondary); font-weight:800;">2 yêu cầu</span>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    <div style="background:var(--gray-50); border-radius:20px; padding:24px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid var(--secondary);">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <span style="font-weight:900; color:var(--secondary); font-size:1.05rem;">RF-20260908-001</span>
+                                <span class="badge" style="background:rgba(255,90,54,0.12); color:var(--secondary); font-size:0.72rem;">Chờ xét duyệt</span>
+                            </div>
+                            <div style="font-size:0.95rem; margin-bottom:4px;"><strong>Phạm Hồng Đức</strong> — Mã booking: BK-20260901-015</div>
+                            <div style="font-size:0.88rem; color:var(--gray-500);">SG-DL-01 • 1 vé • Lý do: <em>"Thay đổi kế hoạch cá nhân"</em></div>
+                            <div style="font-size:0.88rem; color:var(--success); font-weight:700; margin-top:4px;">Hoàn tiền tự động: 100% (350.000₫) — Hủy trước 7+ ngày</div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900>✅ Đã duyệt hoàn 350.000₫</span>'; showToast('Đã phê duyệt hoàn tiền 350.000₫ cho Phạm Hồng Đức!');" class="btn btn-primary btn-sm" style="font-weight:800; padding:10px 20px;">✓ Duyệt hoàn</button>
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--secondary);font-weight:900>❌ Từ chối</span>'; showToast('Đã từ chối yêu cầu hoàn tiền', 'error');" class="btn btn-outline btn-sm" style="font-weight:800; padding:10px 20px; color:var(--secondary); border-color:var(--secondary);">✕ Từ chối</button>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--gray-50); border-radius:20px; padding:24px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid var(--secondary);">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <span style="font-weight:900; color:var(--secondary); font-size:1.05rem;">RF-20260909-002</span>
+                                <span class="badge" style="background:rgba(255,90,54,0.12); color:var(--secondary); font-size:0.72rem;">Chờ xét duyệt</span>
+                            </div>
+                            <div style="font-size:0.95rem; margin-bottom:4px;"><strong>Vũ Thanh Mai</strong> — Mã booking: BK-20260903-022</div>
+                            <div style="font-size:0.88rem; color:var(--gray-500);">SG-NT-02 • 2 vé • Lý do: <em>"Bị ốm không đi được"</em></div>
+                            <div style="font-size:0.88rem; color:#FB923C; font-weight:700; margin-top:4px;">Hoàn tiền bậc thang: 50% (280.000₫) — Hủy trước 3-6 ngày</div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900>✅ Đã duyệt hoàn 280.000₫</span>'; showToast('Đã phê duyệt hoàn tiền 280.000₫ cho Vũ Thanh Mai!');" class="btn btn-primary btn-sm" style="font-weight:800; padding:10px 20px;">✓ Duyệt hoàn</button>
+                            <button onclick="this.parentElement.innerHTML='<span style=color:var(--secondary);font-weight:900>❌ Từ chối</span>'; showToast('Đã từ chối yêu cầu hoàn tiền', 'error');" class="btn btn-outline btn-sm" style="font-weight:800; padding:10px 20px; color:var(--secondary); border-color:var(--secondary);">✕ Từ chối</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Activity Log -->
+            <div class="card" style="padding:32px; background:white; border-radius:24px;">
+                <h3 style="font-size:1.3rem; font-weight:900; margin-bottom:24px; display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="activity" style="color:var(--success);width:22px;height:22px;"></i> Lịch sử Xử lý Hôm nay
+                </h3>
+
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; background:var(--gray-50); border-radius:14px;">
+                        <div style="width:40px; height:40px; border-radius:12px; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="check-circle" style="width:20px;height:20px;color:var(--success);"></i></div>
+                        <div style="flex:1;"><strong>Duyệt chuyến SG-DL-01</strong> — TP. HCM → Đà Lạt (Saigontourist Transport)<br><span style="font-size:0.82rem; color:var(--gray-500);">09:15 sáng</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; background:var(--gray-50); border-radius:14px;">
+                        <div style="width:40px; height:40px; border-radius:12px; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="check-circle" style="width:20px;height:20px;color:var(--success);"></i></div>
+                        <div style="flex:1;"><strong>Duyệt chuyến SG-NT-02</strong> — TP. HCM → Nha Trang (Phương Trang FUTA)<br><span style="font-size:0.82rem; color:var(--gray-500);">09:22 sáng</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; background:var(--gray-50); border-radius:14px;">
+                        <div style="width:40px; height:40px; border-radius:12px; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="building-2" style="width:20px;height:20px;color:var(--success);"></i></div>
+                        <div style="flex:1;"><strong>Duyệt khách sạn Vinpearl Resort Nha Trang</strong> — 5 sao, 50 phòng<br><span style="font-size:0.82rem; color:var(--gray-500);">10:05 sáng</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; background:var(--gray-50); border-radius:14px;">
+                        <div style="width:40px; height:40px; border-radius:12px; background:rgba(0,102,255,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="rotate-ccw" style="width:20px;height:20px;color:var(--primary);"></i></div>
+                        <div style="flex:1;"><strong>Phê duyệt hoàn tiền RF-20260907-005</strong> — Hoàn 100% (350.000₫) cho Trần Văn Bình<br><span style="font-size:0.82rem; color:var(--gray-500);">11:30 sáng</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; background:var(--gray-50); border-radius:14px;">
+                        <div style="width:40px; height:40px; border-radius:12px; background:rgba(239,68,68,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i data-lucide="x-circle" style="width:20px;height:20px;color:var(--secondary);"></i></div>
+                        <div style="flex:1;"><strong>Từ chối chuyến HN-QB-08</strong> — Lý do: Thiếu giấy phép kinh doanh vận tải<br><span style="font-size:0.82rem; color:var(--gray-500);">14:18 chiều</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    `;
+}
+
+// 12. PAYMENT CHECKOUT (Chọn phương thức & Đếm ngược 15 phút)
+function handlePaymentCheckout() {
+    const totalAmount = calculateCartTotal();
+    return `
+        <div style="max-width:960px; margin:40px auto; padding:0 24px;">
+            <!-- 15-Minute Countdown Banner -->
+            <div style="background:linear-gradient(135deg, #1E1B4B 0%, #312E81 100%); color:white; padding:24px 32px; border-radius:24px; margin-bottom:32px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; box-shadow:var(--shadow-lg);">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="width:48px; height:48px; border-radius:14px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; color:#FBBF24;">
+                        <i data-lucide="clock" style="width:26px;height:26px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.85rem; color:#C7D2FE; text-transform:uppercase; letter-spacing:0.04em;">THỜI GIAN GIỮ CHỖ CÒN LẠI</div>
+                        <div style="font-size:1.1rem; font-weight:700;">Vui lòng hoàn tất thanh toán để nhận vé chính thức</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:baseline; gap:6px; background:rgba(0,0,0,0.3); padding:10px 24px; border-radius:16px; border:1px solid rgba(255,255,255,0.15);">
+                    <span id="previewCountdownTimer" style="font-size:2.4rem; font-weight:900; color:#FBBF24; font-variant-numeric:tabular-nums;">
+                        14:59
+                    </span>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:32px; align-items:start;">
+                <!-- Payment Methods Form -->
+                <div class="card" style="padding:32px; background:white; border-radius:24px; box-shadow:var(--shadow-sm);">
+                    <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="credit-card" style="color:var(--primary);width:22px;height:22px;"></i> Chọn Cổng thanh toán Trực tuyến
+                    </h3>
+
+                    <div style="display:flex; flex-direction:column; gap:16px; margin-bottom:28px;">
+                        <!-- VNPay Option -->
+                        <label id="lblVnPay" onclick="selectGateway('vnpay')" style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border:2px solid var(--primary); background:#F0F7FF; border-radius:18px; cursor:pointer; transition:all 0.2s;">
+                            <div style="display:flex; align-items:center; gap:16px;">
+                                <input type="radio" name="payment_gateway" value="vnpay" checked style="width:20px; height:20px; accent-color:var(--primary);">
+                                <div>
+                                    <div style="font-weight:900; font-size:1.1rem; color:#005BAA;">Cổng thanh toán VNPAY</div>
+                                    <div style="font-size:0.85rem; color:var(--gray-500);">Quét mã VNPAY-QR, Thẻ ATM 40+ Ngân hàng, Internet Banking, Visa/Mastercard</div>
+                                </div>
+                            </div>
+                            <span class="badge badge-primary" style="font-weight:800;">Khuyên dùng</span>
+                        </label>
+
+                        <!-- MoMo Option -->
+                        <label id="lblMomo" onclick="selectGateway('momo')" style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border:2px solid var(--gray-200); background:white; border-radius:18px; cursor:pointer; transition:all 0.2s;">
+                            <div style="display:flex; align-items:center; gap:16px;">
+                                <input type="radio" name="payment_gateway" value="momo" style="width:20px; height:20px; accent-color:#A50064;">
+                                <div>
+                                    <div style="font-weight:900; font-size:1.1rem; color:#A50064;">Ví điện tử MoMo</div>
+                                    <div style="font-size:0.85rem; color:var(--gray-500);">Quét mã QR MoMo hoặc thanh toán qua App MoMo trên điện thoại</div>
+                                </div>
+                            </div>
+                            <span class="badge" style="background:rgba(165,0,100,0.1); color:#A50064; font-weight:800;">Nhanh chóng</span>
+                        </label>
+                    </div>
+
+                    <a id="btnProceedPayment" href="/payment/process?method=vnpay" class="btn btn-primary" style="display:block; text-align:center; padding:16px; font-size:1.15rem; font-weight:900; border-radius:16px; box-shadow:0 8px 24px rgba(0,102,255,0.25); text-decoration:none;">
+                        Tiếp tục thanh toán ${formatMoney(totalAmount)} →
+                    </a>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="card" style="padding:28px; background:var(--gray-50); border-radius:24px; border:1px solid var(--gray-200); position:sticky; top:100px;">
+                    <h4 style="font-size:1.15rem; font-weight:800; margin-bottom:16px; border-bottom:1px solid var(--gray-200); padding-bottom:12px;">
+                        Tóm tắt đơn hàng (#TG-2026-8899)
+                    </h4>
+
+                    <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
+                        ${CART_ITEMS.map(item => `
+                            <div style="font-size:0.9rem; border-bottom:1px dashed var(--gray-200); padding-bottom:10px;">
+                                <div style="font-weight:700;">${item.title}</div>
+                                <div style="font-size:0.8rem; color:var(--gray-500);">${item.subtitle} • SL: ${item.quantity}</div>
+                                <div style="text-align:right; font-weight:800; color:var(--primary); margin-top:2px;">
+                                    ${formatMoney(item.subtotal)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:1.1rem; font-weight:900; color:var(--gray-900); padding-top:12px; border-top:2px solid var(--gray-300);">
+                        <span>Tổng thanh toán:</span>
+                        <span style="color:var(--secondary); font-size:1.4rem;">${formatMoney(totalAmount)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function selectGateway(method) {
+                const btn = document.getElementById('btnProceedPayment');
+                const lblVnpay = document.getElementById('lblVnPay');
+                const lblMomo = document.getElementById('lblMomo');
+
+                if (method === 'vnpay') {
+                    lblVnpay.style.border = '2px solid var(--primary)';
+                    lblVnpay.style.background = '#F0F7FF';
+                    lblMomo.style.border = '2px solid var(--gray-200)';
+                    lblMomo.style.background = 'white';
+                    btn.href = '/payment/process?method=vnpay';
+                } else {
+                    lblMomo.style.border = '2px solid #A50064';
+                    lblMomo.style.background = '#FDF2F8';
+                    lblVnpay.style.border = '2px solid var(--gray-200)';
+                    lblVnpay.style.background = 'white';
+                    btn.href = '/payment/process?method=momo';
+                }
+            }
+
+            let rem = 899;
+            const timer = document.getElementById('previewCountdownTimer');
+            if (timer) {
+                setInterval(() => {
+                    if (rem > 0) {
+                        rem--;
+                        const m = Math.floor(rem / 60);
+                        const s = rem % 60;
+                        timer.textContent = m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+                    }
+                }, 1000);
+            }
+        </script>
+    `;
+}
+
+// 13. PAYMENT PROCESS (Mô phỏng Cổng thanh toán)
+function handlePaymentProcess(method = 'vnpay') {
+    const totalAmount = calculateCartTotal();
+    const isVnpay = method === 'vnpay';
+
+    return `
+        <div style="max-width:540px; margin:40px auto; padding:0 20px;">
+            <div class="card" style="padding:40px; background:white; border-radius:28px; box-shadow:var(--shadow-xl); border:1px solid var(--gray-200); text-align:center;">
+                
+                ${isVnpay ? `
+                    <div style="background:#005BAA; color:white; padding:14px 24px; border-radius:18px; margin-bottom:20px; display:inline-flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.5rem; font-weight:900; letter-spacing:0.04em;">VNPAY</span>
+                        <span style="font-size:0.85rem; opacity:0.85;">| Cổng thanh toán quốc gia</span>
+                    </div>
+                ` : `
+                    <div style="background:#A50064; color:white; padding:14px 24px; border-radius:18px; margin-bottom:20px; display:inline-flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.5rem; font-weight:900; letter-spacing:0.04em;">MoMo</span>
+                        <span style="font-size:0.85rem; opacity:0.85;">| Ví điện tử tiện lợi</span>
+                    </div>
+                `}
+
+                <div style="font-size:0.9rem; color:var(--gray-500); margin-bottom:4px;">Số tiền cần thanh toán</div>
+                <div style="font-size:2.4rem; font-weight:900; color:var(--gray-900); margin-bottom:20px;">
+                    ${formatMoney(totalAmount)}
+                </div>
+
+                <div style="background:var(--gray-50); padding:16px; border-radius:16px; margin-bottom:24px; font-size:0.88rem; text-align:left;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--gray-500);">Mã đơn hàng:</span>
+                        <strong style="color:var(--primary);">TG-2026-8899</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--gray-500);">Đơn vị thụ hưởng:</span>
+                        <strong>Công ty Cổ phần Du lịch TravelGo</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--gray-500);">Nội dung chuyển khoản:</span>
+                        <strong>TG20268899 TT VE</strong>
+                    </div>
+                </div>
+
+                <div style="background:white; padding:20px; border-radius:20px; display:inline-block; border:2px dashed var(--gray-300); margin-bottom:20px;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TRAVELGO_PAY_TG20268899_${isVnpay ? 'VNPAY' : 'MOMO'}" 
+                         alt="QR Code Thanh toán" style="width:190px; height:190px; display:block; border-radius:12px;">
+                    <div style="font-size:0.82rem; color:var(--gray-500); margin-top:10px; font-weight:600;">
+                        Mở App Ngân hàng hoặc ${isVnpay ? 'VNPAY' : 'MoMo'} để quét mã
+                    </div>
+                </div>
+
+                <div style="background:#FEF3C7; border:1px solid #FCD34D; padding:14px; border-radius:14px; margin-bottom:20px; font-size:0.84rem; color:#92400E; text-align:left;">
+                    💡 <strong>Môi trường Chấm điểm (Sandbox):</strong> Bạn có thể nhấn nút xác nhận bên dưới để mô phỏng khách hàng đã quét mã thanh toán thành công 100%.
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <a href="/payment/success" class="btn btn-success" style="padding:16px; font-size:1.1rem; font-weight:900; border-radius:16px; text-decoration:none; box-shadow:0 6px 18px rgba(16,185,129,0.35);">
+                        ✓ MÔ PHỎNG: XÁC NHẬN ĐÃ THANH TOÁN
+                    </a>
+
+                    <a href="/payment/checkout" class="btn btn-ghost" style="color:var(--gray-500); font-weight:600; text-decoration:none;">
+                        Quay lại chọn phương thức khác
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 14. PAYMENT SUCCESS
+function handlePaymentSuccess() {
+    const totalAmount = calculateCartTotal();
+    const transCode = 'VNP-' + Date.now().toString().slice(-8);
+
+    return `
+        <div style="max-width:760px; margin:40px auto; padding:0 24px; text-align:center;">
+            <div class="card" style="padding:48px 36px; background:white; border-radius:32px; box-shadow:var(--shadow-xl); border:1px solid var(--gray-100);">
+                
+                <div style="width:84px; height:84px; border-radius:50%; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center; margin:0 auto 24px; color:var(--success);">
+                    <i data-lucide="check-circle-2" style="width:52px; height:52px;"></i>
+                </div>
+
+                <span class="badge badge-success" style="font-size:0.9rem; padding:8px 20px; font-weight:800; margin-bottom:12px;">
+                    GIAO DỊCH HOÀN TẤT
+                </span>
+
+                <h1 style="font-size:2.4rem; font-weight:900; color:var(--gray-900); margin-bottom:8px;">
+                    Thanh toán Thành công!
+                </h1>
+                <p style="color:var(--gray-500); font-size:1.05rem; margin-bottom:32px;">
+                    Hệ thống TravelGo đã xác nhận giao dịch. Chỗ của bạn đã được khóa giữ an toàn 100%.
+                </p>
+
+                <div style="background:var(--gray-50); border-radius:20px; padding:24px; text-align:left; margin-bottom:32px; font-size:0.95rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed var(--gray-200); padding-bottom:10px;">
+                        <span style="color:var(--gray-500);">Mã đơn hàng:</span>
+                        <strong style="color:var(--primary); font-size:1.05rem;">TG-2026-8899</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed var(--gray-200); padding-bottom:10px;">
+                        <span style="color:var(--gray-500);">Mã giao dịch ngân hàng:</span>
+                        <strong style="font-family:monospace; color:var(--gray-900);">${transCode}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed var(--gray-200); padding-bottom:10px;">
+                        <span style="color:var(--gray-500);">Phương thức:</span>
+                        <strong style="color:#005BAA;">CỔNG THANH TOÁN VNPAY (QR-PAY)</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed var(--gray-200); padding-bottom:10px;">
+                        <span style="color:var(--gray-500);">Thời gian thanh toán:</span>
+                        <strong>10/09/2026 - 00:15:30</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:var(--gray-500); font-weight:600;">Tổng tiền đã thanh toán:</span>
+                        <span style="font-size:1.6rem; font-weight:900; color:var(--success);">${formatMoney(totalAmount)}</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:28px;">
+                    <a href="/booking/detail/TG-2026-8899" class="btn btn-primary btn-lg" style="padding:18px 48px; font-size:1.2rem; font-weight:900; border-radius:20px; box-shadow:0 8px 28px rgba(0,102,255,0.35); text-decoration:none;">
+                        🎟️ Xem Vé Điện Tử (E-Ticket) & Mã QR Ngay →
+                    </a>
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:16px;">
+                    <a href="/dashboard" class="btn btn-outline btn-sm" style="font-weight:700;">
+                        Về Dashboard của tôi
+                    </a>
+                    <a href="/" class="btn btn-ghost btn-sm" style="color:var(--gray-500);">
+                        Về Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 15. ADMIN USERS (Quản lý Tài khoản & Phân quyền)
+function handleAdminUsers() {
+    const users = [
+        { id: 1, name: 'Nguyễn Quản Trị', user: 'admin', email: 'admin@travelgo.vn', phone: '0901000001', role: 'admin', status: 'active', orders: 12 },
+        { id: 2, name: 'Trần Thị Hoa', user: 'nv_hoa', email: 'hoa.nv@travelgo.vn', phone: '0901000002', role: 'employee', status: 'active', orders: 5 },
+        { id: 3, name: 'Lê Văn Minh', user: 'nv_minh', email: 'minh.nv@travelgo.vn', phone: '0901000003', role: 'employee', status: 'active', orders: 3 },
+        { id: 4, name: 'Nguyễn Đối Tác A', user: 'dt_saigontour', email: 'saigontour@example.com', phone: '0901000004', role: 'partner', status: 'active', orders: 0, company: 'Saigontourist Transport' },
+        { id: 5, name: 'Trần Đối Tác B', user: 'dt_havanhotel', email: 'havanhotel@example.com', phone: '0901000005', role: 'partner', status: 'active', orders: 0, company: 'Havan Hotel Group' },
+        { id: 6, name: 'Nguyễn Văn An', user: 'kh_an', email: 'an.nguyen@gmail.com', phone: '0901000006', role: 'customer', status: 'active', orders: 4 },
+        { id: 7, name: 'Trần Văn Bình', user: 'kh_binh', email: 'binh.tran@gmail.com', phone: '0901000007', role: 'customer', status: 'active', orders: 2 },
+        { id: 8, name: 'Lê Hoàng Phạm', user: 'kh_baduser', email: 'baduser@gmail.com', phone: '0901000099', role: 'customer', status: 'banned', orders: 1 }
+    ];
+
+    return `
+        <div style="max-width:1260px; margin:40px auto; padding:0 24px;">
+            <!-- Subnav Bar -->
+            <div style="display:flex; gap:12px; margin-bottom:28px; border-bottom:1px solid var(--gray-200); padding-bottom:12px;">
+                <a href="/admin" class="btn btn-ghost btn-sm" style="font-weight:700;">📊 Tổng quan GMV</a>
+                <a href="/admin/users" class="btn btn-primary btn-sm" style="font-weight:800;">👥 Tài khoản & Phân quyền</a>
+                <a href="/admin/settings" class="btn btn-ghost btn-sm" style="font-weight:700;">⚙️ Cấu hình hệ thống</a>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:16px;">
+                <div>
+                    <h2 style="font-size:2rem; font-weight:900; display:flex; align-items:center; gap:10px;">
+                        👥 Quản lý Tài khoản & Phân quyền (RBAC)
+                    </h2>
+                    <p style="color:var(--gray-500); font-size:0.95rem; margin-top:4px;">
+                        Quản trị viên kiểm soát người dùng, thay đổi vai trò (Role) và khóa/mở tài khoản
+                    </p>
+                </div>
+                <button onclick="showToast('Mở form tạo tài khoản nhân viên / đối tác mới!')" class="btn btn-primary" style="font-weight:800;">
+                    + Thêm tài khoản mới
+                </button>
+            </div>
+
+            <!-- Role Pills -->
+            <div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap;">
+                <span class="badge" style="padding:10px 18px; font-size:0.88rem; background:var(--primary); color:white; font-weight:800;">Tất cả (8)</span>
+                <span class="badge" style="padding:10px 18px; font-size:0.88rem; background:#38BDF8; color:#0B1120; font-weight:800;">👑 Quản trị viên (1)</span>
+                <span class="badge" style="padding:10px 18px; font-size:0.88rem; background:#8B5CF6; color:white; font-weight:800;">💼 Nhân viên (2)</span>
+                <span class="badge" style="padding:10px 18px; font-size:0.88rem; background:#FB923C; color:white; font-weight:800;">🤝 Đối tác (2)</span>
+                <span class="badge" style="padding:10px 18px; font-size:0.88rem; background:var(--success); color:white; font-weight:800;">🧑 Khách hàng (3)</span>
+            </div>
+
+            <!-- Users Table -->
+            <div class="card" style="padding:28px; background:white; border-radius:24px; box-shadow:var(--shadow-sm);">
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:separate; border-spacing:0 8px;">
+                        <thead>
+                            <tr style="font-size:0.82rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.04em;">
+                                <th style="padding:12px 16px; text-align:left;">ID</th>
+                                <th style="padding:12px 16px; text-align:left;">Họ và tên</th>
+                                <th style="padding:12px 16px; text-align:left;">Liên hệ</th>
+                                <th style="padding:12px 16px; text-align:left;">Vai trò (Quyền hạn)</th>
+                                <th style="padding:12px 16px; text-align:center;">Trạng thái</th>
+                                <th style="padding:12px 16px; text-align:center;">Đơn hàng</th>
+                                <th style="padding:12px 16px; text-align:right;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(u => `
+                                <tr style="background:var(--gray-50); border-radius:16px;">
+                                    <td style="padding:16px; font-weight:800; color:var(--gray-400); border-radius:16px 0 0 16px;">#${u.id}</td>
+                                    <td style="padding:16px;">
+                                        <strong>${u.name}</strong><br>
+                                        <span style="font-size:0.82rem; color:var(--gray-500);">@${u.user}</span>
+                                    </td>
+                                    <td style="padding:16px; font-size:0.9rem;">
+                                        ${u.email}<br>
+                                        <span style="color:var(--gray-500); font-size:0.82rem;">${u.phone}</span>
+                                    </td>
+                                    <td style="padding:16px;">
+                                        <select onchange="showToast('Đã cập nhật quyền của @${u.user} sang: ' + this.value)" style="padding:6px 12px; border-radius:10px; font-weight:800; font-size:0.84rem; cursor:pointer; border:1px solid #CBD5E1; background:white;">
+                                            <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>🧑 Khách hàng</option>
+                                            <option value="partner" ${u.role === 'partner' ? 'selected' : ''}>🤝 Đối tác</option>
+                                            <option value="employee" ${u.role === 'employee' ? 'selected' : ''}>💼 Nhân viên</option>
+                                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>👑 Quản trị viên</option>
+                                        </select>
+                                        ${u.company ? `<div style="font-size:0.75rem; color:var(--gray-500); margin-top:4px;">DN: ${u.company}</div>` : ''}
+                                    </td>
+                                    <td style="padding:16px; text-align:center;">
+                                        <span class="badge ${u.status === 'active' ? 'badge-success' : 'badge-danger'}" style="font-size:0.8rem;">
+                                            ${u.status === 'active' ? 'Đang hoạt động' : 'Đã bị khóa'}
+                                        </span>
+                                    </td>
+                                    <td style="padding:16px; text-align:center; font-weight:800; color:var(--primary);">
+                                        ${u.orders} đơn
+                                    </td>
+                                    <td style="padding:16px; text-align:right; border-radius:0 16px 16px 0;">
+                                        ${u.id !== 1 ? `
+                                            <button onclick="this.textContent = this.textContent.includes('Khóa') ? 'Mở khóa' : 'Khóa'; showToast('Đã thay đổi trạng thái tài khoản @${u.user}!')" class="btn btn-sm ${u.status === 'active' ? 'btn-outline' : 'btn-success'}" style="font-size:0.8rem; padding:6px 14px; font-weight:700;">
+                                                ${u.status === 'active' ? 'Khóa' : 'Mở khóa'}
+                                            </button>
+                                        ` : `<span style="color:var(--gray-400); font-size:0.8rem; font-style:italic;">(Bạn)</span>`}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 16. ADMIN SETTINGS
+function handleAdminSettings() {
+    return `
+        <div style="max-width:960px; margin:40px auto; padding:0 24px;">
+            <!-- Subnav Bar -->
+            <div style="display:flex; gap:12px; margin-bottom:28px; border-bottom:1px solid var(--gray-200); padding-bottom:12px;">
+                <a href="/admin" class="btn btn-ghost btn-sm" style="font-weight:700;">📊 Tổng quan GMV</a>
+                <a href="/admin/users" class="btn btn-ghost btn-sm" style="font-weight:700;">👥 Tài khoản & Phân quyền</a>
+                <a href="/admin/settings" class="btn btn-primary btn-sm" style="font-weight:800;">⚙️ Cấu hình hệ thống</a>
+            </div>
+
+            <div style="margin-bottom:28px;">
+                <h2 style="font-size:2rem; font-weight:900; display:flex; align-items:center; gap:10px;">
+                    ⚙️ Cấu hình Hệ thống TravelGo
+                </h2>
+                <p style="color:var(--gray-500); font-size:0.95rem; margin-top:4px;">
+                    Thiết lập tham số nghiệp vụ trọng yếu: Khóa giữ chỗ 15 phút, cổng thanh toán VNPay/MoMo, chính sách hoàn tiền
+                </p>
+            </div>
+
+            <form onsubmit="event.preventDefault(); showToast('Đã lưu và cập nhật cấu hình hệ thống thành công!');">
+                <div class="card" style="padding:32px; background:white; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:24px;">
+                    <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="clock" style="color:var(--primary);width:20px;height:20px;"></i> Quy định Giữ chỗ 15 phút
+                    </h3>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Thời gian giữ chỗ tạm thời (Phút)</label>
+                            <input type="number" value="15" min="5" max="60" required style="width:100%; padding:12px 16px; border-radius:12px; border:1px solid var(--gray-200); font-size:1.05rem; font-weight:800; color:var(--primary);">
+                            <small style="color:var(--gray-500); display:block; margin-top:6px;">Quá 15 phút đơn hàng chưa thanh toán sẽ tự động nhả ghế/phòng cho người khác.</small>
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Tên nền tảng</label>
+                            <input type="text" value="TravelGo Luxury" style="width:100%; padding:12px 16px; border-radius:12px; border:1px solid var(--gray-200); font-size:0.95rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:32px; background:white; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:24px;">
+                    <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="credit-card" style="color:var(--success);width:20px;height:20px;"></i> Bật / Tắt Cổng Thanh toán
+                    </h3>
+
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <label style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:var(--gray-50); border-radius:16px; cursor:pointer;">
+                            <div>
+                                <strong style="color:#005BAA; font-size:1.05rem;">Cổng thanh toán VNPAY (QR Pay / Thẻ ATM / Visa)</strong>
+                                <div style="font-size:0.85rem; color:var(--gray-500);">Kích hoạt thanh toán quét mã QR qua ứng dụng ngân hàng</div>
+                            </div>
+                            <input type="checkbox" checked style="width:22px; height:22px; accent-color:var(--primary);">
+                        </label>
+
+                        <label style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:var(--gray-50); border-radius:16px; cursor:pointer;">
+                            <div>
+                                <strong style="color:#A50064; font-size:1.05rem;">Ví điện tử MoMo</strong>
+                                <div style="font-size:0.85rem; color:var(--gray-500);">Kích hoạt thanh toán quét mã qua ứng dụng MoMo</div>
+                            </div>
+                            <input type="checkbox" checked style="width:22px; height:22px; accent-color:#A50064;">
+                        </label>
+                    </div>
+                </div>
+
+                <div style="text-align:right;">
+                    <button type="submit" class="btn btn-primary" style="padding:14px 36px; font-weight:800; font-size:1.05rem;">
+                        ✓ Lưu cấu hình hệ thống
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+}
+
+// 17. EMPLOYEE QR SCANNER
+function handleEmployeeQr(searchCode = '') {
+    const defaultCode = searchCode || 'BK-20260905-001';
+    return `
+        <div style="max-width:860px; margin:40px auto; padding:0 24px;">
+            <!-- Subnav Bar -->
+            <div style="display:flex; gap:12px; margin-bottom:28px; border-bottom:1px solid var(--gray-200); padding-bottom:12px;">
+                <a href="/employee" class="btn btn-ghost btn-sm" style="font-weight:700;">📋 Hàng đợi Duyệt</a>
+                <a href="/employee/qr" class="btn btn-primary btn-sm" style="font-weight:800;">🔍 Soát vé QR Check-in</a>
+                <a href="/employee/refunds" class="btn btn-ghost btn-sm" style="font-weight:700;">💸 Xử lý Hoàn tiền</a>
+            </div>
+
+            <div style="text-align:center; margin-bottom:32px;">
+                <h2 style="font-size:2rem; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px;">
+                    <i data-lucide="qr-code" style="color:var(--primary);width:32px;height:32px;"></i> Soát vé & Quét QR Code Check-in
+                </h2>
+                <p style="color:var(--gray-500); font-size:0.95rem; margin-top:4px;">
+                    Nhân viên bến xe / Lễ tân khách sạn kiểm tra tính hợp lệ của Vé điện tử và xác nhận khách lên xe
+                </p>
+            </div>
+
+            <!-- Search Card -->
+            <div class="card" style="padding:28px; background:white; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:28px;">
+                <form method="GET" action="/employee/qr" style="display:flex; gap:12px; margin-bottom:14px;">
+                    <div style="flex:1; position:relative;">
+                        <i data-lucide="scan" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); width:20px; height:20px; color:var(--primary);"></i>
+                        <input type="text" name="code" value="${defaultCode}" placeholder="Nhập hoặc quét mã vé (vd: BK-20260905-001)..." required style="width:100%; padding:14px 16px 14px 48px; border-radius:14px; border:2px solid var(--primary); font-size:1.05rem; font-weight:800;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="padding:14px 28px; font-weight:800;">
+                        Kiểm tra vé
+                    </button>
+                </form>
+
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:0.85rem; color:var(--gray-500);">
+                    <span>Mã vé mẫu test nhanh:</span>
+                    <a href="/employee/qr?code=BK-20260905-001" class="badge badge-secondary" style="text-decoration:none;">BK-20260905-001</a>
+                    <a href="/employee/qr?code=BK-20260905-002" class="badge badge-secondary" style="text-decoration:none;">BK-20260905-002</a>
+                    <a href="/employee/qr?code=BK-20260906-003" class="badge badge-secondary" style="text-decoration:none;">BK-20260906-003</a>
+                </div>
+            </div>
+
+            <!-- Ticket Card -->
+            <div class="card" style="padding:36px; background:white; border-radius:28px; box-shadow:var(--shadow-xl); border:2px solid var(--primary); margin-bottom:40px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gray-100); padding-bottom:20px; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <span style="font-size:0.85rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.04em;">KẾT QUẢ XÁC THỰC VÉ</span>
+                        <h3 style="font-size:1.6rem; font-weight:900; color:var(--primary); margin-top:2px;">
+                            ${defaultCode}
+                        </h3>
+                    </div>
+
+                    <div id="checkinBadgeContainer">
+                        <div class="badge" style="background:rgba(0,102,255,0.12); color:var(--primary); padding:10px 20px; font-size:1rem; font-weight:900;">
+                            🎫 VÉ HỢP LỆ - CHỜ CHECK-IN
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px;">
+                    <div style="background:var(--gray-50); padding:20px; border-radius:18px;">
+                        <div style="font-size:0.82rem; color:var(--gray-500); text-transform:uppercase; margin-bottom:6px;">HÀNH KHÁCH</div>
+                        <div style="font-size:1.2rem; font-weight:800; color:var(--gray-900);">Nguyễn Văn An</div>
+                        <div style="font-size:0.9rem; color:var(--gray-600); margin-top:4px;">📞 0901234567</div>
+                        <div style="font-size:0.85rem; color:var(--gray-500);">✉️ an.nguyen@gmail.com</div>
+                    </div>
+
+                    <div style="background:var(--gray-50); padding:20px; border-radius:18px;">
+                        <div style="font-size:0.82rem; color:var(--gray-500); text-transform:uppercase; margin-bottom:6px;">CHI TIẾT VÉ & DỊCH VỤ</div>
+                        <div style="font-size:1.15rem; font-weight:800; color:var(--gray-900);">TP. HCM → Đà Lạt</div>
+                        <div style="font-size:0.9rem; color:var(--primary); font-weight:700; margin-top:4px;">Khởi hành: 05/09/2026 lúc 07:30</div>
+                        <div style="font-size:0.85rem; color:var(--gray-600); margin-top:2px;">Xe Limousine 9 chỗ VIP • <strong>2 vé (Ghế A1, A2)</strong></div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#F0FDF4; padding:18px 24px; border-radius:16px; border:1px solid #BBF7D0; margin-bottom:28px;">
+                    <div>
+                        <div style="font-size:0.82rem; color:#15803D; font-weight:700;">TRẠNG THÁI THANH TOÁN</div>
+                        <div style="font-size:1.2rem; font-weight:900; color:#166534;">700.000₫ (Đã thanh toán VNPay)</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.82rem; color:var(--gray-500);">Trạng thái soát vé</div>
+                        <div id="checkinStatusText" style="font-weight:800; color:var(--primary);">Chưa lên xe</div>
+                    </div>
+                </div>
+
+                <div style="text-align:center;">
+                    <button id="btnConfirmCheckin" onclick="confirmCheckin()" class="btn btn-success" style="padding:16px 48px; font-size:1.2rem; font-weight:900; border-radius:18px; box-shadow:0 8px 24px rgba(16,185,129,0.35);">
+                        ✓ XÁC NHẬN CHO HÀNH KHÁCH LÊN XE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function confirmCheckin() {
+                document.getElementById('checkinBadgeContainer').innerHTML = '<div class="badge badge-success" style="padding:10px 20px; font-size:1rem; font-weight:900;">✅ ĐÃ CHECK-IN LÊN XE</div>';
+                document.getElementById('checkinStatusText').innerHTML = '<span style="color:var(--success)">Đã lên xe (Vừa xong)</span>';
+                document.getElementById('btnConfirmCheckin').style.display = 'none';
+                showToast('✅ CHECK-IN THÀNH CÔNG! Đã xác nhận khách hàng lên xe.');
+            }
+        </script>
+    `;
+}
+
+// 18. EMPLOYEE REFUNDS
+function handleEmployeeRefunds() {
+    return `
+        <div style="max-width:1100px; margin:40px auto; padding:0 24px;">
+            <!-- Subnav Bar -->
+            <div style="display:flex; gap:12px; margin-bottom:28px; border-bottom:1px solid var(--gray-200); padding-bottom:12px;">
+                <a href="/employee" class="btn btn-ghost btn-sm" style="font-weight:700;">📋 Hàng đợi Duyệt</a>
+                <a href="/employee/qr" class="btn btn-ghost btn-sm" style="font-weight:700;">🔍 Soát vé QR Check-in</a>
+                <a href="/employee/refunds" class="btn btn-primary btn-sm" style="font-weight:800;">💸 Xử lý Hoàn tiền</a>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:16px;">
+                <div>
+                    <h2 style="font-size:2rem; font-weight:900; display:flex; align-items:center; gap:10px;">
+                        💸 Xử lý Hàng đợi Hoàn tiền Vé (Bậc thang)
+                    </h2>
+                    <p style="color:var(--gray-500); font-size:0.95rem; margin-top:4px;">
+                        Tự động tính tỷ lệ hoàn tiền: ≥7 ngày hoàn 100%, 3-6 ngày hoàn 50%, 1-2 ngày hoàn 20%
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <!-- Item 1 -->
+                <div class="card" style="padding:28px; background:white; border-radius:20px; box-shadow:var(--shadow-sm); border-left:5px solid #FB923C;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px;">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <span style="font-weight:900; color:var(--primary); font-size:1.15rem;">#RF-001</span>
+                                <span class="badge" style="background:rgba(251,146,60,0.15); color:#EA580C; font-weight:800;">Chờ xét duyệt</span>
+                                <span style="font-size:0.82rem; color:var(--gray-400);">Booking: <strong>BK-20260901-015</strong></span>
+                            </div>
+                            <div style="font-size:1.05rem; font-weight:700; margin-bottom:6px;">Phạm Hồng Đức — 0905123456</div>
+                            <div style="background:var(--gray-50); padding:14px 18px; border-radius:12px; margin-bottom:12px; font-size:0.9rem;">
+                                <strong>Dịch vụ:</strong> 🚌 SG-DL-01 (Limousine TP.HCM → Đà Lạt)<br>
+                                <strong>Lý do khách gửi:</strong> <em>"Thay đổi kế hoạch cá nhân"</em>
+                            </div>
+                            <div style="display:flex; gap:24px; font-size:0.9rem; flex-wrap:wrap;">
+                                <div>Giá gốc: <strong>350.000₫</strong></div>
+                                <div>Thời gian trước khởi hành: <strong>8 ngày</strong></div>
+                                <div>Mức hoàn: <span class="badge badge-success" style="font-weight:800;">100%</span></div>
+                                <div>Số tiền hoàn: <strong style="color:var(--success); font-size:1.15rem;">350.000₫</strong></div>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:10px; min-width:180px;">
+                            <button onclick="this.closest('.card').style.borderLeftColor='var(--success)'; this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900>✅ ĐÃ DUYỆT HOÀN 350.000₫</span>'; showToast('Đã phê duyệt hoàn tiền 350.000₫!');" class="btn btn-success" style="font-weight:800; padding:12px 20px;">
+                                ✓ Duyệt hoàn tiền
+                            </button>
+                            <button onclick="this.closest('.card').style.opacity='0.5'; this.parentElement.innerHTML='<span style=color:var(--danger);font-weight:900>❌ ĐÃ TỪ CHỐI</span>'; showToast('Đã từ chối hoàn tiền', 'error');" class="btn btn-outline btn-sm" style="color:var(--danger); border-color:var(--danger); font-weight:700;">
+                                ✕ Từ chối
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="card" style="padding:28px; background:white; border-radius:20px; box-shadow:var(--shadow-sm); border-left:5px solid #FB923C;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px;">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <span style="font-weight:900; color:var(--primary); font-size:1.15rem;">#RF-002</span>
+                                <span class="badge" style="background:rgba(251,146,60,0.15); color:#EA580C; font-weight:800;">Chờ xét duyệt</span>
+                                <span style="font-size:0.82rem; color:var(--gray-400);">Booking: <strong>BK-20260903-022</strong></span>
+                            </div>
+                            <div style="font-size:1.05rem; font-weight:700; margin-bottom:6px;">Vũ Thanh Mai — 0918765432</div>
+                            <div style="background:var(--gray-50); padding:14px 18px; border-radius:12px; margin-bottom:12px; font-size:0.9rem;">
+                                <strong>Dịch vụ:</strong> 🚌 SG-NT-02 (Giường nằm TP.HCM → Nha Trang, 2 vé)<br>
+                                <strong>Lý do khách gửi:</strong> <em>"Bị ốm đột xuất không thể đi"</em>
+                            </div>
+                            <div style="display:flex; gap:24px; font-size:0.9rem; flex-wrap:wrap;">
+                                <div>Giá gốc: <strong>560.000₫</strong></div>
+                                <div>Thời gian trước khởi hành: <strong>4 ngày</strong></div>
+                                <div>Mức hoàn: <span class="badge badge-warning" style="font-weight:800;">50%</span></div>
+                                <div>Số tiền hoàn: <strong style="color:#D97706; font-size:1.15rem;">280.000₫</strong></div>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:10px; min-width:180px;">
+                            <button onclick="this.closest('.card').style.borderLeftColor='var(--success)'; this.parentElement.innerHTML='<span style=color:var(--success);font-weight:900>✅ ĐÃ DUYỆT HOÀN 280.000₫</span>'; showToast('Đã phê duyệt hoàn tiền 280.000₫!');" class="btn btn-success" style="font-weight:800; padding:12px 20px;">
+                                ✓ Duyệt hoàn tiền
+                            </button>
+                            <button onclick="this.closest('.card').style.opacity='0.5'; this.parentElement.innerHTML='<span style=color:var(--danger);font-weight:900>❌ ĐÃ TỪ CHỐI</span>'; showToast('Đã từ chối hoàn tiền', 'error');" class="btn btn-outline btn-sm" style="color:var(--danger); border-color:var(--danger); font-weight:700;">
+                                ✕ Từ chối
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 19. PARTNER TRIP CREATE
+function handlePartnerTripCreate() {
+    return `
+        <div style="max-width:800px; margin:40px auto; padding:0 24px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+                <a href="/partner" class="btn btn-ghost btn-sm">
+                    <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Quay lại
+                </a>
+                <h2 style="font-size:1.8rem; font-weight:900;">Đăng ký Chuyến xe mới</h2>
+            </div>
+
+            <div class="card" style="padding:36px; background:white; border-radius:24px; box-shadow:var(--shadow-md);">
+                <form onsubmit="event.preventDefault(); showToast('✅ Đã gửi yêu cầu đăng ký chuyến xe mới! Đang chờ Nhân viên phê duyệt.'); setTimeout(() => window.location.href='/partner', 1500);">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Điểm khởi hành <span style="color:var(--danger)">*</span></label>
+                            <select class="form-control" required>
+                                <option value="">-- Chọn điểm đi --</option>
+                                <option value="1" selected>TP. Hồ Chí Minh</option>
+                                <option value="2">Hà Nội</option>
+                                <option value="3">Đà Nẵng</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Điểm đến <span style="color:var(--danger)">*</span></label>
+                            <select class="form-control" required>
+                                <option value="">-- Chọn điểm đến --</option>
+                                <option value="4" selected>Đà Lạt</option>
+                                <option value="5">Nha Trang</option>
+                                <option value="6">Phú Quốc</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Loại xe <span style="color:var(--danger)">*</span></label>
+                            <select class="form-control" required>
+                                <option value="1" selected>Xe Limousine 9 chỗ VIP</option>
+                                <option value="2">Xe Giường Nằm 34 phòng</option>
+                                <option value="3">Máy Bay</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Thời gian khởi hành <span style="color:var(--danger)">*</span></label>
+                            <input type="datetime-local" class="form-control" value="2026-09-15T08:00" required>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Tổng số ghế / chỗ <span style="color:var(--danger)">*</span></label>
+                            <input type="number" class="form-control" value="9" min="1" required>
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Giá vé (VND) <span style="color:var(--danger)">*</span></label>
+                            <input type="number" class="form-control" value="380000" min="10000" step="10000" required>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Mô tả tiện ích chuyến đi</label>
+                        <textarea class="form-control" rows="3">Ghế massage da cao cấp, cổng sạc Type-C, wifi tốc độ cao, khăn lạnh và nước uống miễn phí.</textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:12px; padding-top:16px; border-top:1px solid var(--gray-100);">
+                        <a href="/partner" class="btn btn-ghost">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary" style="padding:12px 32px; font-weight:800;">
+                            ✓ Gửi chuyến xe chờ duyệt
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
+// 20. REVIEW & SOCIAL PROOF COMPONENT
+function renderReviewSectionHtml(type, itemId) {
+    const reviews = MOCK_DATA.reviews.filter(r => r.type === type && r.item_id === itemId);
+    const displayReviews = reviews.length > 0 ? reviews : MOCK_DATA.reviews;
+
+    return `
+        <div class="card" style="padding:32px; background:white; border-radius:24px; box-shadow:var(--shadow-sm); margin-top:32px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; border-bottom:1px solid var(--gray-200); padding-bottom:24px; margin-bottom:24px;">
+                <div>
+                    <div style="display:inline-flex; align-items:center; gap:6px; color:#F59E0B; font-weight:800; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.04em;">
+                        <i data-lucide="star" style="width:16px;height:16px;fill:#F59E0B;"></i> ĐÁNH GIÁ TỪ HÀNH KHÁCH
+                    </div>
+                    <h3 style="font-size:1.7rem; font-weight:900; color:var(--gray-900); margin:4px 0 0;">
+                        Trải nghiệm & Bình luận thực tế
+                    </h3>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:20px; background:var(--gray-50); padding:16px 24px; border-radius:18px; border:1px solid var(--gray-200);">
+                    <div style="text-align:center;">
+                        <div style="font-size:2.4rem; font-weight:900; color:var(--gray-900); line-height:1;">4.9</div>
+                        <div style="color:#F59E0B; font-size:0.95rem; margin-top:4px;">★★★★★</div>
+                    </div>
+                    <div style="border-left:1px solid var(--gray-300); padding-left:16px; font-size:0.88rem; color:var(--gray-600);">
+                        Dựa trên <strong>${displayReviews.length + 124}</strong> lượt đánh giá<br>
+                        <span style="color:var(--success); font-weight:700;">100% Đã xác thực đặt chỗ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Star Breakdown Bars -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-bottom:32px; align-items:center;">
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:12px; font-size:0.85rem;">
+                        <span style="min-width:45px; font-weight:700; color:var(--gray-700);">5 sao</span>
+                        <div style="flex:1; height:8px; background:var(--gray-100); border-radius:4px; overflow:hidden;">
+                            <div style="width:85%; height:100%; background:linear-gradient(90deg, #F59E0B, #FBBF24); border-radius:4px;"></div>
+                        </div>
+                        <span style="min-width:35px; text-align:right; color:var(--gray-500); font-weight:600;">85%</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; font-size:0.85rem;">
+                        <span style="min-width:45px; font-weight:700; color:var(--gray-700);">4 sao</span>
+                        <div style="flex:1; height:8px; background:var(--gray-100); border-radius:4px; overflow:hidden;">
+                            <div style="width:12%; height:100%; background:linear-gradient(90deg, #F59E0B, #FBBF24); border-radius:4px;"></div>
+                        </div>
+                        <span style="min-width:35px; text-align:right; color:var(--gray-500); font-weight:600;">12%</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px; font-size:0.85rem;">
+                        <span style="min-width:45px; font-weight:700; color:var(--gray-700);">3 sao</span>
+                        <div style="flex:1; height:8px; background:var(--gray-100); border-radius:4px; overflow:hidden;">
+                            <div style="width:3%; height:100%; background:linear-gradient(90deg, #F59E0B, #FBBF24); border-radius:4px;"></div>
+                        </div>
+                        <span style="min-width:35px; text-align:right; color:var(--gray-500); font-weight:600;">3%</span>
+                    </div>
+                </div>
+
+                <div style="background:linear-gradient(135deg, rgba(0,102,255,0.06), rgba(0,245,212,0.08)); border:1px dashed var(--primary); padding:20px; border-radius:18px;">
+                    <div style="font-weight:800; color:var(--primary); font-size:0.95rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                        <i data-lucide="shield-check" style="width:18px;height:18px;"></i> Tiêu chuẩn Đánh giá Xác thực
+                    </div>
+                    <p style="font-size:0.86rem; color:var(--gray-600); margin:0; line-height:1.5;">
+                        Chỉ hành khách có mã đặt chỗ hợp lệ đã thanh toán mới có thể viết đánh giá. Nhà xe có trách nhiệm phản hồi minh bạch các góp ý.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Review Form -->
+            <div style="background:var(--gray-50); padding:24px; border-radius:20px; margin-bottom:32px; border:1px solid var(--gray-200);">
+                <h4 style="font-size:1.15rem; font-weight:800; color:var(--gray-900); margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="edit-3" style="width:18px;height:18px;color:var(--primary);"></i> Viết đánh giá của bạn
+                </h4>
+
+                <form onsubmit="event.preventDefault(); submitPreviewReview(this);">
+                    <div style="margin-bottom:14px;">
+                        <label style="display:block; font-size:0.88rem; font-weight:700; color:var(--gray-700); margin-bottom:6px;">
+                            Mức độ hài lòng của bạn:
+                        </label>
+                        <select id="newReviewRating" class="form-control" style="max-width:220px; font-weight:800; color:#F59E0B;">
+                            <option value="5" selected>★★★★★ Tuyệt vời (5/5)</option>
+                            <option value="4">★★★★☆ Rất tốt (4/5)</option>
+                            <option value="3">★★★☆☆ Hài lòng (3/5)</option>
+                            <option value="2">★★☆☆☆ Tạm được (2/5)</option>
+                            <option value="1">★☆☆☆☆ Không hài lòng (1/5)</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom:14px;">
+                        <label style="display:block; font-size:0.88rem; font-weight:700; color:var(--gray-700); margin-bottom:6px;">
+                            Tiêu đề tóm tắt:
+                        </label>
+                        <input type="text" id="newReviewTitle" class="form-control" placeholder="Ví dụ: Xe chạy rất êm, bác tài thân thiện và đón đúng giờ..." required>
+                    </div>
+
+                    <div style="margin-bottom:14px;">
+                        <label style="display:block; font-size:0.88rem; font-weight:700; color:var(--gray-700); margin-bottom:6px;">
+                            Chi tiết trải nghiệm:
+                        </label>
+                        <textarea id="newReviewComment" rows="3" class="form-control" placeholder="Chia sẻ thêm về ghế ngồi, chất lượng phục vụ, tiện ích trên xe..." required></textarea>
+                    </div>
+
+                    <div style="text-align:right;">
+                        <button type="submit" class="btn btn-primary" style="font-weight:800; padding:10px 28px;">
+                            ✓ Gửi đánh giá ngay
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Reviews List Container -->
+            <div id="previewReviewsList" style="display:flex; flex-direction:column; gap:20px;">
+                ${displayReviews.map(r => `
+                    <div class="card" style="padding:22px; background:white; border-radius:18px; border:1px solid var(--gray-200); box-shadow:var(--shadow-xs);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg, var(--primary), #00F5D4); color:white; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem;">
+                                    ${r.customer_name ? r.customer_name[0] : 'K'}
+                                </div>
+                                <div>
+                                    <div style="font-weight:800; color:var(--gray-900); font-size:0.98rem;">
+                                        ${r.customer_name}
+                                        <span class="badge badge-success" style="font-size:0.7rem; padding:2px 8px; margin-left:6px;">✓ Đã trải nghiệm</span>
+                                    </div>
+                                    <div style="font-size:0.8rem; color:var(--gray-400);">${r.created_at}</div>
+                                </div>
+                            </div>
+
+                            <div style="color:#F59E0B; font-size:1.05rem; font-weight:800;">
+                                ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}
+                            </div>
+                        </div>
+
+                        <div style="font-weight:800; font-size:1.02rem; color:var(--gray-900); margin-bottom:6px;">
+                            ${r.title}
+                        </div>
+                        <p style="color:var(--gray-700); font-size:0.92rem; line-height:1.6; margin:0 0 12px;">
+                            ${r.comment}
+                        </p>
+
+                        ${r.partner_reply ? `
+                            <div style="background:#F0FDF4; border-left:4px solid var(--success); padding:14px 18px; border-radius:0 14px 14px 0; margin-top:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <strong style="font-size:0.85rem; color:#166534; display:flex; align-items:center; gap:6px;">
+                                        💬 Phản hồi từ Nhà cung cấp
+                                    </strong>
+                                    <span style="font-size:0.75rem; color:#15803D;">${r.partner_replied_at || 'Vừa xong'}</span>
+                                </div>
+                                <p style="font-size:0.88rem; color:#14532D; margin:0; line-height:1.5;">
+                                    ${r.partner_reply}
+                                </p>
+                            </div>
+                        ` : `
+                            <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--gray-200);">
+                                <details style="font-size:0.86rem;">
+                                    <summary style="color:var(--primary); font-weight:700; cursor:pointer;">
+                                        💬 Phản hồi đánh giá này với tư cách Đối tác / Nhà xe...
+                                    </summary>
+                                    <div style="margin-top:10px;">
+                                        <textarea id="replyText_${r.id}" rows="2" class="form-control" placeholder="Nhập lời cảm ơn hoặc giải đáp của nhà xe..." style="font-size:0.86rem; margin-bottom:8px;"></textarea>
+                                        <button onclick="submitPartnerReply(${r.id})" class="btn btn-primary btn-sm" style="font-weight:700;">
+                                            Gửi phản hồi
+                                        </button>
+                                    </div>
+                                </details>
+                            </div>
+                        `}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <script>
+            function submitPreviewReview(form) {
+                const title = document.getElementById('newReviewTitle').value;
+                const comment = document.getElementById('newReviewComment').value;
+                const rating = parseInt(document.getElementById('newReviewRating').value, 10);
+
+                const list = document.getElementById('previewReviewsList');
+                const newCard = document.createElement('div');
+                newCard.className = 'card';
+                newCard.style.cssText = 'padding:22px; background:white; border-radius:18px; border:2px solid var(--primary); box-shadow:var(--shadow-sm); animation:fadeIn 0.4s ease; margin-bottom:16px;';
+                newCard.innerHTML = \`
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg, var(--primary), #00F5D4); color:white; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem;">
+                                B
+                            </div>
+                            <div>
+                                <div style="font-weight:800; color:var(--gray-900); font-size:0.98rem;">
+                                    Bạn (Vừa xong)
+                                    <span class="badge badge-success" style="font-size:0.7rem; padding:2px 8px; margin-left:6px;">✓ Đã trải nghiệm</span>
+                                </div>
+                                <div style="font-size:0.8rem; color:var(--gray-400);">Hôm nay</div>
+                            </div>
+                        </div>
+                        <div style="color:#F59E0B; font-size:1.05rem; font-weight:800;">
+                            \${'★'.repeat(rating)}\${'☆'.repeat(5 - rating)}
+                        </div>
+                    </div>
+                    <div style="font-weight:800; font-size:1.02rem; color:var(--gray-900); margin-bottom:6px;">\${title}</div>
+                    <p style="color:var(--gray-700); font-size:0.92rem; line-height:1.6; margin:0;">\${comment}</p>
+                \`;
+                list.prepend(newCard);
+                form.reset();
+                showToast('✅ Cảm ơn bạn! Đánh giá đã được đăng thành công.');
+            }
+
+            function submitPartnerReply(id) {
+                const txt = document.getElementById('replyText_' + id);
+                if (!txt || !txt.value.trim()) {
+                    showToast('Vui lòng nhập nội dung phản hồi', 'error');
+                    return;
+                }
+                showToast('✅ Đã đăng phản hồi từ Nhà xe thành công!');
+                txt.closest('details').innerHTML = \`
+                    <div style="background:#F0FDF4; border-left:4px solid var(--success); padding:14px 18px; border-radius:0 14px 14px 0; margin-top:12px;">
+                        <strong style="font-size:0.85rem; color:#166534;">💬 Phản hồi từ Nhà cung cấp:</strong>
+                        <p style="font-size:0.88rem; color:#14532D; margin:4px 0 0;">\${txt.value}</p>
+                    </div>
+                \`;
+            }
+        </script>
+    `;
+}
+
+// 21. TRIP DETAIL PAGE (With Reviews & 15-min Booking)
+function handleTripDetail(tripId = 1) {
+    const trip = MOCK_DATA.trips.find(t => t.id === parseInt(tripId, 10)) || MOCK_DATA.trips[0];
+
+    return `
+        <!-- Trip Header -->
+        <section style="background:linear-gradient(135deg, #050B14 0%, #0A192F 50%, #0052CC 100%); padding:48px 0 40px; color:white; border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="max-width:1260px; margin:0 auto; padding:0 24px;">
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                    <span class="badge" style="background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.2);">
+                        #${trip.trip_code}
+                    </span>
+                    <span class="badge" style="background:rgba(0,245,212,0.2); color:#00F5D4; border:1px solid rgba(0,245,212,0.3); font-weight:800;">
+                        ${trip.vehicle_name}
+                    </span>
+                </div>
+                <h1 style="color:white; font-size:2.8rem; font-weight:900; margin-bottom:8px;">
+                    ${trip.departure_name} <span style="color:var(--accent);">→</span> ${trip.arrival_name}
+                </h1>
+                <p style="color:#94A3B8; font-size:1.05rem; margin:0;">
+                    Vận hành bởi đối tác: <strong style="color:white;">${trip.partner_name}</strong> • Đánh giá: <strong style="color:#FBBF24;">★ ${trip.rating} (${trip.reviews_count} đánh giá)</strong>
+                </p>
+            </div>
+        </section>
+
+        <!-- Body Layout -->
+        <div style="max-width:1260px; margin:40px auto; padding:0 24px;">
+            <div style="display:grid; grid-template-columns:1fr 380px; gap:40px; align-items:start;">
+                
+                <!-- Left Column -->
+                <div>
+                    <div style="border-radius:24px; overflow:hidden; margin-bottom:32px; box-shadow:var(--shadow-lg); height:420px;">
+                        <img src="${trip.featured_image}" alt="${trip.arrival_name}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+
+                    <!-- Hành trình -->
+                    <div class="card" style="padding:28px; background:white; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:28px;">
+                        <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+                            <i data-lucide="route" style="color:var(--primary);width:20px;height:20px;"></i> Lịch trình khởi hành
+                        </h3>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                            <div style="background:var(--gray-50); padding:18px; border-radius:16px; border-left:4px solid var(--primary);">
+                                <div style="font-size:0.82rem; color:var(--gray-500); margin-bottom:4px; text-transform:uppercase;">ĐIỂM ĐI</div>
+                                <div style="font-weight:800; font-size:1.15rem; color:var(--gray-900);">${trip.departure_name}</div>
+                                <div style="font-size:0.95rem; color:var(--primary); font-weight:700; margin-top:4px;">
+                                    Khởi hành: ${trip.departure_datetime}
+                                </div>
+                            </div>
+
+                            <div style="background:var(--gray-50); padding:18px; border-radius:16px; border-left:4px solid var(--secondary);">
+                                <div style="font-size:0.82rem; color:var(--gray-500); margin-bottom:4px; text-transform:uppercase;">ĐIỂM ĐẾN</div>
+                                <div style="font-weight:800; font-size:1.15rem; color:var(--gray-900);">${trip.arrival_name}</div>
+                                <div style="font-size:0.95rem; color:var(--secondary); font-weight:700; margin-top:4px;">
+                                    Thời gian xe chạy: ~6-8 giờ
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:20px; padding-top:18px; border-top:1px solid var(--gray-100); font-size:0.94rem; color:var(--gray-700); line-height:1.7;">
+                            ${trip.description}
+                        </div>
+                    </div>
+
+                    <!-- Tiện ích đi kèm -->
+                    <div class="card" style="padding:28px; background:white; border-radius:24px; box-shadow:var(--shadow-sm); margin-bottom:28px;">
+                        <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+                            <i data-lucide="sparkles" style="color:var(--accent-dark);width:20px;height:20px;"></i> Tiện ích VIP miễn phí
+                        </h3>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div style="display:flex; align-items:center; gap:10px; background:var(--gray-50); padding:14px; border-radius:14px;">
+                                <i data-lucide="wifi" style="width:20px;height:20px;color:var(--success);"></i>
+                                <span style="font-weight:700; font-size:0.92rem;">Wifi 5G tốc độ cao</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; background:var(--gray-50); padding:14px; border-radius:14px;">
+                                <i data-lucide="zap" style="width:20px;height:20px;color:var(--success);"></i>
+                                <span style="font-weight:700; font-size:0.92rem;">Cổng sạc Type-C & USB</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; background:var(--gray-50); padding:14px; border-radius:14px;">
+                                <i data-lucide="droplet" style="width:20px;height:20px;color:var(--success);"></i>
+                                <span style="font-weight:700; font-size:0.92rem;">Nước khoáng & Khăn lạnh</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; background:var(--gray-50); padding:14px; border-radius:14px;">
+                                <i data-lucide="shield-check" style="width:20px;height:20px;color:var(--success);"></i>
+                                <span style="font-weight:700; font-size:0.92rem;">Bảo hiểm hành khách đầy đủ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REVIEW & SOCIAL PROOF SECTION -->
+                    ${renderReviewSectionHtml('trip', trip.id)}
+                </div>
+
+                <!-- Right Column: Booking Box Sticky -->
+                <div style="position:sticky; top:130px;">
+                    <div class="card" style="padding:28px; background:white; border-radius:24px; box-shadow:var(--shadow-xl); border:2px solid var(--primary);">
+                        <div style="font-size:0.82rem; color:var(--gray-500); text-transform:uppercase; margin-bottom:4px;">GIÁ VÉ NIÊM YẾT</div>
+                        <div style="display:flex; align-items:baseline; gap:4px; margin-bottom:16px;">
+                            <span style="font-size:2.2rem; font-weight:900; color:var(--secondary);">
+                                ${formatMoney(trip.price_per_person)}
+                            </span>
+                            <span style="color:var(--gray-500); font-size:0.9rem;">/người</span>
+                        </div>
+
+                        <div style="background:var(--gray-50); padding:14px; border-radius:14px; margin-bottom:20px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.88rem; margin-bottom:6px;">
+                                <span>Ghế còn trống:</span>
+                                <strong style="color:var(--primary); font-size:1.05rem;">${trip.available_seats} / ${trip.total_seats}</strong>
+                            </div>
+                            <div style="height:6px; background:var(--gray-200); border-radius:3px; overflow:hidden;">
+                                <div style="height:100%; width:${Math.round(((trip.total_seats - trip.available_seats) / trip.total_seats) * 100)}%; background:linear-gradient(90deg, var(--primary), var(--secondary));"></div>
+                            </div>
+                        </div>
+
+                        <a href="/cart/add-trip?id=${trip.id}" class="btn btn-primary btn-full btn-lg" style="font-weight:900; padding:16px; margin-bottom:12px; font-size:1.1rem; border-radius:16px; text-decoration:none; text-align:center; display:block;">
+                            🎟️ Đặt chuyến & Giữ chỗ 15 phút
+                        </a>
+
+                        <a href="/tracking" class="btn btn-outline btn-full btn-sm" style="font-weight:800; padding:12px; border-radius:14px; text-decoration:none; text-align:center; display:block; color:var(--accent-dark); border-color:var(--accent-dark);">
+                            <span class="live-pulse" style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-dark); margin-right:4px;"></span>
+                            Xem Live GPS Xe chạy
+                        </a>
+
+                        <div style="font-size:0.8rem; color:var(--gray-500); text-align:center; margin-top:14px;">
+                            <i data-lucide="clock" style="width:12px;height:12px;display:inline-block;vertical-align:middle;"></i>
+                            Giữ chỗ tự động 15 phút trong thời gian thanh toán.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    `;
+}
+
+// 22. NOTIFICATIONS CENTER PAGE
+function handleNotifications() {
+    return `
+        <div style="max-width:960px; margin:40px auto; padding:0 24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; flex-wrap:wrap; gap:16px;">
+                <div>
+                    <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(0,102,255,0.1); color:var(--primary); padding:6px 14px; border-radius:30px; font-size:0.82rem; font-weight:800; margin-bottom:8px;">
+                        <i data-lucide="bell" style="width:14px;height:14px;"></i> TRUNG TÂM THÔNG BÁO
+                    </div>
+                    <h2 style="font-size:2.2rem; font-weight:900; margin:0;">Thông báo của bạn</h2>
+                    <p style="color:var(--gray-500); font-size:0.95rem; margin-top:4px;">Cập nhật tức thời đơn hàng, vé xe, khách sạn và thông tin thanh toán</p>
+                </div>
+                <button onclick="markAllPreviewNotifRead(); document.querySelectorAll('.notif-unread').forEach(el => el.classList.remove('notif-unread')); showToast('Đã đánh dấu tất cả đã đọc');" class="btn btn-outline btn-sm" style="font-weight:700;">
+                    ✓ Đánh dấu tất cả đã đọc
+                </button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                ${MOCK_DATA.notifications.map(n => `
+                    <div class="card ${!n.is_read ? 'notif-unread' : ''}" style="padding:20px 24px; background:${!n.is_read ? '#F0F9FF' : 'white'}; border-radius:20px; border:1px solid ${!n.is_read ? '#BAE6FD' : 'var(--gray-200)'}; display:flex; gap:18px; align-items:flex-start; transition:all 0.2s;">
+                        <div style="width:46px; height:46px; border-radius:14px; background:${n.type === 'payment' ? 'rgba(16,185,129,0.15)' : 'rgba(0,102,255,0.15)'}; color:${n.type === 'payment' ? 'var(--success)' : 'var(--primary)'}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <i data-lucide="${n.type === 'payment' ? 'credit-card' : 'bell'}" style="width:22px;height:22px;"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--gray-900); margin:0;">${n.title}</h4>
+                                <span style="font-size:0.8rem; color:var(--gray-400);">${n.created_at}</span>
+                            </div>
+                            <p style="color:var(--gray-600); font-size:0.92rem; line-height:1.5; margin:0 0 10px;">${n.message}</p>
+                            <div style="display:flex; gap:10px;">
+                                <a href="/booking/detail/TG-2026-8899" class="btn btn-primary btn-sm" style="font-size:0.8rem; padding:4px 12px; border-radius:8px; text-decoration:none;">
+                                    Xem vé E-Ticket →
+                                </a>
+                                <button onclick="this.closest('.card').style.background='white'; this.closest('.card').style.borderColor='var(--gray-200)'; this.style.display='none'; showToast('Đã đọc thông báo');" class="btn btn-ghost btn-sm" style="font-size:0.8rem; color:var(--gray-500);">
+                                    Đánh dấu đã đọc
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// 23. USER PROFILE & ACCOUNT SETTINGS
+function handleProfile() {
+    return `
+        <div style="max-width:1100px; margin:40px auto; padding:0 24px;">
+            <div style="display:grid; grid-template-columns:320px 1fr; gap:36px; align-items:start;">
+                
+                <!-- Left Column: User Card & Membership Tier -->
+                <div>
+                    <div class="card" style="padding:32px; background:white; border-radius:24px; box-shadow:var(--shadow-sm); text-align:center; margin-bottom:24px;">
+                        <div style="width:100px; height:100px; border-radius:50%; background:linear-gradient(135deg, var(--primary), #00F5D4); color:white; font-size:2.4rem; font-weight:900; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 8px 24px rgba(0,102,255,0.3);">
+                            A
+                        </div>
+                        <h3 style="font-size:1.4rem; font-weight:900; margin-bottom:4px; color:var(--gray-900);">Nguyễn Văn An</h3>
+                        <p style="color:var(--gray-500); font-size:0.88rem; margin-bottom:16px;">@an_nguyen • an.nguyen@travelgo.vn</p>
+                        
+                        <div style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg, #FEF3C7, #FDE68A); color:#92400E; padding:8px 16px; border-radius:20px; font-weight:900; font-size:0.85rem; border:1px solid #FCD34D;">
+                            🥇 HỘI VIÊN VÀNG (VIP GOLD)
+                        </div>
+
+                        <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--gray-100); text-align:left; font-size:0.9rem;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <span style="color:var(--gray-500);">Điểm tích lũy:</span>
+                                <strong style="color:var(--primary); font-size:1.05rem;">1.250 Điểm</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <span style="color:var(--gray-500);">Chuyến xe đã đi:</span>
+                                <strong>4 chuyến</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <span style="color:var(--gray-500);">Đêm nghỉ khách sạn:</span>
+                                <strong>2 đêm</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="color:var(--gray-500);">Tiết kiệm Voucher:</span>
+                                <strong style="color:var(--success);">520.000₫</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Navigation Links -->
+                    <div class="card" style="padding:16px; background:white; border-radius:20px; box-shadow:var(--shadow-xs);">
+                        <a href="/dashboard" class="btn btn-ghost btn-full" style="justify-content:flex-start; font-weight:700; gap:10px; margin-bottom:4px;">
+                            <i data-lucide="ticket" style="width:18px;height:18px;color:var(--primary);"></i> Booking của tôi
+                        </a>
+                        <a href="/notifications" class="btn btn-ghost btn-full" style="justify-content:flex-start; font-weight:700; gap:10px; margin-bottom:4px;">
+                            <i data-lucide="bell" style="width:18px;height:18px;color:#F59E0B;"></i> Trung tâm Thông báo
+                        </a>
+                        <a href="/tracking" class="btn btn-ghost btn-full" style="justify-content:flex-start; font-weight:700; gap:10px;">
+                            <i data-lucide="navigation" style="width:18px;height:18px;color:var(--accent-dark);"></i> Live GPS Tracking xe
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Column: Edit Forms -->
+                <div class="card" style="padding:36px; background:white; border-radius:24px; box-shadow:var(--shadow-sm);">
+                    <div style="display:flex; gap:12px; border-bottom:2px solid var(--gray-100); padding-bottom:16px; margin-bottom:28px;">
+                        <button class="btn btn-primary btn-sm" id="btnTabInfo" onclick="switchProfileTab('info')" style="font-weight:800;">
+                            👤 Thông tin cá nhân
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="btnTabPass" onclick="switchProfileTab('password')" style="font-weight:800;">
+                            🔒 Đổi mật khẩu
+                        </button>
+                    </div>
+
+                    <!-- Form 1: Personal Info -->
+                    <div id="profileTabInfo">
+                        <h3 style="font-size:1.3rem; font-weight:900; margin-bottom:20px; color:var(--gray-900);">
+                            Cập nhật thông tin hồ sơ
+                        </h3>
+
+                        <form onsubmit="event.preventDefault(); showToast('✅ Đã cập nhật hồ sơ cá nhân thành công!');">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+                                <div>
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Họ và tên <span style="color:var(--danger)">*</span></label>
+                                    <input type="text" class="form-control" value="Nguyễn Văn An" required>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Số điện thoại <span style="color:var(--danger)">*</span></label>
+                                    <input type="tel" class="form-control" value="0901234567" required>
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+                                <div>
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Email tài khoản</label>
+                                    <input type="email" class="form-control" value="an.nguyen@travelgo.vn" disabled style="background:var(--gray-100); cursor:not-allowed;">
+                                    <small style="color:var(--gray-500);">Email liên kết bảo mật tài khoản</small>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Tên đăng nhập</label>
+                                    <input type="text" class="form-control" value="an_nguyen" disabled style="background:var(--gray-100); cursor:not-allowed;">
+                                    <small style="color:var(--gray-500);">Định danh tài khoản hệ thống</small>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom:28px;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Địa chỉ liên hệ</label>
+                                <input type="text" class="form-control" value="123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh">
+                            </div>
+
+                            <div style="text-align:right;">
+                                <button type="submit" class="btn btn-primary" style="padding:12px 32px; font-weight:800;">
+                                    ✓ Lưu thay đổi hồ sơ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Form 2: Change Password -->
+                    <div id="profileTabPassword" style="display:none;">
+                        <h3 style="font-size:1.3rem; font-weight:900; margin-bottom:20px; color:var(--gray-900);">
+                            Thay đổi mật khẩu đăng nhập
+                        </h3>
+
+                        <form onsubmit="event.preventDefault(); showToast('✅ Đổi mật khẩu thành công! Hãy dùng mật khẩu mới trong lần đăng nhập tiếp theo.');">
+                            <div style="margin-bottom:18px;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Mật khẩu hiện tại <span style="color:var(--danger)">*</span></label>
+                                <input type="password" class="form-control" required placeholder="Nhập mật khẩu đang dùng...">
+                            </div>
+
+                            <div style="margin-bottom:18px;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Mật khẩu mới <span style="color:var(--danger)">*</span></label>
+                                <input type="password" class="form-control" required minlength="6" placeholder="Tối thiểu 6 ký tự...">
+                            </div>
+
+                            <div style="margin-bottom:28px;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Xác nhận mật khẩu mới <span style="color:var(--danger)">*</span></label>
+                                <input type="password" class="form-control" required minlength="6" placeholder="Nhập lại mật khẩu mới...">
+                            </div>
+
+                            <div style="text-align:right;">
+                                <button type="submit" class="btn btn-primary" style="padding:12px 32px; font-weight:800;">
+                                    ✓ Cập nhật mật khẩu mới
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            function switchProfileTab(tab) {
+                const info = document.getElementById('profileTabInfo');
+                const pass = document.getElementById('profileTabPassword');
+                const btnInfo = document.getElementById('btnTabInfo');
+                const btnPass = document.getElementById('btnTabPass');
+
+                if (tab === 'info') {
+                    info.style.display = 'block';
+                    pass.style.display = 'none';
+                    btnInfo.className = 'btn btn-primary btn-sm';
+                    btnPass.className = 'btn btn-outline btn-sm';
+                } else {
+                    info.style.display = 'none';
+                    pass.style.display = 'block';
+                    btnInfo.className = 'btn btn-outline btn-sm';
+                    btnPass.className = 'btn btn-primary btn-sm';
+                }
+            }
+        </script>
+    `;
+}
+
 // Dispatcher
 const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
@@ -1600,9 +3601,10 @@ const server = http.createServer((req, res) => {
         activeTab = 'trips';
         html = handleTrips();
     } else if (pathname.startsWith('/trips/detail')) {
-        pageTitle = 'Chi tiết Chuyến đi';
+        pageTitle = 'Chi tiết Chuyến đi & Đánh giá';
         activeTab = 'trips';
-        html = handleTrips();
+        const tripId = pathname.split('/')[3] || query.id || 1;
+        html = handleTripDetail(tripId);
     } else if (pathname === '/hotels') {
         pageTitle = 'Danh sách Khách sạn';
         activeTab = 'hotels';
@@ -1616,28 +3618,66 @@ const server = http.createServer((req, res) => {
     } else if (pathname.startsWith('/booking/detail')) {
         pageTitle = 'Vé điện tử E-Ticket';
         html = handleBookingDetail();
+    } else if (pathname === '/payment/checkout') {
+        pageTitle = 'Thanh toán Đơn hàng';
+        html = handlePaymentCheckout();
+    } else if (pathname === '/payment/process') {
+        pageTitle = 'Cổng thanh toán Trực tuyến';
+        html = handlePaymentProcess(query.method || 'vnpay');
+    } else if (pathname === '/payment/success') {
+        pageTitle = 'Thanh toán Thành công';
+        html = handlePaymentSuccess();
     } else if (pathname === '/tracking' || pathname === '/trips/tracking' || pathname.startsWith('/trips/tracking/')) {
         pageTitle = 'Theo dõi Định vị GPS Xe thời gian thực';
         activeTab = 'tracking';
         html = handleTracking();
     } else if (pathname === '/admin' || pathname === '/admin/dashboard') {
         pageTitle = 'Dashboard Admin';
+        activeTab = 'admin';
         html = handleAdminDashboard();
+    } else if (pathname === '/admin/users') {
+        pageTitle = 'Quản lý Tài khoản & Phân quyền';
+        activeTab = 'admin';
+        html = handleAdminUsers();
+    } else if (pathname === '/admin/settings') {
+        pageTitle = 'Cấu hình Hệ thống';
+        activeTab = 'admin';
+        html = handleAdminSettings();
     } else if (pathname === '/dashboard') {
         pageTitle = 'Dashboard Khách hàng';
         html = handleCustomerDashboard();
-    } else if (pathname === '/partner') {
+    } else if (pathname === '/partner' || pathname === '/partner/dashboard') {
         pageTitle = 'Dashboard Đối tác';
-        html = `<div style="max-width:1200px;margin:40px auto;padding:0 24px;"><div class="card" style="padding:40px;border-radius:28px;"><h1>🤝 Dashboard Doanh thu Đối tác</h1><p style="color:var(--gray-500);margin-top:8px;">Báo cáo doanh thu riêng và quản lý dịch vụ vận tải / phòng khách sạn.</p></div></div>`;
-    } else if (pathname === '/employee') {
+        activeTab = 'partner';
+        html = handlePartnerDashboard();
+    } else if (pathname === '/partner/trips/create') {
+        pageTitle = 'Đăng ký Chuyến xe mới';
+        activeTab = 'partner';
+        html = handlePartnerTripCreate();
+    } else if (pathname === '/employee' || pathname === '/employee/dashboard') {
         pageTitle = 'Bảng điều hành Nhân viên';
-        html = `<div style="max-width:1200px;margin:40px auto;padding:0 24px;"><div class="card" style="padding:40px;border-radius:28px;"><h1>💼 Bảng điều hành Nghiệp vụ Nhân viên</h1><p style="color:var(--gray-500);margin-top:8px;">Hàng đợi xét duyệt chuyến đi và xử lý yêu cầu hoàn tiền vé.</p></div></div>`;
+        activeTab = 'employee';
+        html = handleEmployeeDashboard();
+    } else if (pathname === '/employee/qr') {
+        pageTitle = 'Soát vé QR Code Check-in';
+        activeTab = 'employee';
+        html = handleEmployeeQr(query.code || '');
+    } else if (pathname === '/employee/refunds') {
+        pageTitle = 'Xử lý Hoàn tiền Bậc thang';
+        activeTab = 'employee';
+        html = handleEmployeeRefunds();
     } else if (pathname === '/auth/register' || pathname === '/auth/register-partner') {
         pageTitle = 'Đăng ký Tài khoản';
         html = handleRegister();
     } else if (pathname === '/auth/login') {
         pageTitle = 'Đăng nhập';
         html = handleLogin();
+    } else if (pathname === '/notifications') {
+        pageTitle = 'Trung tâm Thông báo';
+        html = handleNotifications();
+    } else if (pathname === '/profile' || pathname === '/auth/profile') {
+        pageTitle = 'Hồ sơ cá nhân & Thành viên';
+        html = handleProfile();
     } else {
         pageTitle = '404 Không tìm thấy';
         html = `<div style="text-align:center;padding:100px 24px;"><h1>404</h1><p>Trang không tồn tại.</p><a href="/" class="btn btn-primary">Về trang chủ</a></div>`;
