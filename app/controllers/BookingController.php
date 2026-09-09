@@ -49,13 +49,20 @@ class BookingController extends Controller
             $totalAmount += (float)$item['subtotal'];
         }
 
+        $appliedCoupon = Session::get('applied_coupon', null);
+        $discount = $appliedCoupon ? (float)$appliedCoupon['discount'] : 0;
+        $finalAmount = max(0, $totalAmount - $discount);
+
         $user = (object)Auth::user();
 
         $this->view('booking/checkout', [
-            'pageTitle'   => 'Xác nhận thông tin & Đặt chỗ',
-            'cart'        => $cart,
-            'totalAmount' => $totalAmount,
-            'user'        => $user,
+            'pageTitle'     => 'Xác nhận thông tin & Đặt chỗ',
+            'cart'          => $cart,
+            'totalAmount'   => $totalAmount,
+            'appliedCoupon' => $appliedCoupon,
+            'discount'      => $discount,
+            'finalAmount'   => $finalAmount,
+            'user'          => $user,
         ]);
     }
 
@@ -90,6 +97,8 @@ class BookingController extends Controller
             return;
         }
 
+        $appliedCoupon = Session::get('applied_coupon', null);
+
         try {
             // Gọi BookingService để thực hiện Transaction nguyên tử với FOR UPDATE
             $orderResult = $this->bookingService->createOrderWithHold(
@@ -100,11 +109,13 @@ class BookingController extends Controller
                     'contact_phone' => trim($this->input('contact_phone')),
                     'contact_email' => trim($this->input('contact_email')),
                     'notes'         => trim($this->input('notes') ?? ''),
-                ]
+                ],
+                $appliedCoupon
             );
 
-            // Xóa giỏ hàng sau khi giữ chỗ thành công
+            // Xóa giỏ hàng và coupon sau khi giữ chỗ thành công
             Session::remove('cart');
+            Session::remove('applied_coupon');
 
             Session::flash('success', 'Giữ chỗ thành công! Vui lòng hoàn tất thanh toán trong vòng 15 phút.');
             $this->redirect('/payment/checkout/' . $orderResult->order_code);
