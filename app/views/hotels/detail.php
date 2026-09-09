@@ -166,5 +166,12 @@ $nights = max(1, (int)round((strtotime($checkOut) - strtotime($checkIn)) / 86400
             <?php endif; ?>
         </div>
 
+        <!-- Đánh giá & Social Proof -->
+        <?php
+            $reviewType = 'hotel';
+            $reviewId = $hotel->id;
+            require __DIR__ . '/../partials/review_section.php';
+        ?>
+
     </div>
 </section>
