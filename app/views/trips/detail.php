@@ -104,7 +104,7 @@ use App\Core\Helper;
                 <?php endif; ?>
 
                 <!-- Chính sách chuyến đi -->
-                <div class="card" style="padding:var(--space-xl);">
+                <div class="card" style="padding:var(--space-xl); margin-bottom:var(--space-xl);">
                     <h3 style="margin-bottom:var(--space-md); font-size:1.3rem; display:flex; align-items:center; gap:8px;">
                         <i data-lucide="shield-alert" style="color:var(--gray-700); width:20px;height:20px;"></i> Chính sách & Lưu ý
                     </h3>
@@ -112,6 +112,13 @@ use App\Core\Helper;
                         <?= nl2br(Helper::e($trip->policies ?? "• Quý khách vui lòng có mặt tại điểm đón trước giờ khởi hành ít nhất 15 phút.\n• Xuất trình vé điện tử có mã QR hoặc tin nhắn xác nhận cho nhân viên soát vé.\n• Chính sách hoàn tiền áp dụng tự động theo thời gian hủy trước ngày khởi hành.")) ?>
                     </div>
                 </div>
+
+                <!-- Đánh giá & Social Proof -->
+                <?php
+                    $reviewType = 'trip';
+                    $reviewId = $trip->id;
+                    require __DIR__ . '/../partials/review_section.php';
+                ?>
             </div>
 
             <!-- ==================== RIGHT COLUMN: BOOKING BOX ==================== -->
