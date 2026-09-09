@@ -38,10 +38,17 @@ class CartController extends Controller
             $totalAmount += (float)$item['subtotal'];
         }
 
+        $appliedCoupon = Session::get('applied_coupon', null);
+        $discount = $appliedCoupon ? (float)$appliedCoupon['discount'] : 0;
+        $finalAmount = max(0, $totalAmount - $discount);
+
         $this->view('cart/index', [
-            'pageTitle'   => 'Giỏ hàng của bạn',
-            'cart'        => $cart,
-            'totalAmount' => $totalAmount,
+            'pageTitle'     => 'Giỏ hàng của bạn',
+            'cart'          => $cart,
+            'totalAmount'   => $totalAmount,
+            'appliedCoupon' => $appliedCoupon,
+            'discount'      => $discount,
+            'finalAmount'   => $finalAmount,
         ]);
     }
 
