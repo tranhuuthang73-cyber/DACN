@@ -90,10 +90,22 @@ use App\Core\Helper;
                             <?php endforeach; ?>
                         </div>
 
+                        <div style="display:flex; justify-content:space-between; margin-bottom:var(--space-sm); font-size:0.95rem; color:var(--gray-600);">
+                            <span>Tạm tính:</span>
+                            <strong><?= Helper::formatMoney($totalAmount) ?></strong>
+                        </div>
+
+                        <?php if (!empty($discount) && $discount > 0): ?>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:var(--space-sm); font-size:0.95rem; color:var(--success);">
+                                <span>Voucher (<?= Helper::e($appliedCoupon['code'] ?? '') ?>):</span>
+                                <strong>-<?= Helper::formatMoney($discount) ?></strong>
+                            </div>
+                        <?php endif; ?>
+
                         <div style="display:flex; justify-content:space-between; align-items:baseline; padding-top:var(--space-md); border-top:2px solid var(--gray-100); margin-bottom:var(--space-xl);">
-                            <span style="font-weight:700; font-size:1.1rem;">Tổng cộng:</span>
+                            <span style="font-weight:700; font-size:1.1rem;">Tổng thanh toán:</span>
                             <span style="font-size:1.8rem; font-weight:800; color:var(--secondary);">
-                                <?= Helper::formatMoney($totalAmount) ?>
+                                <?= Helper::formatMoney($finalAmount ?? $totalAmount) ?>
                             </span>
                         </div>
 
