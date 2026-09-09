@@ -413,3 +413,44 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gray-400);
 }
+
+/* ==================== DARK THEME STYLES ==================== */
+body.dark-theme {
+  --bg-light: #060B17;
+  --white: #0F172A;
+  --gray-50: #0B1329;
+  --gray-100: #131E3D;
+  --gray-200: #1E293B;
+  --gray-300: #334155;
+  --gray-400: #64748B;
+  --gray-500: #94A3B8;
+  --gray-600: #CBD5E1;
+  --gray-700: #E2E8F0;
+  --gray-800: #F1F5F9;
+  --gray-900: #F8FAFC;
+  background-color: #060B17 !important;
+  color: #E2E8F0 !important;
+}
+
+body.dark-theme .navbar {
+  background: rgba(15, 23, 42, 0.94) !important;
+  border-bottom-color: #1E293B !important;
+}
+
+body.dark-theme .card {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+  color: #E2E8F0 !important;
+}
+
+body.dark-theme .form-control {
+  background: #131E3D !important;
+  border-color: #1E293B !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-theme .dropdown-menu {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+  color: #E2E8F0 !important;
+}
