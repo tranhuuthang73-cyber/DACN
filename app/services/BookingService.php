@@ -35,7 +35,7 @@ class BookingService
      * @return object ['order_id' => int, 'order_code' => string, 'expires_at' => string, 'final_amount' => float]
      * @throws Exception
      */
-    public function createOrderWithHold(int $customerId, array $cartItems, array $contactInfo = []): object
+    public function createOrderWithHold(int $customerId, array $cartItems, array $contactInfo = [], ?array $couponData = null): object
     {
         if (empty($cartItems)) {
             throw new Exception("Giỏ hàng đang trống, không thể tiến hành đặt chỗ.");
@@ -135,19 +135,38 @@ class BookingService
                 }
             }
 
+            // Tính toán mã giảm giá (nếu có)
+            $discountAmount = 0;
+            if ($couponData && !empty($couponData['discount'])) {
+                $discountAmount = min($totalAmount, (float)$couponData['discount']);
+            }
+            $finalAmount = max(0, $totalAmount - $discountAmount);
+
             // Tạo Order tổng
             $orderId = $this->db->insert(
-                "INSERT INTO orders (order_code, customer_id, total_amount, final_amount, status, notes, expires_at) 
-                 VALUES (?, ?, ?, ?, 'pending_payment', ?, ?)",
+                "INSERT INTO orders (order_code, customer_id, total_amount, discount_amount, final_amount, status, notes, expires_at) 
+                 VALUES (?, ?, ?, ?, ?, 'pending_payment', ?, ?)",
                 [
                     $orderCode,
                     $customerId,
                     $totalAmount,
-                    $totalAmount,
+                    $discountAmount,
+                    $finalAmount,
                     $contactInfo['notes'] ?? null,
                     $expiresAt
                 ]
             );
+
+            // Ghi nhận lịch sử sử dụng Coupon (nếu có)
+            if ($couponData && !empty($couponData['id'])) {
+                try {
+                    $couponModel = new \App\Models\CouponModel();
+                    $couponModel->recordUsage((int)$couponData['id'], (int)$orderId, $customerId, $discountAmount);
+                } catch (\Throwable $t) {
+                    // Tránh chặn luồng đặt nếu bảng phụ có lỗi
+                    error_log("Coupon usage error: " . $t->getMessage());
+                }
+            }
 
             // Tạo các Bookings con chi tiết
             foreach ($processedBookings as $b) {
@@ -188,7 +207,9 @@ class BookingService
                 'order_id'     => $orderId,
                 'order_code'   => $orderCode,
                 'expires_at'   => $expiresAt,
-                'final_amount' => $totalAmount,
+                'total_amount' => $totalAmount,
+                'discount'     => $discountAmount,
+                'final_amount' => $finalAmount,
             ];
 
         } catch (Exception $e) {
