@@ -93,11 +93,20 @@ class TripController extends Controller
             3
         );
 
+        // Đánh giá & Social Proof
+        $reviewModel = new \App\Models\ReviewModel();
+        $reviews = $reviewModel->getReviewsFor('trip', $id);
+        $ratingSummary = $reviewModel->getRatingSummary('trip', $id);
+        $canReview = \App\Core\Auth::check() ? $reviewModel->canUserReview(\App\Core\Auth::id(), 'trip', $id) : null;
+
         $this->view('trips/detail', [
-            'pageTitle'    => "{$trip->departure_name} → {$trip->arrival_name} ({$trip->vehicle_name})",
-            'trip'         => $trip,
-            'alternatives' => $alternatives,
-            'comboHotels'  => $comboHotels,
+            'pageTitle'     => "{$trip->departure_name} → {$trip->arrival_name} ({$trip->vehicle_name})",
+            'trip'          => $trip,
+            'alternatives'  => $alternatives,
+            'comboHotels'   => $comboHotels,
+            'reviews'       => $reviews,
+            'ratingSummary' => $ratingSummary,
+            'canReview'     => $canReview,
         ]);
     }
 
