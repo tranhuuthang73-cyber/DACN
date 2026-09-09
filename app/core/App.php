@@ -99,35 +99,51 @@ class App
         $segment2 = strtolower($url[1] ?? '');
         $segment3 = $url[2] ?? null;
 
-        // Route cho admin panel: /admin/trips/create
+        // Route cho admin panel: /admin/trips/create hoặc /admin/users
         if ($segment1 === 'admin') {
             $controllerBase = !empty($segment2) ? $segment2 : 'dashboard';
-            $pascal = $this->toPascalCase($controllerBase);
-            $this->controllerName = 'Admin\\Admin' . $pascal . 'Controller';
+            $pascalPlural = $this->toPascalCase($controllerBase);
+            $singularBase = (str_ends_with($controllerBase, 's') && !str_ends_with($controllerBase, 'ss')) ? substr($controllerBase, 0, -1) : $controllerBase;
+            $pascalSingular = $this->toPascalCase($singularBase);
+
+            $this->controllerName = $this->findFirstExistingController([
+                'Admin\\Admin' . $pascalSingular . 'Controller',
+                'Admin\\Admin' . $pascalPlural . 'Controller',
+            ]);
             $this->actionName = $segment3 ?? 'index';
             $this->params = array_slice($url, 3);
             return;
         }
 
-        // Route cho employee: /employee/trips
+        // Route cho employee: /employee/trips, /employee/bookings, /employee/qr
         if ($segment1 === 'employee') {
             $controllerBase = !empty($segment2) ? $segment2 : 'dashboard';
-            $pascal = $this->toPascalCase($controllerBase);
-            // Hỗ trợ cả EmployeeDashboardController và EmpTripController
-            $empClass = 'Employee\\Emp' . $pascal . 'Controller';
-            $employeeClass = 'Employee\\Employee' . $pascal . 'Controller';
-            $empFile = dirname(__DIR__) . '/controllers/' . str_replace('\\', '/', $empClass) . '.php';
-            
-            $this->controllerName = file_exists($empFile) ? $empClass : $employeeClass;
+            $pascalPlural = $this->toPascalCase($controllerBase);
+            $singularBase = (str_ends_with($controllerBase, 's') && !str_ends_with($controllerBase, 'ss')) ? substr($controllerBase, 0, -1) : $controllerBase;
+            $pascalSingular = $this->toPascalCase($singularBase);
+
+            $this->controllerName = $this->findFirstExistingController([
+                'Employee\\Emp' . $pascalSingular . 'Controller',
+                'Employee\\Emp' . $pascalPlural . 'Controller',
+                'Employee\\Employee' . $pascalSingular . 'Controller',
+                'Employee\\Employee' . $pascalPlural . 'Controller',
+            ]);
             $this->actionName = $segment3 ?? 'index';
             $this->params = array_slice($url, 3);
             return;
         }
 
-        // Route cho partner: /partner/hotels/edit/5
+        // Route cho partner: /partner/hotels/create, /partner/trips
         if ($segment1 === 'partner') {
             $controllerBase = !empty($segment2) ? $segment2 : 'dashboard';
-            $this->controllerName = 'Partner\\Partner' . $this->toPascalCase($controllerBase) . 'Controller';
+            $pascalPlural = $this->toPascalCase($controllerBase);
+            $singularBase = (str_ends_with($controllerBase, 's') && !str_ends_with($controllerBase, 'ss')) ? substr($controllerBase, 0, -1) : $controllerBase;
+            $pascalSingular = $this->toPascalCase($singularBase);
+
+            $this->controllerName = $this->findFirstExistingController([
+                'Partner\\Partner' . $pascalSingular . 'Controller',
+                'Partner\\Partner' . $pascalPlural . 'Controller',
+            ]);
             $this->actionName = $segment3 ?? 'index';
             $this->params = array_slice($url, 3);
             return;
@@ -140,12 +156,40 @@ class App
             $this->actionName = $segment3 ?? 'index';
             $this->params = array_slice($url, 3);
             return;
+        // Route trực tiếp cho profile cá nhân: /profile -> AuthController::profile
+        if ($segment1 === 'profile') {
+            $this->controllerName = 'AuthController';
+            $this->actionName = 'profile';
+            $this->params = array_slice($url, 1);
+            return;
         }
 
-        // Route mặc định: /trips/detail/5
-        $this->controllerName = $this->toPascalCase($segment1) . 'Controller';
+        // Route mặc định: /trips/detail/5, /hotels
+        $pascalPlural = $this->toPascalCase($segment1);
+        $singularBase = (str_ends_with($segment1, 's') && !str_ends_with($segment1, 'ss')) ? substr($segment1, 0, -1) : $segment1;
+        $pascalSingular = $this->toPascalCase($singularBase);
+
+        $this->controllerName = $this->findFirstExistingController([
+            $pascalSingular . 'Controller',
+            $pascalPlural . 'Controller',
+        ]);
         $this->actionName = !empty($segment2) ? $segment2 : 'index';
         $this->params = array_slice($url, 2);
+    }
+
+    /**
+     * Tìm controller đầu tiên có file tồn tại trong thư mục app/controllers
+     */
+    protected function findFirstExistingController(array $candidates): string
+    {
+        $baseDir = dirname(__DIR__) . '/controllers/';
+        foreach ($candidates as $candidate) {
+            $file = $baseDir . str_replace('\\', '/', $candidate) . '.php';
+            if (file_exists($file)) {
+                return $candidate;
+            }
+        }
+        return $candidates[0];
     }
 
     /**
